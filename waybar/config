@@ -36,10 +36,6 @@
         }
     },
 
-    // Minimal example for other modules to make the config valid
-    "other-left-module": {
-        "format": "👋"
-    },
     "some-center-module": {
         "format": "Hyprland"
     },
@@ -74,10 +70,10 @@
         "on-click": "kitty nmtui"
     },
     "cpu": {
-        "format": "󰻠",
+        "format": "",
         "tooltip": true
     },
     "memory": {
-        "format": ""
+        "format": ""
     }
 }
