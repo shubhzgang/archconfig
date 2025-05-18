@@ -1,0 +1,67 @@
+{
+    // General Waybar settings
+    "layer": "top",          // Ensures Waybar is on top
+    "position": "top",       // Default position, as you mentioned
+
+    // Module placement
+    "modules-left": ["hyprland/workspaces", "other-left-module"], // Add hyprland/workspaces here
+    "modules-center": ["some-center-module"],
+    "modules-right": ["tray", "clock", "pulseaudio", "network"], // Example right modules
+
+    // Module configurations
+    "hyprland/workspaces": {
+        "format": "{id}",                   // This will display the workspace ID/number. You can also use {name} or "{icon}" if you set them up.
+        // "format": "{id}: {name}",        // Example: "1: Web"
+        "format": "{icon}",              // If you prefer icons
+        "all-outputs": false,               // Set to true if you want to see workspaces from all monitors
+        "on-click": "activate",             // Allows you to click on a workspace number/name to switch to it
+        "persistent-workspaces": {          // Optional: if you want to always show a certain number of workspaces
+            "1": [], // Shows workspace 1 even if empty
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": []
+        },
+        "format-icons": {                   // Optional: define icons for named workspaces or states
+            "1": "",                   // Example: Font Awesome icon for workspace 1
+            "2": "",                   // Example: Font Awesome icon for workspace 2
+            "9": "",			// icon for spotify
+            "default": "",
+            "urgent": "",
+            "active": ""              // Icon for the focused workspace
+        }
+    },
+
+    // Minimal example for other modules to make the config valid
+    "other-left-module": {
+        "format": "👋"
+    },
+    "some-center-module": {
+        "format": "Hyprland"
+    },
+    "tray": {
+        "icon-size": 18
+    },
+    "clock": {
+        "format": "{:%H:%M }", // Example: 14:30 
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "pulseaudio": {
+        "format": "{volume}% {icon}",
+        "format-muted": " Muted",
+        "format-icons": {
+            "default": ["", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+    "network": {
+        "format-wifi": "  {essid}",
+        "format-ethernet": " {ipaddr}/{cidr}",
+        "format-disconnected": "⚠ Disconnected",
+        "on-click": "nm-connection-editor"
+    }
+}
