@@ -4,9 +4,9 @@
     "position": "top",       // Default position, as you mentioned
 
     // Module placement
-    "modules-left": ["hyprland/workspaces", "other-left-module"], // Add hyprland/workspaces here
-    "modules-center": ["some-center-module"],
-    "modules-right": ["tray", "clock", "pulseaudio", "network"], // Example right modules
+    "modules-left": ["other-left-module"], // Add hyprland/workspaces here
+    "modules-center": ["hyprland/workspaces", "some-center-module"],
+    "modules-right": ["tray", "clock", "pulseaudio", "network", "cpu", "memory"], // Example right modules
 
     // Module configurations
     "hyprland/workspaces": {
@@ -47,8 +47,14 @@
         "icon-size": 18
     },
     "clock": {
-        "format": "{:%H:%M }", // Example: 14:30 
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+        "format": "{:%H:%M:%S }", 
+        "interval": 1,
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "format": {
+                "today": "<span color='#fAfBfC'><b>{}</b></span>"
+            }
+        }
     },
     "pulseaudio": {
         "format": "{volume}% {icon}",
@@ -59,9 +65,19 @@
         "on-click": "pavucontrol"
     },
     "network": {
-        "format-wifi": "  {essid}",
-        "format-ethernet": " {ipaddr}/{cidr}",
-        "format-disconnected": "⚠ Disconnected",
-        "on-click": "nm-connection-editor"
+        "format-wifi": "",
+        "format-ethernet":"",
+        "format-disconnected": "",
+        "tooltip-format-disconnected": "Error",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+        "tooltip-format-ethernet": "{ifname} 🖧 ",
+        "on-click": "kitty nmtui"
+    },
+    "cpu": {
+        "format": "󰻠",
+        "tooltip": true
+    },
+    "memory": {
+        "format": ""
     }
 }
