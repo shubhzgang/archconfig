@@ -1,6 +1,9 @@
-#Ignore everything
+# Ignore everything
 /*
+# Dont ignore these
 !hypr/
 !rofi/
 !waybar/
 !.gitignore
+# Ignore monitor config
+hypr/source/monitor.conf
