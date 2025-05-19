@@ -1,9 +1,0 @@
-# Ignore everything
-/*
-# Dont ignore these
-!hypr/
-!rofi/
-!waybar/
-!.gitignore
-# Ignore monitor config
-**/monitor.conf

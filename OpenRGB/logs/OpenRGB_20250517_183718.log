@@ -1,0 +1,51 @@
+    OpenRGB v0.9
+    Commit:  from 
+    Launched: 20250517_183718
+====================================================================================================
+
+1001  |Info:    ------------------------------------------------------
+1001  |Info:    |               Start device detection               |
+1001  |Info:    ------------------------------------------------------
+1001  |Info:    Initializing HID interfaces: Success
+1006  |Info:    ------------------------------------------------------
+1006  |Info:    |             Detecting I2C interfaces               |
+1006  |Info:    ------------------------------------------------------
+1006  |Info:    Registering I2C interface: /dev/i2c-3 Device 1002:13C0 Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-10 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Info:    Registering I2C interface: /dev/i2c-1 Device 1002:13C0 Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-8 Device 1022:790B Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-15 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Warning: [i2c_smbus_linux] Failed to read i2c device PCI device ID
+1006  |Info:    Registering I2C interface: /dev/i2c-6 Device 0000:0000 Subsystem: 0000:0000
+1006  |Info:    Registering I2C interface: /dev/i2c-13 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Warning: [i2c_smbus_linux] Failed to read i2c device PCI device ID
+1006  |Info:    Registering I2C interface: /dev/i2c-4 Device 0000:0000 Subsystem: 0000:0000
+1006  |Info:    Registering I2C interface: /dev/i2c-11 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Info:    Registering I2C interface: /dev/i2c-2 Device 1002:13C0 Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-0 Device 1002:13C0 Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-9 Device 1022:790B Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-16 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Info:    Registering I2C interface: /dev/i2c-7 Device 1022:790B Subsystem: 1462:7E12
+1006  |Info:    Registering I2C interface: /dev/i2c-14 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Warning: [i2c_smbus_linux] Failed to read i2c device PCI device ID
+1006  |Info:    Registering I2C interface: /dev/i2c-5 Device 0000:0000 Subsystem: 0000:0000
+1006  |Info:    Registering I2C interface: /dev/i2c-12 Device 10DE:2684 Subsystem: 1043:88C3
+1006  |Info:    ------------------------------------------------------
+1006  |Info:    |               Detecting I2C devices                |
+1006  |Info:    ------------------------------------------------------
+2041  |Info:    ------------------------------------------------------
+2041  |Info:    |               Detecting I2C PCI devices            |
+2041  |Info:    ------------------------------------------------------
+2042  |Info:    ------------------------------------------------------
+2042  |Info:    |               Detecting HID devices                |
+2042  |Info:    ------------------------------------------------------
+2610  |Info:    [G502 LIGHTSPEED Wireless Gaming Mouse] Registering RGB controller
+2610  |Info:    ------------------------------------------------------
+2610  |Info:    |            Detecting libusb HID devices            |
+2610  |Info:    ------------------------------------------------------
+2722  |Info:    ------------------------------------------------------
+2722  |Info:    |              Detecting other devices               |
+2722  |Info:    ------------------------------------------------------
+2727  |Info:    ------------------------------------------------------
+2727  |Info:    |                Detection completed                 |
+2727  |Info:    ------------------------------------------------------

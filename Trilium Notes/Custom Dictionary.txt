@@ -1,0 +1,12 @@
+LEDs
+hyprland
+leds
+linux
+neovim
+openrgb
+repo
+rofi
+url
+waybar
+youtube
+checksum_v1 = 21c91cc2603c72dd8b7e07a1f2c5efc1
