@@ -1,0 +1,10 @@
+#Ignore everything
+/*
+!hypr/
+!rofi/
+!waybar/
+!wofi/
+!wlogout/
+!wal/
+!.gitignore
+**/monitor.conf
