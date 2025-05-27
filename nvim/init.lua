@@ -1,5 +1,6 @@
 -- Path for lazy.nvim plugin manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+require("shubham")
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
     vim.fn.system({
         "git",
@@ -15,3 +16,4 @@ vim.cmd("set number")
 require("vim-options")
 require("lazy").setup("plugins")
 vim.opt.termguicolors = true
+print("from the main")
