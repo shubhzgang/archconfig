@@ -7,7 +7,7 @@ menu() {
 main() {
     choice=$(menu | wofi -c ~/.config/wofi/wallpaper -s ~/.config/wofi/style-wallpaper.css --show dmenu --prompt "Select Wallpaper:" -n)
     selected_wallpaper=$(echo "$choice" | sed 's/^img://')
-    swww img "$selected_wallpaper" --transition-type any --transition-fps 60 --transition-duration .5
+    swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
     wal -i "$selected_wallpaper" -n
     swaync-client --reload-css
     cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
