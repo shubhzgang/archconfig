@@ -11,17 +11,20 @@
     }
 }
 
-* {
+* { 
+    width: 800px;
     all:unset;
     font-family: 'CodeNewRoman Nerd Font Mono', monospace;
     font-size: 18px;
     outline: none;
     border: none;
     text-shadow:none;
-    background-color:transparent;
+    background-color:rgba(0,0,0,0.6);
 }
 
-window {
+#window {
+    width:80%;
+    height:80%;
     all:unset;
     padding: 20px;
     border-radius: 0px;
