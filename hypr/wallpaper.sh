@@ -18,7 +18,11 @@ main() {
     sed -i "s/^gradient_color_1 = .*/gradient_color_1 = '$color1'/" $cava_config
     sed -i "s/^gradient_color_2 = .*/gradient_color_2 = '$color2'/" $cava_config
     pkill -USR2 cava 2>/dev/null
-    ~/Downloads/OpenRGB_1.0rc1_x86_64_1fbacde.AppImage -c $(sed -n '5s/^#//p' ~/.cache/wal/colors)
+    sys_box_color=$(sed -n '5s/^#//p' ~/.cache/wal/colors)
+    echo $sys_box_color
+    saturated_color=$(python ~/.config/hypr/inc_saturation.py "$sys_box_color" "2.0")
+    echo $saturated_color
+    ~/Downloads/OpenRGB_1.0rc1_x86_64_1fbacde.AppImage -c $saturated_color
     source ~/.cache/wal/colors.sh && cp -r $wallpaper ~/wallpapers/pywallpaper.jpg 
 }
 main
