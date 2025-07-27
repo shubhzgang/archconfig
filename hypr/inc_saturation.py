@@ -5,7 +5,8 @@ def increase_saturation(hex_color, factor=1.5):
     r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
     r_norm, g_norm, b_norm = r / 255.0, g / 255.0, b / 255.0
     h, s, v = colorsys.rgb_to_hsv(r_norm, g_norm, b_norm)
-    s = min(1.0, s * factor)
+    s = 0.85
+    #print(h, s, v)
     new_r, new_g, new_b = colorsys.hsv_to_rgb(h, s, v)
     new_r = int(new_r * 255)
     new_g = int(new_g * 255)
