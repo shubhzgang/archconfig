@@ -19,3 +19,8 @@
     "action" : "systemctl poweroff || loginctl poweroff",
     "keybind" : "s"
 }
+{
+    "label" : "sleep",
+    "action" : "systemctl suspend || loginctl suspend",
+    "keybind" : "z"
+}
