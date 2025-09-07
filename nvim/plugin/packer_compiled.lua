@@ -129,6 +129,11 @@ _G.packer_plugins = {
     path = "/home/shubham/.local/share/nvim/site/pack/packer/start/nvim-java",
     url = "https://github.com/nvim-java/nvim-java"
   },
+  ["nvim-java-core"] = {
+    loaded = true,
+    path = "/home/shubham/.local/share/nvim/site/pack/packer/start/nvim-java-core",
+    url = "https://github.com/nvim-java/nvim-java-core"
+  },
   ["nvim-lspconfig"] = {
     loaded = true,
     path = "/home/shubham/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",

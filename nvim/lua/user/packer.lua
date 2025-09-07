@@ -41,10 +41,16 @@ return packer.startup(function(use)
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
 
   -- LSP, Autocomplete, and Java Support ------------------------------
-  -- LSP framework
+  -- java stuff
+  use { 
+  'nvim-java/nvim-java',
+   }
+ 
+-- LSP framework
   use 'neovim/nvim-lspconfig'
+   require('lspconfig').jdtls.setup({})
 
-  -- Mason: Installer for LSPs, formatters, linters
+   -- Mason: Installer for LSPs, formatters, linters
   use 'williamboman/mason.nvim'
   use 'williamboman/mason-lspconfig.nvim'
 
@@ -58,7 +64,7 @@ return packer.startup(function(use)
   use 'L3MON4D3/LuaSnip'
   use 'saadparwaiz1/cmp_luasnip'
 
-  -- Java-specific plugins
-  use 'mfussenegger/nvim-dap' -- Debug Adapter Protocol
-  use 'nvim-java/nvim-java'   -- Extensions for Java LSP
-end)
+ -- Java-specific plugins
+  use 'nvim-java/nvim-java-core'
+ use 'mfussenegger/nvim-dap' -- Debug Adapter Protocol
+ end)
