@@ -9,3 +9,4 @@
 !wlogout/
 !.gitignore
 **/monitor.conf
+nvim/plugin/packer_compiled.lua
