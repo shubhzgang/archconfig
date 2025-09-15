@@ -19,7 +19,7 @@
     outline: none;
     border: none;
     text-shadow:none;
-    background-color:rgba(0,0,0,0.6);
+    transition: 200ms cubic-bezier(0, 0, 1, 1);
 }
 
 #window {
@@ -28,7 +28,7 @@
     all:unset;
     padding: 20px;
     border-radius: 0px;
-    background-color: alpha(@background,.5);
+    background-color: alpha(@color9, 1.0);
 }
 #inner-box {
     margin: 2px;
@@ -53,7 +53,7 @@
     outline: none;
     color: @text;
     box-shadow: 1px 1px 5px rgba(0,0,0, .5);
-    border-radius:10;
+    border-radius: 5px;
     background-color: alpha(@background,.2);
 }
 #input image {
@@ -70,12 +70,12 @@
     outline: none;
     border: none;
 
-    border-radius:10;
+    border-radius: 5px;
 }
 #text {
     margin: 5px;
     border: none;
-    color: @text;
+    color: white;
     outline: none;
 }
 #entry {
@@ -89,13 +89,15 @@
 
 }
 #entry:selected {
-    box-shadow: 1px 1px 5px rgba(255,255,255, .09);
-    border: 2px solid @text;
-    border-radius: 20px;
-    background-color:transparent;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 5px;
+    background-color: @color5;
+    font-weight: bold;
 }
 #entry:selected #text {
-    color: @mauve;
+    color: white;
+    text-shadow: none;
 }
 #entry:drop(active) {
     background-color: @lavender !important;
