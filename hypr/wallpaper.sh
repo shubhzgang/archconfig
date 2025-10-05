@@ -24,6 +24,7 @@ main() {
     echo $saturated_color
     ~/Downloads/OpenRGB_1.0rc1_x86_64_1fbacde.AppImage -c $saturated_color
     source ~/.cache/wal/colors.sh && cp -r $wallpaper ~/wallpapers/pywallpaper.jpg 
+    /home/shubham/local/hyperion/bin/hyperion-remote -i ~/wallpapers/pywallpaper.jpg
 }
 main
 
