@@ -20,7 +20,11 @@ selected_key=$(printf "%s\n" "${!options[@]}" | wofi --height=80% --width=80% -p
 
 # Check if the user made a selection (i.e., didn't cancel).
 if [ -n "$selected_key" ]; then
-    # If a selection was made, retrieve the corresponding link
-    # from the array and output it.
-    echo "${options[$selected_key]}"
+    if [[ -v options[$selected_key] ]]; then
+        # Key exists, print the value (URL)
+        echo "${options[$selected_key]}"
+    else
+        # Key does not exist, print the key itself
+        echo "$selected_key"
+    fi
 fi
