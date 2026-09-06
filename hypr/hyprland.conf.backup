@@ -1,9 +1,13 @@
 source = /home/$USER/.cache/wal/colors-hyprland
 
 source = ~/.config/hypr/monitors.conf
+source = ~/.config/hypr/workspaces.conf
 
 env = LIBVA_DRIVER_NAME,nvidia
+env = XDG_SESSION_TYPE,wayland
+env = GBM_BACKEND,nvidia-drm
 env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+env = WLR_DRM_NO_ATOMIC,1
 env = NVD_BACKEND,direct
 $terminal = kitty
 $fileManager = nautilus
@@ -13,6 +17,7 @@ $wofiHeight=80%
 $menu = wofi -n --width=$wofiWidth --height=$wofiHeight 
 $mpvpaper = pkill mpvpaper; mpvpaper HDMI-A-2 $(~/.config/hypr/mpvpaper.sh)
 #$mpvpaper = pkill mpvpaper; mpvpaper DP-6 $(wofi --prompt "YouTube URL" --height=$wofiHeight --width=$wofiWidth --dmenu)
+exec-once = hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on
 exec-once = hypridle
 exec-once = waybar
 exec-once = swww-daemon
@@ -23,7 +28,7 @@ exec-once = pactl set-sink-mute @DEFAULT_SINK@ 0
 exec-once = hyprctl plugin load $HOME/.local/share/hyprpm/dynamic-cursors/dynamic-cursors.so
 exec-once = wl-paste --type text --watch cliphist store # Stores only text data
 exec-once = wl-paste --type image --watch cliphist store # Stores only image data
-exec-once = wf-recorder --muxer=v4l2 --codec=rawvideo --pixel-format=yuv420p --file=/dev/video1 -r 30
+#exec-once = wf-recorder --muxer=v4l2 --codec=rawvideo --pixel-format=yuv420p --file=/dev/video1 -r 30
 env = ELECTRON_OZONE_PLATFORM_HINT,wayland
 env = XCURSOR_THEME,Bibata-Modern-Classic
 env = XCURSOR_SIZE,24
@@ -59,28 +64,31 @@ general {
 }
 cursor {
 	inactive_timeout = 5
+    no_hardware_cursors = true # Often required for HDR/10-bit to render correctly
 }
+
 decoration {
     rounding = 10
-        active_opacity = 0.78
-        inactive_opacity = 0.7
-        fullscreen_opacity = 1
-        blur {
-            enabled = true
-                size = 3
-                passes = 2
-                new_optimizations = true
-                ignore_opacity = true
-                xray = false
-                popups = true
-        }
-    shadow {
+    active_opacity = 0.95   # Active window is fully opaque
+    inactive_opacity = 0.6  # Inactive windows are slightly transparent
+    fullscreen_opacity = 1
+    blur {
         enabled = true
-            range = 15
-            render_power = 5
-            color = rgba(0,0,0,.5)
+        size = 3
+        passes = 2
+        new_optimizations = true
+        ignore_opacity = true
+        xray = false
+        popups = true
+    }
+    shadow {
+        enabled = false
+        range = 15
+        render_power = 5
+        color = rgba(0,0,0,.5)
     }
 }
+
 animations {
     enabled = true
     bezier = fluid, 0.15, 0.85, 0.25, 1
@@ -99,6 +107,7 @@ misc {
     force_default_wallpaper = -1
     disable_hyprland_logo = true
     focus_on_activate = true
+    vrr = 0
 }
 input {
     kb_layout = us
@@ -148,7 +157,7 @@ bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, F, exec,firefox
 bind = $mainMod, G, exec, pypr toggle music
 bind = $mainMod, I, exec, $mpvpaper
-bind = $mainMod, J, togglesplit
+bind = $mainMod, J, layoutmsg, togglesplit
 bind = $mainMod, L, exec, hyprlock
 bind = $mainMod, M, exec, mpv $(wl-paste)
 bind = $mainMod, O, exec, pavucontrol
@@ -205,16 +214,18 @@ bindl = , XF86AudioPause, exec, playerctl play-pause
 bindl = , XF86AudioPlay, exec, playerctl play-pause
 bindl = , XF86AudioPrev, exec, playerctl previous
 #bind = CTRL, ESCAPE, exec, gksu #Dont worry about this
-layerrule = blur, waybar
-layerrule = ignorezero, waybar
-layerrule = ignorealpha 0.5, waybar
-layerrule = blur, swaync-control-center
-layerrule = blur, swaync-notification-window
-layerrule = ignorezero, swaync-control-center
-layerrule = ignorezero, swaync-notification-window
-layerrule = ignorealpha 0.5, swaync-control-center
-layerrule = ignorealpha 0.5, swaync-notification-window
-layerrule = noanim, selection
 
-windowrulev2 = opacity 1.15, class:firefox
-windowrulev2 = rounding 0, class:^[fF]irefox
+windowrule = match:class firefox, opacity 1.15
+windowrule = rounding 0, match:class ^[fF]irefox
+windowrule = float on, match:class ^(kitty-)(.*)
+windowrule = match:class jetbrains-idea, opacity 1.2
+
+
+# -----------------------------------------------------
+# Opacity Controls
+# -----------------------------------------------------
+
+# SUPER + SHIFT + Plus/Minus -> Active Window Opacity
+bind = $mainMod SHIFT, equal, exec, ~/.config/hypr/scripts/active_opacity.sh up
+bind = $mainMod SHIFT, minus, exec, ~/.config/hypr/scripts/active_opacity.sh down
+bind = $mainMod SHIFT, P, exec, ~/.config/hypr/scripts/toggle_opacity.sh

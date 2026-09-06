@@ -1,0 +1,499 @@
+-- Hyprland Lua configuration migrated from hyprland.conf
+-- Target: Hyprland 0.55+ Lua configuration API.
+--
+-- IMPORTANT:
+--   1. Hyprland 0.55+ prefers this file over hyprland.conf.
+--   2. monitors.lua and workspaces.lua are loaded as Lua modules below.
+--
+-- References:
+--   https://wiki.hypr.land/Configuring/Start/
+--   https://wiki.hypr.land/Configuring/Basics/Variables/
+--   https://wiki.hypr.land/Configuring/Basics/Binds/
+require("monitors")
+
+local HOME = os.getenv("HOME")
+
+-- ---------------------------------------------------------------------------
+-- Compatibility helper for the existing pywal colors file.
+-- The original config sourced a hyprlang file containing variables such as
+-- $color5 and $color9. Lua cannot source that file as Lua, so we parse those
+-- simple $name = value assignments here.
+-- ---------------------------------------------------------------------------
+
+local function read_hyprlang_vars(path)
+    local vars = {}
+    local file = io.open(path, "r")
+    if not file then
+        return vars
+    end
+
+    for line in file:lines() do
+        local name, value = line:match("^%s*%$([%w_]+)%s*=%s*(.-)%s*$")
+        if name and value then
+            vars[name] = value
+        end
+    end
+
+    file:close()
+    return vars
+end
+
+local wal = read_hyprlang_vars(HOME .. "/.cache/wal/colors-hyprland")
+
+-- Keep the old $color9 / $color5 references.
+local color9 = wal.color9 or "rgba(ffffffaa)"
+local color5 = wal.color5 or "rgba(888888aa)"
+
+-- ---------------------------------------------------------------------------
+-- External configs
+-- ---------------------------------------------------------------------------
+-- The old config had:
+--   source = ~/.config/hypr/monitors.conf
+--   source = ~/.config/hypr/workspaces.conf
+--
+-- Convert those files to Lua first, e.g.:
+--   ~/.config/hypr/monitors.lua
+--   ~/.config/hypr/workspaces.lua
+--
+
+-- ---------------------------------------------------------------------------
+-- Programs / variables
+-- ---------------------------------------------------------------------------
+
+local terminal = "kitty"
+local fileManager = "nautilus"
+
+local wofiWidth = "80%"
+local wofiHeight = "80%"
+local menu = "wofi -n --width=" .. wofiWidth .. " --height=" .. wofiHeight
+
+local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-2 $(~/.config/hypr/mpvpaper.sh)"
+
+local mainMod = "SUPER"
+
+-- ---------------------------------------------------------------------------
+-- Plugin loading
+-- ---------------------------------------------------------------------------
+-- IMPORTANT: plugin configuration must be registered after the plugin exists.
+-- The old hyprland.conf loaded this during exec-once, which happens too late
+-- for plugin.* keys in a Lua config.
+local dynamicCursorsPlugin =
+    HOME .. "/.local/share/hyprpm/dynamic-cursors/dynamic-cursors.so"
+
+hl.plugin.load(dynamicCursorsPlugin)
+
+
+-- ---------------------------------------------------------------------------
+-- Environment
+-- ---------------------------------------------------------------------------
+
+hl.env("LIBVA_DRIVER_NAME", "nvidia")
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("GBM_BACKEND", "nvidia-drm")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+hl.env("WLR_DRM_NO_ATOMIC", "1")
+hl.env("NVD_BACKEND", "direct")
+hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("XCURSOR_SIZE", "24")
+
+-- ---------------------------------------------------------------------------
+-- General / input / decoration / misc
+-- ---------------------------------------------------------------------------
+
+hl.config({
+    general = {
+        gaps_in = 2,
+        gaps_out = 10,
+        border_size = 0,
+        ["col.active_border"] = color9,
+        ["col.inactive_border"] = color5,
+        resize_on_border = true,
+        allow_tearing = false,
+        layout = "dwindle",
+    },
+
+    cursor = {
+        inactive_timeout = 5,
+        no_hardware_cursors = true,
+    },
+
+    decoration = {
+        rounding = 10,
+        active_opacity = 0.95,
+        inactive_opacity = 0.6,
+        fullscreen_opacity = 1.0,
+
+        blur = {
+            enabled = true,
+            size = 3,
+            passes = 2,
+            new_optimizations = true,
+            ignore_opacity = true,
+            xray = false,
+            popups = true,
+        },
+
+        shadow = {
+            enabled = false,
+            range = 15,
+            render_power = 5,
+            color = "rgba(0,0,0,.5)",
+        },
+    },
+
+    dwindle = {
+        preserve_split = true,
+    },
+
+    misc = {
+        force_default_wallpaper = -1,
+        disable_hyprland_logo = true,
+        focus_on_activate = true,
+        vrr = 0,
+    },
+
+    input = {
+        kb_layout = "us",
+        follow_mouse = 1,
+        sensitivity = 0,
+
+        touchpad = {
+            natural_scroll = true,
+        },
+    },
+
+    xwayland = {
+        force_zero_scaling = true,
+    },
+
+})
+
+hl.device({
+    name = "epic-mouse-v1",
+    sensitivity = 0,
+})
+
+-- ---------------------------------------------------------------------------
+-- Dynamic cursors plugin
+-- ---------------------------------------------------------------------------
+-- hypr-dynamic-cursors uses the Lua plugin namespace `dynamic_cursors`
+-- (underscore, not the legacy hyprlang `dynamic-cursors` spelling).
+--
+-- Its current Lua API also changed two details from the old .conf syntax:
+--   * stretch.function -> stretch.activation
+--   * shaperule -> hl.plugin.dynamic_cursors.shape_rule(...)
+--
+-- The plugin itself recommends guarding configuration with this check so a
+-- missing/unloadable plugin does not create config errors.
+
+if hl.plugin.dynamic_cursors then
+    hl.config({
+        plugin = {
+            dynamic_cursors = {
+                mode = "stretch",
+                threshold = 2,
+
+                rotate = {
+                    length = 12,
+                    offset = 30,
+                },
+
+                stretch = {
+                    limit = 1000,
+                    activation = "negative_quadratic",
+                },
+
+                shake = {
+                    enabled = false,
+                },
+            },
+        },
+    })
+
+    hl.plugin.dynamic_cursors.shape_rule({
+        shape = "grab",
+        mode = "stretch",
+        stretch = {
+            limit = 2000,
+        },
+    })
+end
+
+-- ---------------------------------------------------------------------------
+-- Animations
+-- ---------------------------------------------------------------------------
+
+hl.config({
+    animations = {
+        enabled = true,
+    },
+})
+
+hl.curve("fluid", {
+    type = "bezier",
+    points = {
+        { 0.15, 0.85 },
+        { 0.25, 1.0 },
+    },
+})
+
+hl.curve("snappy", {
+    type = "bezier",
+    points = {
+        { 0.3, 1.0 },
+        { 0.4, 1.0 },
+    },
+})
+
+hl.animation({
+    leaf = "windows",
+    enabled = true,
+    speed = 3,
+    bezier = "fluid",
+    style = "popin 5%",
+})
+
+hl.animation({
+    leaf = "windowsOut",
+    enabled = true,
+    speed = 2.5,
+    bezier = "snappy",
+})
+
+hl.animation({
+    leaf = "fade",
+    enabled = true,
+    speed = 4,
+    bezier = "snappy",
+})
+
+hl.animation({
+    leaf = "workspaces",
+    enabled = true,
+    speed = 1.7,
+    bezier = "snappy",
+    style = "slide",
+})
+
+hl.animation({
+    leaf = "specialWorkspace",
+    enabled = true,
+    speed = 4,
+    bezier = "fluid",
+    style = "slidefadevert -35%",
+})
+
+hl.animation({
+    leaf = "layers",
+    enabled = true,
+    speed = 2,
+    bezier = "snappy",
+    style = "popin 70%",
+})
+
+-- ---------------------------------------------------------------------------
+-- Autostart
+-- ---------------------------------------------------------------------------
+
+hl.on("hyprland.start", function()
+    hl.exec_cmd("hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on")
+    hl.exec_cmd("hypridle")
+    hl.exec_cmd("waybar")
+    hl.exec_cmd("swww-daemon")
+    hl.exec_cmd("swaync")
+    hl.exec_cmd("pypr")
+    hl.exec_cmd("swaync-client -df")
+    hl.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ 0")
+    hl.exec_cmd("wl-paste --type text --watch cliphist store")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store")
+end)
+
+-- ---------------------------------------------------------------------------
+-- Keybinds: workspaces
+-- ---------------------------------------------------------------------------
+
+for i = 1, 10 do
+    local key = i % 10
+    hl.bind(
+        mainMod .. " + " .. key,
+        hl.dsp.focus({ workspace = i })
+    )
+
+    hl.bind(
+        mainMod .. " + SHIFT + " .. key,
+        hl.dsp.window.move({ workspace = i })
+    )
+end
+
+hl.bind(mainMod .. " + SHIFT + S",
+    hl.dsp.window.move({ workspace = "special:magic" }))
+
+hl.bind(mainMod .. " + S",
+    hl.dsp.workspace.toggle_special("magic"))
+
+-- ---------------------------------------------------------------------------
+-- Keybinds: applications / window actions
+-- ---------------------------------------------------------------------------
+
+hl.bind(mainMod .. " + B", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + C", hl.dsp.window.close())
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
+hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("pypr toggle music"))
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd(mpvpaper))
+hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("mpv $(wl-paste)"))
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("pavucontrol"))
+
+-- The old bind used:
+--   setprop activewindow opaque toggle
+-- Keep the exact behavior through hyprctl IPC.
+hl.bind(mainMod .. " + P",
+    hl.dsp.exec_cmd("hyprctl dispatch setprop activewindow opaque toggle"))
+
+hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pypr toggle term"))
+hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("pypr toggle taskbar"))
+
+hl.bind(mainMod .. " + V",
+    hl.dsp.exec_cmd(
+        "cliphist list | wofi --dmenu --width=" ..
+        wofiWidth ..
+        " --height=" ..
+        wofiHeight ..
+        " | cliphist decode | wl-copy"
+    ))
+
+hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
+
+hl.bind(mainMod .. " + CTRL + left",
+    hl.dsp.focus({ workspace = "e-1" }))
+
+hl.bind(mainMod .. " + CTRL + right",
+    hl.dsp.focus({ workspace = "e+1" }))
+
+-- ---------------------------------------------------------------------------
+-- Special workspaces
+-- ---------------------------------------------------------------------------
+
+hl.bind("ALT + 1", hl.dsp.workspace.toggle_special("one"))
+hl.bind("ALT + SHIFT + 1",
+    hl.dsp.window.move({ workspace = "special:one" }))
+
+hl.bind("ALT + 2", hl.dsp.workspace.toggle_special("two"))
+hl.bind("ALT + SHIFT + 2",
+    hl.dsp.window.move({ workspace = "special:two" }))
+
+hl.bind("ALT + 3", hl.dsp.workspace.toggle_special("three"))
+hl.bind("ALT + SHIFT + 3",
+    hl.dsp.window.move({ workspace = "special:three" }))
+
+hl.bind("ALT + 4", hl.dsp.workspace.toggle_special("four"))
+hl.bind("ALT + SHIFT + 4",
+    hl.dsp.window.move({ workspace = "special:four" }))
+
+-- ---------------------------------------------------------------------------
+-- Miscellaneous binds
+-- ---------------------------------------------------------------------------
+
+hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m window -o ~/Screenshots/"))
+hl.bind("ALT + B", hl.dsp.exec_cmd("~/.config/waybar/scripts/select.sh"))
+hl.bind("ALT + Print",
+    hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Screenshots/"))
+hl.bind("ALT + TAB", hl.dsp.exec_cmd("wlogout -b 5"))
+hl.bind("ALT + a", hl.dsp.exec_cmd("~/.config/waybar/scripts/refresh.sh"))
+hl.bind("ALT + down", hl.dsp.window.move({ direction = "down" }))
+hl.bind("ALT + left", hl.dsp.window.move({ direction = "left" }))
+hl.bind("ALT + r", hl.dsp.exec_cmd("~/.config/swaync/refresh.sh"))
+hl.bind("ALT + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind("ALT + t",
+    hl.dsp.exec_cmd("/home/shubham/Downloads/trilium-linux-x64/trilium"))
+hl.bind("ALT + up", hl.dsp.window.move({ direction = "up" }))
+hl.bind("ALT + w", hl.dsp.exec_cmd("~/.config/hypr/wallpaper.sh"))
+hl.bind("CTRL + Print",
+    hl.dsp.exec_cmd("hyprshot -m region -o ~/Screenshots/"))
+
+-- Mouse binds.
+hl.bind(mainMod .. " + mouse:272",
+    hl.dsp.window.drag(),
+    { mouse = true })
+
+hl.bind(mainMod .. " + mouse:273",
+    hl.dsp.window.resize(),
+    { mouse = true })
+
+-- ---------------------------------------------------------------------------
+-- Media / brightness binds
+-- ---------------------------------------------------------------------------
+
+hl.bind("XF86AudioRaiseVolume",
+    hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"),
+    { locked = true, repeating = true })
+
+hl.bind("XF86AudioLowerVolume",
+    hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+    { locked = true, repeating = true })
+
+hl.bind("XF86AudioMute",
+    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
+    { locked = true })
+
+hl.bind("XF86AudioMicMute",
+    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
+    { locked = true })
+
+hl.bind("XF86MonBrightnessUp",
+    hl.dsp.exec_cmd("brightnessctl s 10%+"),
+    { locked = true, repeating = true })
+
+hl.bind("XF86MonBrightnessDown",
+    hl.dsp.exec_cmd("brightnessctl s 10%-"),
+    { locked = true, repeating = true })
+
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+
+-- ---------------------------------------------------------------------------
+-- Window rules
+-- ---------------------------------------------------------------------------
+
+hl.window_rule({
+    match = { class = "firefox" },
+    opacity = "1.15",
+})
+
+hl.window_rule({
+    match = { class = "^[fF]irefox" },
+    rounding = 0,
+})
+
+hl.window_rule({
+    match = { class = "^(kitty-)(.*)" },
+    float = true,
+})
+
+hl.window_rule({
+    match = { class = "jetbrains-idea" },
+    opacity = "1.2",
+})
+
+-- ---------------------------------------------------------------------------
+-- Opacity controls
+-- ---------------------------------------------------------------------------
+
+hl.bind(mainMod .. " + SHIFT + equal",
+    hl.dsp.exec_cmd("~/.config/hypr/scripts/active_opacity.sh up"))
+
+hl.bind(mainMod .. " + SHIFT + minus",
+    hl.dsp.exec_cmd("~/.config/hypr/scripts/active_opacity.sh down"))
+
+hl.bind(mainMod .. " + SHIFT + P",
+    hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_opacity.sh"))

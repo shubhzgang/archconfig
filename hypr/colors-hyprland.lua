@@ -1,0 +1,1 @@
+/home/shubham/.cache/wal/colors-hyprland.lua
