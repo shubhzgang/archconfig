@@ -46,7 +46,7 @@
       "enabled": false,
       "oauth": false,
       "headers": {
-        "Authorization": "Bearer {GITHUB_PAT}"
+        "Authorization": "Bearer {env:GITHUB_PAT}"
       }
     },
     "global-web-search": {
