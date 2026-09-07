@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "paths": [
+      "/home/shubham/.claude/skills"
+    ]
+  },
+  "command": {
+    "daily-journal": {
+      "template": "Execute daily journal workflow from daily-journal skill",
+      "description": "Creates a daily journal entry in Trilium by reviewing recent journals, Todoist tasks, and memories"
+    },
+    "project-explorer": {
+      "template": "Analyze the codebase and suggest next development steps without implementing any code",
+      "description": "Analyzes the codebase and suggests next development steps (advisory)"
+    },
+    "verify-and-commit": {
+      "template": "Review uncommitted code changes, stage, create a conventional git commit, and push to remote",
+      "description": "Reviews uncommitted code changes, creates a descriptive git commit, and pushes"
+    }
+  },
+  "mcp": {
+    "trilium": {
+      "type": "local",
+      "command": [
+        "node",
+        "/home/shubham/repos/triliumnext-mcp/dist/index.js"
+      ],
+      "environment": {
+        "TRILIUM_TOKEN": "YmQ3FhbD1K4L_RtX8CJ/k2PgAjd2HeOKmnp/fK+EQcOnY5BkBP1PUAEU=",
+        "TRILIUM_URL": "https://notes1.shubhamgangwal.space/etapi"
+      },
+      "enabled": false
+    },
+    "memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": false,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {GITHUB_PAT}"
+      }
+    },
+    "global-web-search": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "duckduckgo-mcp-server"
+      ]
+    },
+    "universal-search": {
+      "type": "remote",
+      "url": "http://localhost:8282/servers/global-web-search/sse",
+      "enabled": false
+    },
+    "web-fetch": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-server-fetch-typescript"
+      ]
+    },
+    "todoist": {
+      "type": "remote",
+      "url": "https://ai.todoist.net/mcp",
+      "enabled": false
+    },
+    "intellij": {
+      "type": "remote",
+      "url": "http://127.0.0.1:64342/stream",
+      "enabled": false
+    },
+    "crawl4ai-mcp": {
+      "type": "local",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--volume",
+        "/tmp/crawl4ai-crawls:/app/crawls",
+        "crawl4ai-mcp-server:latest"
+      ],
+      "environment": {
+        "CRAWL4AI_MCP_LOG": "INFO"
+      },
+      "enabled": false
+    }
+  },
+  "disabled_providers": [],
+  "provider": {
+    "llama-cpp": {
+      "name": "llama cpp",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:8888/v1",
+        "apiKey": "sk-unsloth-f6899b222376fe6a234934527be5e058"
+      },
+      "models": {
+        "qwen": {
+          "limit": {
+            "output": 32000,
+            "context": 262144
+          },
+          "compaction": {
+            "threshold": 0.85
+          },
+          "name": "qwen"
+        }
+      }
+    },
+    "freetoken-1919": {
+      "name": "FreeToken 1919",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:1919/v1"
+      },
+      "models": {
+        "Qwen3.6-35B-A3B-NVFP4": {
+          "name": "Qwen3.6 35B A3B NVFP4",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "tool_call": true
+        }
+      }
+    },
+    "freetoken-1921": {
+      "name": "FreeToken 1921",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:1921/v1"
+      },
+      "models": {
+        "Qwen3.8-Flash-Next-NVFP4": {
+          "name": "Qwen3.8 Flash Next NVFP4",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
+        }
+      }
+    },
+    "unsloth": {
+      "name": "Unsloth Studio",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:8888/v1",
+        "apiKey": "sk-unsloth-f6899b222376fe6a234934527be5e058"
+      },
+      "models": {
+        "unsloth/GLM-5.3-Flash-GGUF:UD-IQ4_XS": {
+          "name": "GLM 5.3 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "reasoning": true,
+          "tool_call": true
+        },
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF:UD-Q4_K_XL": {
+          "name": "DeepSeek V4 Flash 0731",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
+        },
+        "unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL": {
+          "name": "Qwen3 8B Flash Next",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
+        },
+        "unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_XL": {
+          "name": "Qwen3 27B",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
+        },
+        "unsloth/gemma-4-31B-it-GGUF:UD-Q4_K_XL": {
+          "name": "Gemma 4 31B IT",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "reasoning": false,
+          "tool_call": true
+        },
+        "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-Q8_K_XL": {
+          "name": "Qwen3 35B A3B MTP",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
+        }
+      }
+    }
+  },
+  "agent": {
+    "build": {
+      "model": "freetoken-1919/Qwen3.6-35B-A3B-NVFP4"
+    },
+    "plan": {
+      "model": "freetoken-1921/Qwen3.8-Flash-Next-NVFP4"
+    }
+  }
+}
