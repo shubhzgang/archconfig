@@ -135,6 +135,23 @@
         }
       }
     },
+    "bilbo-freetoken": {
+      "name": "bilbo freetoken",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://192.168.1.2:1919/v1"
+      },
+      "models": {
+        "Qwen3.6-35B-A3B-NVFP4": {
+          "name": "Qwen3.6 35B A3B NVFP4",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "tool_call": true
+        }
+      }
+    },
     "freetoken-1921": {
       "name": "FreeToken 1921",
       "npm": "@ai-sdk/openai-compatible",
@@ -150,14 +167,23 @@
           },
           "reasoning": true,
           "tool_call": true
+        },
+        "Qwen3.8-Flash-Next-NVFP4-520k": {
+          "name": "Qwen3.8 Flash Next NVFP4 520k",
+          "limit": {
+            "context": 520000,
+            "output": 65536
+          },
+          "reasoning": true,
+          "tool_call": true
         }
       }
     },
     "unsloth": {
-      "name": "Unsloth Studio",
+      "name": "Unsloth 8080",
       "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "baseURL": "http://localhost:8888/v1",
+        "baseURL": "http://127.0.0.1:8080/v1",
         "apiKey": "sk-unsloth-f6899b222376fe6a234934527be5e058"
       },
       "models": {
@@ -207,7 +233,7 @@
           "tool_call": true
         },
         "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-Q8_K_XL": {
-          "name": "Qwen3 35B A3B MTP",
+          "name": "Qwen 3.6 35B Q8",
           "limit": {
             "context": 262144,
             "output": 65536

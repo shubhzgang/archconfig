@@ -10,3 +10,4 @@
 !.gitignore
 **/monitor.conf
 nvim/plugin/packer_compiled.lua
+environment.d/50-github-pat.conf

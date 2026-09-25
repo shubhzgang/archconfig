@@ -47,14 +47,8 @@ local color5 = wal.color5 or "rgba(888888aa)"
 -- ---------------------------------------------------------------------------
 -- External configs
 -- ---------------------------------------------------------------------------
--- The old config had:
---   source = ~/.config/hypr/monitors.conf
---   source = ~/.config/hypr/workspaces.conf
---
--- Convert those files to Lua first, e.g.:
---   ~/.config/hypr/monitors.lua
---   ~/.config/hypr/workspaces.lua
---
+-- monitors.lua is required at the top of this file.
+-- workspaces.conf exists but is empty; no Lua counterpart is needed.
 
 -- ---------------------------------------------------------------------------
 -- Programs / variables
@@ -106,8 +100,10 @@ hl.config({
         gaps_in = 2,
         gaps_out = 10,
         border_size = 0,
-        ["col.active_border"] = color9,
-        ["col.inactive_border"] = color5,
+        col = {
+            active_border   = color9,
+            inactive_border = color5,
+        },
         resize_on_border = true,
         allow_tearing = false,
         layout = "dwindle",
@@ -138,7 +134,7 @@ hl.config({
             enabled = false,
             range = 15,
             render_power = 5,
-            color = "rgba(0,0,0,.5)",
+            color = "rgba(00000080)",
         },
     },
 
@@ -347,11 +343,10 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("mpv $(wl-paste)"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("pavucontrol"))
 
--- The old bind used:
---   setprop activewindow opaque toggle
--- Keep the exact behavior through hyprctl IPC.
+-- Toggle the active window between fully opaque and its default transparency.
+-- Uses hl.dsp.window.set_prop directly (hyprctl dispatch setprop is broken in Lua config mode).
 hl.bind(mainMod .. " + P",
-    hl.dsp.exec_cmd("hyprctl dispatch setprop activewindow opaque toggle"))
+    hl.dsp.window.set_prop({ window = "active", prop = "opaque", value = "toggle" }))
 
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
@@ -475,7 +470,7 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 
 hl.window_rule({
     match = { class = "firefox" },
-    opacity = "1.15",
+    opacity = "1.0",
 })
 
 hl.window_rule({
@@ -490,7 +485,7 @@ hl.window_rule({
 
 hl.window_rule({
     match = { class = "jetbrains-idea" },
-    opacity = "1.2",
+    opacity = "1.0",
 })
 
 -- ---------------------------------------------------------------------------
