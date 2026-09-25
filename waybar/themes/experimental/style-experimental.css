@@ -77,9 +77,9 @@ tooltip {
 #workspaces button.active {
     border: none;
     padding: 0px 2px;
-    border-radius:10px;
+    border-radius: 50%;
     background: @color1;
-    min-width: 30px;
+    min-width: 15px;
 }
 #workspaces button.active:hover{
     background: @color2;
@@ -93,7 +93,7 @@ tooltip {
 #workspaces button.empty:hover {
     color: rgba(0,0,0,0);
     border: none;
-    text-shadow: 0px 0px 1.5px rgba(0, 0, 0, .5);
+    background: @color1;
 }
 #workspaces button.empty.active {
     color: rgba(0,0,0,0);
