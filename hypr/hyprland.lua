@@ -367,11 +367,24 @@ hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 
+-- Cycle through every workspace, including the empty ones. The built-in
+-- "e-1"/"e+1" only ever lands on workspaces that have windows in them, so the
+-- next id is computed here instead.
+local WORKSPACE_COUNT = 10
+
+local function cycle_workspace(delta)
+    local id = hl.get_active_workspace().id
+    if id < 1 or id > WORKSPACE_COUNT then
+        id = delta > 0 and 0 or WORKSPACE_COUNT + 1
+    end
+    hl.dispatch(hl.dsp.focus({ workspace = (id - 1 + delta) % WORKSPACE_COUNT + 1 }))
+end
+
 hl.bind(mainMod .. " + CTRL + left",
-    hl.dsp.focus({ workspace = "e-1" }))
+    function() cycle_workspace(-1) end)
 
 hl.bind(mainMod .. " + CTRL + right",
-    hl.dsp.focus({ workspace = "e+1" }))
+    function() cycle_workspace(1) end)
 
 
 -- Screenshots
