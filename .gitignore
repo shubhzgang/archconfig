@@ -1,6 +1,7 @@
 #Ignore everything
 /*
 !hypr/
+!kitty/
 !nvim/
 !rofi/
 !wal/
@@ -11,3 +12,4 @@
 **/monitor.conf
 nvim/plugin/packer_compiled.lua
 environment.d/50-github-pat.conf
+kitty/current-theme.conf
