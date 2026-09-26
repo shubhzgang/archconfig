@@ -19,7 +19,7 @@ main() {
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
     
     # 2. Generate pywal colors
-    wal -i "$selected_wallpaper" -n
+    wal -i "$selected_wallpaper" -n -s
     
     # 3. Source the generated colors
     # By sourcing this file directly, you instantly load $wallpaper, $color1, $color2, etc. as variables, removing the need for complex awk commands.
