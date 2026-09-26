@@ -406,7 +406,6 @@ hl.bind("ALT + SHIFT + 4",
 -- ---------------------------------------------------------------------------
 
 hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m window -o ~/Screenshots/"))
-hl.bind("ALT + B", hl.dsp.exec_cmd("~/.config/waybar/scripts/select.sh"))
 hl.bind("ALT + Print",
     hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Screenshots/"))
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("wlogout -b 5"))
