@@ -1,8 +1,33 @@
 #!/bin/bash
 WALLPAPER_DIR="$HOME/wallpapers/walls"
+THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-150x84"
+THUMB_W=150
+THUMB_H=84
+
+export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H
+
+make_thumb() {
+    local file="$1"
+    local rel="${file#"$WALLPAPER_DIR"/}"
+    local thumb="$THUMB_DIR/$rel.png"
+    mkdir -p "$(dirname "$thumb")"
+    if [ -f "$thumb" ] && [ "$thumb" -nt "$file" ]; then
+        return
+    fi
+    magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" -quality 80 "$thumb" 2>/dev/null
+}
+export -f make_thumb
 
 menu() {
-    find "${WALLPAPER_DIR}" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | awk '{print "img:"$0}'
+    local files=()
+    while IFS= read -r -d '' f; do files+=("$f"); done < <(
+        find "${WALLPAPER_DIR}" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) -print0
+    )
+    printf '%s\0' "${files[@]}" | xargs -0 -P "$(nproc)" -n1 bash -c 'make_thumb "$@"' _
+    local f
+    for f in "${files[@]}"; do
+        echo "img:$THUMB_DIR/${f#"$WALLPAPER_DIR"/}.png"
+    done
 }
 
 main() {
@@ -13,7 +38,7 @@ main() {
         exit 0
     fi
 
-    selected_wallpaper=$(echo "$choice" | sed 's/^img://')
+    selected_wallpaper=$(echo "$choice" | sed "s|^img:${THUMB_DIR}/|${WALLPAPER_DIR}/|; s|\.png$||")
     
     # 1. Apply wallpaper
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
