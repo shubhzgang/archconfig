@@ -61,7 +61,7 @@ local wofiWidth = "80%"
 local wofiHeight = "80%"
 local menu = "wofi -n --width=" .. wofiWidth .. " --height=" .. wofiHeight
 
-local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-2 $(~/.config/hypr/mpvpaper.sh)"
+local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-1 $(~/.config/hypr/mpvpaper.sh)"
 
 local mainMod = "SUPER"
 
