@@ -67,6 +67,14 @@
         "SEARXNG_URL": "http://192.168.1.2:8084"
       }
     },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
     "universal-search": {
       "type": "remote",
       "url": "http://localhost:8282/servers/global-web-search/sse",
