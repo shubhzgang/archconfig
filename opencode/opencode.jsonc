@@ -56,6 +56,17 @@
         "duckduckgo-mcp-server"
       ]
     },
+    "searxng": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-searxng"
+      ],
+      "environment": {
+        "SEARXNG_URL": "http://192.168.1.2:8084"
+      }
+    },
     "universal-search": {
       "type": "remote",
       "url": "http://localhost:8282/servers/global-web-search/sse",
@@ -77,6 +88,11 @@
     "intellij": {
       "type": "remote",
       "url": "http://127.0.0.1:64342/stream",
+      "enabled": false
+    },
+    "budget": {
+      "type": "remote",
+      "url": "https://mcp.budget.shubhamgangwal.space/mcp",
       "enabled": false
     },
     "crawl4ai-mcp": {
