@@ -35,8 +35,8 @@ else
     exit 1
 fi
 
-# Constrain between 0.1 and 1.0
-NEW=$(awk "BEGIN {if ($NEW > 1.0) print 1.0; else if ($NEW < 0.1) print 0.1; else print $NEW}")
+# Constrain between 0.0 and 1.0
+NEW=$(awk "BEGIN {if ($NEW > 1.0) print 1.0; else if ($NEW < 0.0) print 0.0; else print $NEW}")
 
 # Save state and apply via hyprctl eval + Lua API.
 # "opacity" prop with " override" suffix forces exact value instead of multiplier.

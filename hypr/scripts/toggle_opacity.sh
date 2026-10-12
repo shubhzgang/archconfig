@@ -5,14 +5,14 @@
 # When toggling to opaque, also clears any per-window set_prop opacity overrides
 # (set by active_opacity.sh) because those take precedence over the global config.
 
-CURRENT_OPACITY=$(hyprctl getoption decoration:active_opacity -j | jq -r '.float')
+CURRENT_OPACITY=$(hyprctl getoption decoration:inactive_opacity -j | jq -r '.float')
 
 # Check if fully opaque (safe floating-point comparison via awk)
 IS_OPAQUE=$(awk -v op="$CURRENT_OPACITY" 'BEGIN { print (op >= 0.99) ? 1 : 0 }')
 
 if [ "$IS_OPAQUE" -eq 1 ]; then
-    # Revert to translucent defaults
-    hyprctl eval 'hl.config({ decoration = { active_opacity = 0.95, inactive_opacity = 0.6 } })'
+    # Revert to defaults: active opaque, inactive 0.95
+    hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 0.95 } })'
 else
     # Force all windows fully opaque globally
     hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 1.0 } })'
