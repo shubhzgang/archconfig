@@ -1,16 +1,29 @@
-/* Thumbnail grid for hypr/wallpaper.sh. */
+/* Thumbnail grid for hypr/wallpaper.sh: no search bar, one card per wallpaper. */
 @import "~/.config/rofi/theme.rasi"
+@import "~/.config/rofi/card.rasi"
 
-window { width: 900px; }
+window { width: 3000px; height: 1500px; }
+
+mainbox { children: [ listview ]; }
+
 listview {
-    columns: 4;
+    columns: 12;
     fixed-columns: true;
-    lines: 4;
-    spacing: 12px;
+    lines: 8;
 }
+
 element {
     orientation: vertical;
-    padding: 8px;
+    /* The icon box is square (150x150) but thumbnails are 16:9, so each image has ~33px of
+       blank above and below it; 33px of horizontal padding makes the gaps even. The extra
+       12px on each side is the card image's shadow margin (see make-cards.py). */
+    padding: 12px 45px;
+    background-image: url("/home/shubham/.cache/wal/rofi-card-wall.png", both);
 }
+
+element selected {
+    background-image: url("/home/shubham/.cache/wal/rofi-card-wall-sel.png", both);
+}
+
 element-icon { size: 150px; horizontal-align: 0.5; }
 element-text { enabled: false; }

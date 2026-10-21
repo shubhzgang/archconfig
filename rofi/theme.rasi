@@ -64,3 +64,6 @@ element-text {
     vertical-align: 0.5;
     text-color: inherit;
 }
+
+/* Gradient window background, same colors as the waybar side sections. Last so it wins. */
+@import "~/.cache/wal/colors-rofi-bar.rasi"

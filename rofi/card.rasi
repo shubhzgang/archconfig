@@ -1,0 +1,30 @@
+/* Shared by the launcher and wallpaper picker: entries are cards drawn from PNGs
+   (make-cards.py) so they can have soft, spread-out shadows like the sysstats panel. */
+element {
+    background-color: transparent;
+    border: 0px;
+    border-radius: 0px;
+    text-color: @bg;
+}
+
+element selected {
+    background-color: transparent;
+    text-color: @bg;
+}
+
+entry {
+    text-color: @bg;
+    placeholder-color: rgba(0, 0, 0, 45%);
+}
+
+window {
+    padding: 28px;
+}
+
+mainbox {
+    spacing: 4px;
+}
+
+listview {
+    spacing: 4px;
+}

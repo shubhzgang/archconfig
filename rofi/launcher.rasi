@@ -1,0 +1,26 @@
+/* App launcher (Super+R): several columns, since app names are short. */
+@import "~/.config/rofi/theme.rasi"
+@import "~/.config/rofi/card.rasi"
+
+listview {
+    columns: 4;
+    fixed-columns: true;
+}
+
+/* 12px of each side's padding is the card image's shadow margin (see make-cards.py) */
+element {
+    padding: 22px 24px;
+    background-image: url("/home/shubham/.cache/wal/rofi-card-launcher.png", both);
+}
+
+element selected {
+    background-image: url("/home/shubham/.cache/wal/rofi-card-launcher-sel.png", both);
+}
+
+inputbar {
+    padding: 26px 28px;
+    border: 0px;
+    border-radius: 0px;
+    background-color: transparent;
+    background-image: url("/home/shubham/.cache/wal/rofi-card-input.png", both);
+}

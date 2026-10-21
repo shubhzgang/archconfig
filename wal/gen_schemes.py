@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate one pywal scheme (JSON) per wallpaper.
 
-Usage: gen_schemes.py [wallpaper_dir] [out_dir]
+Usage: gen_schemes.py [wallpaper_dir_or_file] [out_dir]
 
 Unlike pywal's own backends, which favour the most *common* colors (a red car
 on a grey road comes out grey), accents here are scored by population AND
@@ -154,10 +154,14 @@ def build_scheme(path):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    for name in sorted(os.listdir(WALL_DIR)):
+    if os.path.isfile(WALL_DIR):  # single wallpaper (used by wallpaper.sh for new images)
+        names = [(os.path.dirname(WALL_DIR), os.path.basename(WALL_DIR))]
+    else:
+        names = [(WALL_DIR, n) for n in sorted(os.listdir(WALL_DIR))]
+    for directory, name in names:
         if not name.lower().endswith(EXTS):
             continue
-        path = os.path.join(WALL_DIR, name)
+        path = os.path.join(directory, name)
         out = os.path.join(OUT_DIR, name + ".json")
         with open(out, "w") as f:
             json.dump(build_scheme(path), f, indent=4)
