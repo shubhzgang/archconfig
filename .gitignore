@@ -10,6 +10,9 @@
 !wlogout/
 !.gitignore
 **/monitor.conf
+hypr/monitors.conf
+hypr/monitors.lua
+hypr/sysstats.json
 nvim/plugin/packer_compiled.lua
 environment.d/50-github-pat.conf
 kitty/current-theme.conf
