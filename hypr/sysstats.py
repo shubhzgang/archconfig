@@ -9,6 +9,7 @@ waybar, so graphs are full as soon as the panel opens.
 import json
 import math
 import os
+import subprocess
 from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer
 from PyQt6.QtGui import (QColor, QFont, QGuiApplication, QLinearGradient,
                          QPainter, QPainterPath, QPen)
@@ -317,6 +318,12 @@ class Stats(QWidget):
         mins, secs = divmod(int(round(span)), 60)
         self.text(p, x + w, y, f"last {mins}m {secs:02d}s" if mins else f"last {secs}s",
                   pal.ink, 16, align=Qt.AlignmentFlag.AlignRight, w=w * 0.4)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key.Key_Escape:  # hide the scratchpad, same as pushing the left edge again
+            subprocess.Popen(["pypr", "toggle", "taskbar"])
+        else:
+            super().keyPressEvent(e)
 
     def mouseMoveEvent(self, e):
         over = any(r.contains(e.position()) for r, _, _ in self.chips)
