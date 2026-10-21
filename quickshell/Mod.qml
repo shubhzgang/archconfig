@@ -8,6 +8,7 @@ Item {
     property alias hovered: area.containsMouse
     property alias font: label.font
     signal clicked(var mouse)
+    signal pressed()
 
     implicitWidth: label.implicitWidth + 10
     implicitHeight: 39
@@ -27,6 +28,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        onPressed: root.pressed()
         onClicked: mouse => root.clicked(mouse)
     }
 }

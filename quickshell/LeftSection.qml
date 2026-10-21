@@ -6,7 +6,7 @@ import Quickshell.Networking
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
-// Top-left section, replicating waybar's: notifications button, clock (click opens the calendar panel),
+// Top-left section: Apps button (opens the launcher), clock (click opens the calendar panel),
 // pending pacman updates, tray, bluetooth and network.
 Item {
     id: section
@@ -34,7 +34,17 @@ Item {
         command: ["kitty", "sh", "-c", "yay -Syu; echo Done - Press enter to exit; read"]
         onExited: pacmanCheck.running = true
     }
-    Process { id: swaync; command: ["swaync-client", "-t", "-sw"] }
+    // Apps button: opens the launcher, or closes it if it is already open. Whether it was open is
+    // checked when the mouse goes DOWN (before anything the click itself might do to the launcher).
+    // Only a live rofi counts: an exited-but-unreaped (zombie) one still matches pgrep/pkill.
+    property bool launcherWasOpen: false
+    Process {
+        id: launcherCheck
+        command: ["sh", "-c", "ps -C rofi -o stat= | grep -q '^[^Z]'"]
+        onExited: (code, status) => section.launcherWasOpen = (code === 0)
+    }
+    Process { id: launcherOpen; command: ["rofi", "-show", "drun"] }
+    Process { id: launcherClose; command: ["pkill", "-x", "rofi"] }
     Process { id: blueman; command: ["blueman-manager"] }
     Process { id: nmtui; command: ["kitty", "nmtui"] }
 
@@ -85,8 +95,11 @@ Item {
 
         Mod {
             theme: section.theme
-            text: ""
-            onClicked: swaync.running = true
+            text: "Apps"
+            font.pixelSize: 19
+            font.weight: Font.ExtraBold
+            onPressed: launcherCheck.running = true
+            onClicked: section.launcherWasOpen ? launcherClose.running = true : launcherOpen.running = true
         }
         Mod {
             id: clockMod

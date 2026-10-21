@@ -299,7 +299,6 @@ hl.animation({
 hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on")
     hl.exec_cmd("hypridle")
-    hl.exec_cmd("systemctl --user start hotcorner.service")
     hl.exec_cmd("systemctl --user start sysstatsd.service")
     hl.exec_cmd("qs")  -- Quickshell: top-right stats that morph into the stats panel
     hl.exec_cmd("swww-daemon")
@@ -435,6 +434,10 @@ hl.bind("CTRL + Print",
     hl.dsp.exec_cmd("hyprshot -m region -o ~/Screenshots/"))
 
 -- Mouse binds.
+-- Left click anywhere: lets the bar's Apps button close an open rofi launcher (rofi holds the
+-- pointer while open, so the button never sees that click). The click itself is not consumed.
+hl.bind("mouse:272", hl.dsp.exec_cmd("~/.config/hypr/scripts/apps-click.sh"), { non_consuming = true })
+
 hl.bind(mainMod .. " + mouse:272",
     hl.dsp.window.drag(),
     { mouse = true })
