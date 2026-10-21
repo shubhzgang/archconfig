@@ -55,6 +55,7 @@ main() {
     
     # Saturated dark gradient ends for the waybar side sections (CSS can't saturate)
     ~/.config/waybar/scripts/bar-colors.py
+    ~/.config/kitty/gradient.py  # kitty's background gradient uses the same colors
 
     # Hyprland reads the border colors from the pywal file only at config load
     hyprctl reload
