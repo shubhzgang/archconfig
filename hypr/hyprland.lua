@@ -303,6 +303,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start ws-watch.service")
     hl.exec_cmd("systemctl --user start sysstatsd.service")
     hl.exec_cmd("waybar")
+    hl.exec_cmd("qs")  -- Quickshell: top-right stats that morph into the stats panel
     hl.exec_cmd("swww-daemon")
     hl.exec_cmd("swaync")
     hl.exec_cmd("pypr")

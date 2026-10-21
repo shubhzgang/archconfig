@@ -24,20 +24,11 @@ window#waybar{
     background: @bar_start;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
-.modules-right {
-    padding:7px;
-    padding-right:12px;
-    margin: 10px 10px 15px 0;
-    border-radius:10px;
-    border: 2px solid @color1;
-    background: linear-gradient(to right, @bar_start, @bar_end);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
-}
 tooltip {
     background:@background;
     color: @color7;
 }
-#clock:hover, #custom-cpu:hover, #custom-mem:hover, #custom-net:hover, #custom-gpu:hover, #custom-pacman:hover, #custom-notification:hover,#bluetooth:hover,#network:hover{
+#clock:hover, #custom-pacman:hover, #custom-notification:hover,#bluetooth:hover,#network:hover{
     transition: all .3s ease;
     color:@color9;
 }
@@ -45,15 +36,6 @@ tooltip {
     padding: 0px 5px;
     transition: all .3s ease;
     color:@color7;
-}
-#custom-cpu { min-width: 64px; }
-#custom-mem { min-width: 250px; }
-#custom-net { min-width: 190px; }
-#custom-gpu { min-width: 300px; }
-#custom-cpu, #custom-mem, #custom-net, #custom-gpu {
-    padding: 0px 8px;
-    color:@color7;
-    transition: all .3s ease;
 }
 #clock{
     padding: 0px 5px;
@@ -144,7 +126,4 @@ tooltip {
 #tray menu separator {
     padding: 0px 5px;
     transition: all .3s ease; 
-}
-#custom-mem, #custom-net, #custom-gpu, #bluetooth, #network {
-    border-left: 1px solid alpha(@color7, 0.2);
 }
