@@ -71,8 +71,8 @@ main() {
         wal -i "$selected_wallpaper" -n -s
     fi
     
-    # Saturated dark gradient ends for the waybar side sections (CSS can't saturate)
-    ~/.config/waybar/scripts/bar-colors.py
+    # Saturated dark gradient ends for the Quickshell bar sections (also used by rofi and kitty)
+    ~/.config/quickshell/scripts/bar-colors.py
     ~/.config/kitty/gradient.py  # kitty's background gradient uses the same colors
     ~/.config/rofi/make-cards.py  # rofi card images (selected card uses the new color1)
 

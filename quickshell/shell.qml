@@ -7,6 +7,19 @@ import Quickshell.Wayland
 ShellRoot {
     Theme { id: theme }
 
+    // Reserves the top strip the bar occupies (waybar used to), so windows don't tile underneath
+    // it: 10px margin + 39px sections + 15px below, as before. Nothing is drawn or clickable here.
+    PanelWindow {
+        anchors { top: true; left: true; right: true }
+        implicitHeight: 64
+        color: "transparent"
+        exclusionMode: ExclusionMode.Normal
+        exclusiveZone: 64
+        WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.namespace: "qs-bar-space"
+        mask: Region {}
+    }
+
     PanelWindow {
         id: win
         property bool open: false
@@ -24,6 +37,7 @@ ShellRoot {
             regions: [
                 Region { item: win.open ? backdrop : stats },
                 Region { item: leftSection },
+                Region { item: centerSection },
                 Region { item: leftSection.tipRect },
                 Region { item: leftSection.calendarRect }
             ]
@@ -77,6 +91,27 @@ ShellRoot {
                 shadowBlur: 0.85
                 shadowVerticalOffset: 4
             }
+        }
+
+        Rectangle {   // shadow twin for the center section
+            anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 10 }
+            width: centerSection.width
+            height: centerSection.height
+            radius: centerSection.radius
+            color: "black"
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "black"
+                shadowOpacity: 0.85
+                shadowBlur: 0.85
+                shadowVerticalOffset: 4
+            }
+        }
+
+        CenterSection {
+            id: centerSection
+            theme: theme
         }
 
         LeftSection {

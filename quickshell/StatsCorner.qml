@@ -60,13 +60,13 @@ Rectangle {
     transitions: [
         Transition {
             from: ""; to: "open"
-            NumberAnimation { property: "width"; duration: 850; easing.type: Easing.OutQuint }
-            NumberAnimation { property: "height"; duration: 1000; easing.type: Easing.OutQuint }
+            NumberAnimation { property: "width"; duration: 520; easing.type: Easing.OutQuint }
+            NumberAnimation { property: "height"; duration: 620; easing.type: Easing.OutQuint }
         },
         Transition {
             from: "open"; to: ""
-            NumberAnimation { property: "width"; duration: 700; easing.type: Easing.InQuint }
-            NumberAnimation { property: "height"; duration: 800; easing.type: Easing.InQuint }
+            NumberAnimation { property: "width"; duration: 430; easing.type: Easing.InQuint }
+            NumberAnimation { property: "height"; duration: 500; easing.type: Easing.InQuint }
         }
     ]
 
@@ -142,7 +142,7 @@ Rectangle {
         visible: opacity > 0
         Behavior on opacity {   // content fades in once the shape has started to grow
             SequentialAnimation {
-                PauseAnimation { duration: corner.open ? 150 : 0 }
+                PauseAnimation { duration: corner.open ? 90 : 0 }
                 NumberAnimation { duration: corner.open ? 260 : 100 }
             }
         }

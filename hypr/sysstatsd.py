@@ -149,7 +149,7 @@ def main():
                      for i, g in gpus.items()},
         })
 
-        # waybar lines (numbers only; the panel has the graphs)
+        # lines for the collapsed numbers in the Quickshell corner (the panel has the graphs)
         publish("cpu.json", {
             "text": f"󰻠 {cpu:.0f}%",
             "tooltip": f"CPU {cpu:.0f}% at {freq / 1000:.1f} GHz",

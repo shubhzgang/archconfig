@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render kitty's background gradient from the waybar side-section colors.
+"""Render kitty's background gradient from the Quickshell bar-section colors.
 
-Reads bar_start/bar_end (written by waybar/scripts/bar-colors.py) and writes a
+Reads bar_start/bar_end (written by quickshell/scripts/bar-colors.py) and writes a
 small diagonal-gradient PNG that kitty stretches over the window, plus the conf line pointing at it.
 """
 import glob

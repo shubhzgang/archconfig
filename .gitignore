@@ -7,7 +7,6 @@
 !rofi/
 !systemd/
 !wal/
-!waybar/
 !wlogout/
 !.gitignore
 **/monitor.conf

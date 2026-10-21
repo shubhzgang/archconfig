@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Write dark, saturated gradient ends for waybar's left/right sections (and rofi's pale background).
+"""Write the Quickshell bar's dark, saturated gradient ends (and rofi's pale background).
 
 CSS has no saturate(), so derive them from the active pywal colors (color1 and
 color2, the window border hues): keep the hue, fix a low lightness for text
-contrast and push saturation up. Output is imported by waybar/style.css; rofi gets a pale
+contrast and push saturation up. Output is read by quickshell/Theme.qml and kitty/gradient.py; rofi gets a pale
 color1 -> color2 gradient (like the stats panel) as a window rule in colors-rofi-bar.rasi.
 """
 import colorsys

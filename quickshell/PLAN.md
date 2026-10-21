@@ -17,7 +17,7 @@ Goal: a Caelestia-style shell where the bar and panels are one morphing shape dr
    click to switch, drag windows between workspaces, Escape closes. Grows out of the center
    section like the other panels.
 7. **Left section:** notifications button, clock, pacman, tray, bluetooth, network.
-8. **Retire waybar**; Quickshell reserves the bar space; hot zones become real hover areas
+8. **Retire waybar** (done: waybar is removed; sections 1-5 and 7 are ported; step 6, the overview, is still to do); Quickshell reserves the bar space; hot zones become real hover areas
    (replaces `hypr/hotcorner.py` and `hypr/ws-watch.py`).
 9. **Optional:** animated launcher / wallpaper picker / notifications as panels in the same shape.
 

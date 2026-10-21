@@ -10,6 +10,8 @@ Item {
     property color accent: "#4a8fb5"       // color1: active window border
     property color ink: "#d8dce4"          // color7: light text
     property color hover: "#ffb59a"        // color9: text on hover
+    property color accent2: "#5d629b"      // color2: workspace dot with windows
+    property color accent3: "#e12c97"      // color3: empty workspace dot
     property color dark: "#10141a"         // scheme background: dark text on light cards
     property color barStart: "#742306"     // waybar side-section gradient ends
     property color barEnd: "#1c375f"
@@ -27,6 +29,8 @@ Item {
             root.accent = c.color1
             root.ink = c.color7
             root.hover = c.color9
+            root.accent2 = c.color2
+            root.accent3 = c.color3
             root.dark = value.special.background
             // darkened accents read well on the pale cards
             root.series = [1, 2, 3, 4, 5, 6].map(i => root.darken(Qt.color(c["color" + i]), 0.4))

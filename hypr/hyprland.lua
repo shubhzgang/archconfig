@@ -44,7 +44,7 @@ local wal = read_hyprlang_vars(HOME .. "/.cache/wal/colors-hyprland")
 local color9 = wal.color9 or "rgba(ffffffaa)"
 local color5 = wal.color5 or "rgba(888888aa)"
 
--- Match waybar workspace dots: color1 = active, color2 = inactive non-empty.
+-- Match the workspace dots: color1 = active, color2 = inactive non-empty.
 local activeBorder = wal.color1 or color9
 local inactiveBorder = wal.color2 or color5
 
@@ -300,9 +300,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on")
     hl.exec_cmd("hypridle")
     hl.exec_cmd("systemctl --user start hotcorner.service")
-    hl.exec_cmd("systemctl --user start ws-watch.service")
     hl.exec_cmd("systemctl --user start sysstatsd.service")
-    hl.exec_cmd("waybar")
     hl.exec_cmd("qs")  -- Quickshell: top-right stats that morph into the stats panel
     hl.exec_cmd("swww-daemon")
     hl.exec_cmd("swaync")
@@ -425,7 +423,6 @@ hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m window -o ~/Screenshots/"))
 hl.bind("ALT + Print",
     hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Screenshots/"))
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("wlogout -b 5"))
-hl.bind("ALT + a", hl.dsp.exec_cmd("~/.config/waybar/scripts/refresh.sh"))
 hl.bind("ALT + down", hl.dsp.window.move({ direction = "down" }))
 hl.bind("ALT + left", hl.dsp.window.move({ direction = "left" }))
 hl.bind("ALT + r", hl.dsp.exec_cmd("~/.config/swaync/refresh.sh"))
