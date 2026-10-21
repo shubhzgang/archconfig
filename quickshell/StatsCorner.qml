@@ -139,8 +139,8 @@ Item {
         visible: opacity > 0
         Behavior on opacity {
             SequentialAnimation {
-                PauseAnimation { duration: corner.open ? 140 : 0 }
-                NumberAnimation { duration: corner.open ? 260 : 100 }
+                PauseAnimation { duration: corner.open ? 300 : 0 }
+                NumberAnimation { duration: corner.open ? 150 : 100 }
             }
         }
 
@@ -202,10 +202,10 @@ Item {
         clip: true
         opacity: corner.open ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity {   // content fades in once the shape has started to grow
+        Behavior on opacity {   // content fades in once the shape has (nearly) finished growing
             SequentialAnimation {
-                PauseAnimation { duration: corner.open ? 90 : 0 }
-                NumberAnimation { duration: corner.open ? 260 : 100 }
+                PauseAnimation { duration: corner.open ? 300 : 0 }
+                NumberAnimation { duration: corner.open ? 150 : 100 }
             }
         }
 
@@ -216,7 +216,7 @@ Item {
             clip: true
             Column {
                 id: cards
-                width: parent.width
+                width: corner.openW - 32   // fixed, so the graphs don't resize while the panel grows
                 spacing: 16
 
                 Card {
