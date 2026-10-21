@@ -147,29 +147,6 @@ Item {
                     scrollAnim.start()
                 }
             }
-            highlightFollowsCurrentItem: true
-            highlightMoveDuration: 140          // the highlight trails the selection
-
-            // the selected card: accent colored and raised, glides from card to card
-            highlight: Item {
-                z: 0
-                Rectangle {
-                    id: lift
-                    x: 6; y: 6
-                    width: grid.cellWidth - 12
-                    height: grid.cellHeight - 12
-                    radius: 10
-                    color: panel.theme.accent
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        shadowEnabled: true
-                        shadowColor: "#99000000"
-                        shadowBlur: 0.6
-                        shadowVerticalOffset: 4
-                    }
-                }
-            }
-
             delegate: Item {
                 id: cell
                 required property var modelData
@@ -178,52 +155,75 @@ Item {
                 height: grid.cellHeight
                 readonly property bool current: GridView.isCurrentItem
 
-                Rectangle {   // the card; the highlight sits above it when selected
+                Rectangle {   // the card
                     anchors { fill: parent; margins: 6 }
                     radius: 10
                     color: panel.theme.card
-                    visible: !cell.current
+                    opacity: cell.current ? 0 : 1
+                    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                 }
-                Rectangle {   // icon tile, recessed into the card
-                    id: tile
-                    x: 20; anchors.verticalCenter: parent.verticalCenter
-                    width: 52; height: 52; radius: 12
-                    color: "transparent"
-                    // Flat recess, not a bowl: only the edges are shaded (a soft dark band under the top
-                    // edge, a faint light line along the bottom); the middle is the card's own color.
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.16) }
-                        GradientStop { position: 0.10; color: Qt.rgba(0, 0, 0, 0.03) }
-                        GradientStop { position: 0.2; color: "transparent" }
-                        GradientStop { position: 0.84; color: "transparent" }
-                        GradientStop { position: 0.95; color: Qt.rgba(0, 0, 0, 0.06) }   // subtle shadow inside the bottom edge
-                        GradientStop { position: 1.0; color: Qt.rgba(1, 1, 1, 0.16) }
-                    }
-                    Rectangle {   // subtle shadow inside the left and right edges
-                        anchors.fill: parent
-                        radius: parent.radius
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.07) }
-                            GradientStop { position: 0.12; color: "transparent" }
-                            GradientStop { position: 0.88; color: "transparent" }
-                            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.07) }
+                Item {   // everything but the base card rises 6px and shifts 4px right when selected
+                    width: parent.width; height: parent.height
+                    x: cell.current ? 4 : 0
+                    y: cell.current ? -6 : 0
+                    Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    Behavior on y { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    Rectangle {   // selection: accent color and raised, fades in/out as the selection moves
+                        anchors { fill: parent; margins: 6 }
+                        radius: 10
+                        color: panel.theme.accent
+                        opacity: cell.current ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            shadowEnabled: true
+                            shadowColor: "#99000000"
+                            shadowBlur: 0.6
+                            shadowVerticalOffset: 4
                         }
                     }
-                    IconImage {
-                        anchors.centerIn: parent
-                        implicitSize: 32
-                        source: Quickshell.iconPath(cell.modelData.icon, "application-x-executable")
+                    Rectangle {   // icon tile, recessed into the card
+                        id: tile
+                        x: 20; anchors.verticalCenter: parent.verticalCenter
+                        width: 52; height: 52; radius: 12
+                        color: "transparent"
+                        // Flat recess, not a bowl: only the edges are shaded (a soft dark band under the top
+                        // edge, a faint light line along the bottom); the middle is the card's own color.
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.16) }
+                            GradientStop { position: 0.10; color: Qt.rgba(0, 0, 0, 0.03) }
+                            GradientStop { position: 0.2; color: "transparent" }
+                            GradientStop { position: 0.84; color: "transparent" }
+                            GradientStop { position: 0.95; color: Qt.rgba(0, 0, 0, 0.06) }   // subtle shadow inside the bottom edge
+                            GradientStop { position: 1.0; color: Qt.rgba(1, 1, 1, 0.16) }
+                        }
+                        Rectangle {   // subtle shadow inside the left and right edges
+                            anchors.fill: parent
+                            radius: parent.radius
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.07) }
+                                GradientStop { position: 0.12; color: "transparent" }
+                                GradientStop { position: 0.88; color: "transparent" }
+                                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.07) }
+                            }
+                        }
+                        IconImage {
+                            anchors.centerIn: parent
+                            implicitSize: 32
+                            source: Quickshell.iconPath(cell.modelData.icon, "application-x-executable")
+                        }
                     }
-                }
-                Text {
-                    anchors { left: tile.right; leftMargin: 14; right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
-                    text: cell.modelData.name
-                    elide: Text.ElideRight
-                    color: panel.theme.dark
-                    font.family: "CodeNewRoman Nerd Font Mono"
-                    font.pixelSize: 17
-                    font.bold: cell.current
+                    Text {
+                        anchors { left: tile.right; leftMargin: 14; right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
+                        text: cell.modelData.name
+                        elide: Text.ElideRight
+                        color: panel.theme.dark
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 17
+                        font.bold: cell.current
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
