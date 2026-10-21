@@ -17,11 +17,3 @@ command = "kitty --class kitty-pulsemixer -e pulsemixer"
 class = "kitty-pulsemixer"
 size = "50% 20%"
 offset = "200%"
-
-[scratchpads.taskbar]
-animation = "fromLeft"
-command = "python3 /home/shubham/.config/hypr/sysstats.py"
-class = "sysstats"
-size = "30% 80%"
-offset = "200%"
-

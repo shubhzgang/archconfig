@@ -1,5 +1,5 @@
 [Unit]
-Description=System stats sampler for waybar and the sysstats panel
+Description=System stats sampler for the Quickshell stats corner
 
 [Service]
 ExecStart=%h/.config/hypr/sysstatsd.py

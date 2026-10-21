@@ -359,7 +359,6 @@ hl.bind(mainMod .. " + P",
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pypr toggle term"))
-hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("pypr toggle taskbar"))
 
 hl.bind(mainMod .. " + V",
     hl.dsp.exec_cmd(
@@ -499,10 +498,10 @@ hl.window_rule({
     float = true,
 })
 
--- pyprland scratchpads (stats panel, drop terminal, ...) come up with a magenta
+-- pyprland scratchpads (drop terminal, ...) come up with a magenta
 -- border unless it is set explicitly.
 hl.window_rule({
-    match = { class = "^(sysstats|kitty-.*)$" },
+    match = { class = "^kitty-.*$" },
     border_color = activeBorder .. " " .. inactiveBorder,
 })
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""System stats sampler shared by the waybar modules and the sysstats panel.
+"""System stats sampler for the Quickshell stats corner and panel.
 
 Samples CPU, RAM, network and NVIDIA GPUs once a second and publishes, under
 $XDG_RUNTIME_DIR/sysstats/:
-  state.json                       full state + history, read by sysstats.py
-  cpu.json mem.json net.json gpu.json   one waybar JSON line each (`tail -F`'d by waybar)
+  state.json                       full state + history, read by the Quickshell stats panel
+  cpu.json mem.json net.json gpu.json   one JSON line each (the numbers in the Quickshell corner)
 Files are replaced atomically, so readers never see a partial write.
 
 Sampling interval and history length come from sysstats.json next to this file
-(changed from the panel); edits are picked up immediately and reset the history.
+(there is no UI for it yet); edits are picked up immediately and reset the history.
 """
 import json
 import os
