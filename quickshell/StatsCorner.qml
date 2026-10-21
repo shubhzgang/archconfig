@@ -4,14 +4,18 @@ import Quickshell.Io
 
 // Top-right corner: the stats numbers (collapsed, where waybar's right section is) that grow into
 // the full stats panel in the same corner when clicked.
-Rectangle {
+Item {
     id: corner
     required property var theme
     property bool open: false
     signal toggle()
 
+    // Geometry shared with Frame.qml: the numbers live in the top band; the panel hangs from the
+    // band at the right and is drawn by the frame itself (its outline flows into the frame).
+    readonly property int band: 56
+    readonly property real side: 1.5       // the frame's outline sits on the screen edge (Frame.qml)
     readonly property int collapsedW: 900
-    readonly property int collapsedH: 39   // same outer height as waybar's sections
+    readonly property int collapsedH: 39   // height of the numbers row
     readonly property var st: stateFile.value
     readonly property int points: st.points || 120
     readonly property real interval: st.interval || 1
@@ -33,21 +37,14 @@ Rectangle {
         return m ? "last " + m + "m " + (s < 10 ? "0" : "") + s + "s" : "last " + s + "s"
     }
 
-    anchors { top: parent.top; right: parent.right; topMargin: 10; rightMargin: 10 }
-    // expanded size: fit the cards, with the same 16px of space at the bottom as at the top
+    // size of the panel below the band; expanded: fit the cards, same 16px space at top and bottom
     readonly property real openW: 1000
-    readonly property real openH: Math.min(parent.height - 20, cards.implicitHeight + 32 + controlsH)
-    width: collapsedW
-    height: collapsedH
-    radius: 10
-    border.width: 2
-    border.color: theme.accent
-    clip: true
-    gradient: Gradient {
-        orientation: Gradient.Horizontal
-        GradientStop { position: 0; color: theme.barStart }
-        GradientStop { position: 1; color: theme.barEnd }
-    }
+    readonly property real openH: Math.min(parent.height - band - side - 20, cards.implicitHeight + 32 + controlsH)
+    property real panelW: collapsedW
+    property real panelH: 0
+    anchors { top: parent.top; right: parent.right; rightMargin: side }
+    width: panelW
+    height: band + panelH
 
     // Opening decelerates as it nears full size; closing starts slow and speeds up. No overshoot.
     // (States + transitions rather than a Behavior: the easing is picked by direction, whereas a
@@ -55,18 +52,18 @@ Rectangle {
     states: State {
         name: "open"
         when: corner.open
-        PropertyChanges { target: corner; width: corner.openW; height: corner.openH }
+        PropertyChanges { target: corner; panelW: corner.openW; panelH: corner.openH }
     }
     transitions: [
         Transition {
             from: ""; to: "open"
-            NumberAnimation { property: "width"; duration: 520; easing.type: Easing.OutQuint }
-            NumberAnimation { property: "height"; duration: 620; easing.type: Easing.OutQuint }
+            NumberAnimation { property: "panelW"; duration: 520; easing.type: Easing.OutQuint }
+            NumberAnimation { property: "panelH"; duration: 620; easing.type: Easing.OutQuint }
         },
         Transition {
             from: "open"; to: ""
-            NumberAnimation { property: "width"; duration: 430; easing.type: Easing.InQuint }
-            NumberAnimation { property: "height"; duration: 500; easing.type: Easing.InQuint }
+            NumberAnimation { property: "panelW"; duration: 430; easing.type: Easing.InQuint }
+            NumberAnimation { property: "panelH"; duration: 500; easing.type: Easing.InQuint }
         }
     ]
 
@@ -104,7 +101,7 @@ Rectangle {
     Row {
         id: numbers
         height: corner.collapsedH
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors { top: parent.top; topMargin: (corner.band - corner.collapsedH) / 2; horizontalCenter: parent.horizontalCenter }
         spacing: 0
         opacity: corner.open ? 0 : 1
         visible: opacity > 0
@@ -137,7 +134,8 @@ Rectangle {
     // ---- expanded: the panel ----
     Item {
         id: panel
-        anchors { fill: parent; margins: 16 }
+        anchors { fill: parent; margins: 16; topMargin: corner.band + 16 }
+        clip: true
         opacity: corner.open ? 1 : 0
         visible: opacity > 0
         Behavior on opacity {   // content fades in once the shape has started to grow

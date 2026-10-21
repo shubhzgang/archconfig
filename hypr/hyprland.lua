@@ -100,7 +100,7 @@ hl.env("XCURSOR_SIZE", "24")
 hl.config({
     general = {
         gaps_in = 8,
-        gaps_out = { top = 10, right = 20, bottom = 20, left = 20 },
+        gaps_out = 20,
         border_size = 2,
         col = {
             active_border   = activeBorder,
@@ -483,11 +483,6 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 hl.window_rule({
     match = { class = "firefox" },
     opacity = "1.0",
-})
-
-hl.window_rule({
-    match = { class = "^[fF]irefox" },
-    rounding = 0,
 })
 
 hl.window_rule({

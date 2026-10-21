@@ -7,17 +7,13 @@ import Quickshell.Hyprland
 // Top-center section, replicating waybar's workspace dots: workspaces 1-10 always shown; the
 // focused one is a wide pill, ones with windows and empty ones are different colors, hovering
 // recolors, clicking switches.
-Rectangle {
+Item {
     id: section
     required property var theme
 
-    anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 10 }
+    anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 8 }   // inside the frame's top band
     height: 39
-    width: row.implicitWidth + 22        // waybar: 7px padding + 2px border each side (+4 to fully cover it)
-    radius: 10
-    border.width: 2
-    border.color: theme.accent
-    color: theme.barStart
+    width: row.implicitWidth
 
     Process { id: switcher }   // hyprctl: Hyprland's Lua config rejects the legacy `dispatch workspace N`
     function focusWorkspace(n) {

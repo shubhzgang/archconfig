@@ -9,24 +9,16 @@ import Quickshell.Widgets
 
 // Top-left section, replicating waybar's: notifications button, clock (calendar on hover),
 // pending pacman updates, tray, bluetooth and network.
-Rectangle {
+Item {
     id: section
     required property var theme
     required property var win           // the PanelWindow (tray menus anchor to it)
     readonly property alias tipRect: tip
     readonly property alias calendarRect: calendar
 
-    anchors { top: parent.top; left: parent.left; topMargin: 10; leftMargin: 10 }
+    anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 14 + 8 }   // inside the frame's top band
     height: 39
-    width: row.implicitWidth + 22        // waybar: 7px padding + 2px border each side (+4 so it fully covers waybar's)
-    radius: 10
-    border.width: 2
-    border.color: theme.accent
-    gradient: Gradient {
-        orientation: Gradient.Horizontal
-        GradientStop { position: 0; color: theme.barEnd }
-        GradientStop { position: 1; color: theme.barStart }
-    }
+    width: row.implicitWidth
 
     // ---- data ----
     SystemClock { id: clock; precision: SystemClock.Seconds }
