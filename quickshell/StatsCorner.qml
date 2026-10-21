@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 // Top-right corner: the stats numbers (collapsed, where waybar's right section is) that grow into
 // the full stats panel in the same corner when clicked.
@@ -13,11 +14,31 @@ Rectangle {
     readonly property int collapsedH: 46
     readonly property var st: stateFile.value
     readonly property int points: st.points || 120
+    readonly property real interval: st.interval || 1
+    readonly property int controlsH: 46
+
+    // Sampling settings live in hypr/sysstats.json; sysstatsd.py applies a change at once and
+    // restarts the graphs.
+    FileView {
+        id: settings
+        path: Quickshell.env("HOME") + "/.config/hypr/sysstats.json"
+        atomicWrites: true
+        printErrors: true
+    }
+    function setSampling(interval, points) {
+        settings.setText(JSON.stringify({ interval: interval, points: points }, null, 2) + "\n")
+    }
+    function span(seconds) {
+        const m = Math.floor(seconds / 60), s = Math.round(seconds % 60)
+        return m ? "last " + m + "m " + (s < 10 ? "0" : "") + s + "s" : "last " + s + "s"
+    }
 
     anchors { top: parent.top; right: parent.right; topMargin: 10; rightMargin: 10 }
-    width: open ? 1000 : collapsedW
-    // fit the cards: the same 16px of space at the bottom as at the top
-    height: open ? Math.min(parent.height - 20, cards.implicitHeight + 32) : collapsedH
+    // expanded size: fit the cards, with the same 16px of space at the bottom as at the top
+    readonly property real openW: 1000
+    readonly property real openH: Math.min(parent.height - 20, cards.implicitHeight + 32 + controlsH)
+    width: collapsedW
+    height: collapsedH
     radius: 10
     border.width: 2
     border.color: theme.accent
@@ -28,8 +49,26 @@ Rectangle {
         GradientStop { position: 1; color: theme.barEnd }
     }
 
-    Behavior on width { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-    Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+    // Opening decelerates as it nears full size; closing starts slow and speeds up. No overshoot.
+    // (States + transitions rather than a Behavior: the easing is picked by direction, whereas a
+    // Behavior read `open` before it had updated and used the wrong curve.)
+    states: State {
+        name: "open"
+        when: corner.open
+        PropertyChanges { target: corner; width: corner.openW; height: corner.openH }
+    }
+    transitions: [
+        Transition {
+            from: ""; to: "open"
+            NumberAnimation { property: "width"; duration: 850; easing.type: Easing.OutQuint }
+            NumberAnimation { property: "height"; duration: 1000; easing.type: Easing.OutQuint }
+        },
+        Transition {
+            from: "open"; to: ""
+            NumberAnimation { property: "width"; duration: 700; easing.type: Easing.InQuint }
+            NumberAnimation { property: "height"; duration: 800; easing.type: Easing.InQuint }
+        }
+    ]
 
     function fmtBytes(n) {
         const units = ["B", "KiB", "MiB", "GiB", "TiB"]
@@ -51,6 +90,15 @@ Rectangle {
     JsonFile { id: memFile; path: corner.rundir + "mem.json" }
     JsonFile { id: netFile; path: corner.rundir + "net.json" }
     JsonFile { id: gpuFile; path: corner.rundir + "gpu.json" }
+
+    // click anywhere on it to morph between the numbers and the panel (Escape and a click
+    // outside also close it, see shell.qml). Declared before the panel so the buttons inside
+    // it (above) take their own clicks.
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: corner.toggle()
+    }
 
     // ---- collapsed: the numbers, as in waybar ----
     Row {
@@ -92,10 +140,65 @@ Rectangle {
         anchors { fill: parent; margins: 16 }
         opacity: corner.open ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: corner.open ? 260 : 120 } }
+        Behavior on opacity {   // content fades in once the shape has started to grow
+            SequentialAnimation {
+                PauseAnimation { duration: corner.open ? 150 : 0 }
+                NumberAnimation { duration: corner.open ? 260 : 100 }
+            }
+        }
+
+        Row {
+            id: controls
+            height: corner.controlsH - 16
+            spacing: 6
+            Text {
+                text: "every"
+                color: corner.theme.ink
+                font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
+                anchors.verticalCenter: parent.verticalCenter
+                rightPadding: 6
+            }
+            Repeater {
+                model: [1, 2, 3, 5, 10]
+                delegate: Chip {
+                    required property int modelData
+                    theme: corner.theme
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: modelData + "s"
+                    selected: corner.interval === modelData
+                    onClicked: corner.setSampling(modelData, corner.points)
+                }
+            }
+            Item { width: 18; height: 1 }
+            Text {
+                text: "points"
+                color: corner.theme.ink
+                font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
+                anchors.verticalCenter: parent.verticalCenter
+                rightPadding: 6
+            }
+            Repeater {
+                model: [30, 60, 120, 240, 360, 480, 600]
+                delegate: Chip {
+                    required property int modelData
+                    theme: corner.theme
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: String(modelData)
+                    selected: corner.points === modelData
+                    onClicked: corner.setSampling(corner.interval, modelData)
+                }
+            }
+        }
+        Text {
+            anchors { right: parent.right; verticalCenter: controls.verticalCenter }
+            text: corner.span(corner.interval * corner.points)
+            color: corner.theme.ink
+            font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 16
+        }
 
         Flickable {
-            anchors.fill: parent
+            anchors { fill: parent; topMargin: corner.controlsH }
+            interactive: contentHeight > height   // only scrolls if the cards outgrow the screen
             contentHeight: cards.implicitHeight
             clip: true
             Column {
@@ -174,14 +277,5 @@ Rectangle {
                 }
             }
         }
-    }
-
-    // click anywhere on it to morph between the numbers and the panel (Escape and a click
-    // outside also close it, see shell.qml). Declared last so it sits above the cards; future
-    // buttons inside the panel would need their own MouseArea above this one.
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: corner.toggle()
     }
 }

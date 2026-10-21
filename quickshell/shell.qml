@@ -29,11 +29,12 @@ ShellRoot {
             MouseArea { anchors.fill: parent; onClicked: win.open = false }
         }
 
-        IpcHandler {   // qs ipc call stats toggle|open|close
+        IpcHandler {   // qs ipc call stats toggle|open|close|sampling <s> <points>
             target: "stats"
             function toggle(): void { win.open = !win.open }
             function open(): void { win.open = true }
             function close(): void { win.open = false }
+            function sampling(interval: int, points: int): void { stats.setSampling(interval, points) }
         }
 
         StatsCorner {
