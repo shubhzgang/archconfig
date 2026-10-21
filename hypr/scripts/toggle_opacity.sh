@@ -11,8 +11,8 @@ CURRENT_OPACITY=$(hyprctl getoption decoration:inactive_opacity -j | jq -r '.flo
 IS_OPAQUE=$(awk -v op="$CURRENT_OPACITY" 'BEGIN { print (op >= 0.99) ? 1 : 0 }')
 
 if [ "$IS_OPAQUE" -eq 1 ]; then
-    # Revert to defaults: active opaque, inactive 0.95
-    hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 0.95 } })'
+    # Revert to defaults: active opaque, inactive 0.75
+    hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 0.75 } })'
 else
     # Force all windows fully opaque globally
     hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 1.0 } })'
