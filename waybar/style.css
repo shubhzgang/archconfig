@@ -9,28 +9,28 @@ window#waybar{
 }
 .modules-left {
     padding:7px;
-    margin:10px 0 5px 10px;
+    margin:10px 0 15px 10px;
     border-radius:10px;
-    border: 1px solid alpha(@color1, 0.35);
+    border: 2px solid @color1;
     background: @background;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.60), 0 1px 2px rgba(0, 0, 0, 0.70);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 .modules-center {
     padding:7px;
-    margin:10px 0 5px 0;
+    margin:10px 0 15px 0;
     border-radius:10px;
-    border: 1px solid alpha(@color1, 0.35);
+    border: 2px solid @color1;
     background: shade(@color1, 0.6);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.60), 0 1px 2px rgba(0, 0, 0, 0.70);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 .modules-right {
     padding:7px;
     padding-right:12px;
-    margin: 10px 10px 5px 0;
+    margin: 10px 10px 15px 0;
     border-radius:10px;
-    border: 1px solid alpha(@color1, 0.35);
+    border: 2px solid @color1;
     background: @background;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.60), 0 1px 2px rgba(0, 0, 0, 0.70);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 tooltip {
     background:@background;

@@ -101,9 +101,9 @@ hl.env("XCURSOR_SIZE", "24")
 
 hl.config({
     general = {
-        gaps_in = 2,
-        gaps_out = 10,
-        border_size = 1,
+        gaps_in = 8,
+        gaps_out = { top = 10, right = 20, bottom = 20, left = 20 },
+        border_size = 3,
         col = {
             active_border   = activeBorder,
             inactive_border = inactiveBorder,
@@ -135,10 +135,12 @@ hl.config({
         },
 
         shadow = {
-            enabled = false,
-            range = 15,
-            render_power = 5,
-            color = "rgba(00000080)",
+            enabled = true,
+            range = 24,
+            render_power = 2,
+            offset = "0 6",
+            color = "rgba(000000d9)",
+            color_inactive = "rgba(00000000)",
         },
     },
 

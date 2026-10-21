@@ -62,6 +62,7 @@ main() {
     # 4. Update basic UI elements
     swaync-client --reload-css
     cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
+    pkill -USR1 kitty  # make running kitty windows reload the theme
     pywalfox update
     
     # 5. Update Cava (Using the sourced $color2 and $color3 variables)
