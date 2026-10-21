@@ -1,15 +1,15 @@
 #!/bin/bash
 WALLPAPER_DIR="$HOME/wallpapers/walls"
-# 2x the 196x130 size they are shown at (center-cropped to the wallpaper picker card shape
-# so the card margin is even on all sides), so they stay sharp
-THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-392x260"
+# Photo 2x the 196x130 size it is shown at (center-cropped to the wallpaper picker card shape
+# so the card margin is even on all sides), so it stays sharp, plus a 12px margin for the shadow
+THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-416x284"
 THUMB_W=392
 THUMB_H=260
 
 THUMB_MASK="$HOME/.cache/wal/rofi-thumb-mask.png"
-THUMB_SHADE="$HOME/.cache/wal/rofi-thumb-shade.png"
+THUMB_SHADOW="$HOME/.cache/wal/rofi-thumb-shadow.png"
 
-export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H THUMB_MASK THUMB_SHADE
+export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H THUMB_MASK THUMB_SHADOW
 
 make_thumb() {
     local file="$1"
@@ -19,12 +19,12 @@ make_thumb() {
     if [ -f "$thumb" ] && [ "$thumb" -nt "$file" ]; then
         return
     fi
-    # Crop to size, round the corners (mask) and add the recessed-edge shading, all rendered
-    # by rofi/make-cards.py; without them fall back to a plain thumbnail.
-    if [ -f "$THUMB_MASK" ] && [ -f "$THUMB_SHADE" ]; then
-        magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" \
-            "$THUMB_MASK" -alpha off -compose CopyOpacity -composite \
-            "$THUMB_SHADE" -compose over -composite "$thumb" 2>/dev/null
+    # Crop to size, round the corners (mask) and set the photo on its soft shadow, both
+    # rendered by rofi/make-cards.py; without them fall back to a plain thumbnail.
+    if [ -f "$THUMB_MASK" ] && [ -f "$THUMB_SHADOW" ]; then
+        magick "$THUMB_SHADOW" \( "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" \
+            "$THUMB_MASK" -alpha off -compose CopyOpacity -composite \) \
+            -gravity center -compose over -composite "$thumb" 2>/dev/null
     else
         magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" -quality 80 "$thumb" 2>/dev/null
     fi

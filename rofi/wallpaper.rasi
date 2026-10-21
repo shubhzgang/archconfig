@@ -14,17 +14,18 @@ listview {
 
 element {
     orientation: vertical;
-    /* 240x174 cell: 7px card-shadow margin + 15px of card space on every side of the
-       196x130 thumbnail (see make-cards.py). The icon box is square, so a negative vertical
-       margin trims it to the thumbnail's 130px height. */
-    padding: 22px 22px;
+    /* 240x174 cell: 7px card-shadow margin, then the 208x142 thumbnail image (196x130 photo
+       + 6px of its own shadow on each side, see make-cards.py), so the photo has 15px of
+       card around it. The icon box is square, so a negative vertical margin trims it to the
+       image's 142px height. Rofi can't move content on selection, so the selected card grows
+       around it instead of lifting. */
+    padding: 16px 16px;
     background-image: url("/home/shubham/.cache/wal/rofi-card-wall.png", both);
 }
 
 element selected {
-    padding: 16px 22px 28px 22px;  /* content moves up 6px with the lifted card */
     background-image: url("/home/shubham/.cache/wal/rofi-card-wall-sel.png", both);
 }
 
-element-icon { size: 196px; margin: -33px 0px; horizontal-align: 0.5; }
+element-icon { size: 208px; margin: -33px 0px; horizontal-align: 0.5; }
 element-text { enabled: false; }

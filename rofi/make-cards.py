@@ -18,16 +18,16 @@ RADIUS = 10
 SHADOW_ALPHA = 60
 BLUR = 7
 DROP = 3         # shadow sits a little below the card
-SEL_SHADOW_ALPHA = 200  # the selected card is picked up: darker shadow that sits lower...
-SEL_BLUR = 5
-SEL_DROP = 9
-SEL_LIFT = 6            # ...and the card itself moves up (launcher/wallpaper .rasi shift the content to match)
 SS = 3           # supersampling for smooth corners
 
 TILE = 44        # app-icon tile in the launcher: a recessed rounded square behind each icon
 TILE_RADIUS = 10
-THUMB = (392, 260)   # wallpaper thumbnail size (2x display); hypr/wallpaper.sh composites these
-THUMB_RADIUS = 16    # onto each thumbnail so it looks recessed in its card
+THUMB = (392, 260)   # wallpaper thumbnail size (2x display); hypr/wallpaper.sh rounds each
+THUMB_RADIUS = 20    # thumbnail with the mask and sets it on the shadow, so it looks like a photo
+THUMB_MARGIN = 12    # lying on the card: same corner radius as the cards, with a soft shadow
+THUMB_SHADOW_ALPHA = 80
+THUMB_SHADOW_BLUR = 8
+THUMB_SHADOW_DROP = 4
 
 SIZES = {        # name: (width, height, margin) of the rofi element/widget the image backs;
     "launcher": (749, 80, M),        # a smaller margin gives a bigger card in the same cell, and
@@ -35,20 +35,30 @@ SIZES = {        # name: (width, height, margin) of the rofi element/widget the 
     "wall": (240, 174, 7),
 }
 
+# Selected card: rofi can't move an entry's content on selection, so instead of lifting, the card
+# grows a little on every side (content stays centered) and casts a darker, lower shadow.
+# name: (grow px, shadow alpha, blur, drop) -- all must fit inside that image's margin.
+SELECTED = {
+    "launcher": (3, 190, 3.0, 4),
+    "wall": (2, 170, 2.0, 3),
+}
 
-def render(w, h, fill, alpha=SHADOW_ALPHA, blur=BLUR, drop=DROP, lift=0, m=M):
-    scale = m / M
-    blur, drop = blur * scale, drop * scale
+
+def render(w, h, fill, alpha=SHADOW_ALPHA, blur=BLUR, drop=DROP, grow=0, m=M, exact=False):
+    if not exact:  # normal cards: shrink blur/drop along with a smaller margin
+        scale = m / M
+        blur, drop = blur * scale, drop * scale
     W, H = w * SS, h * SS
     shadow = Image.new("L", (W, H), 0)
     ImageDraw.Draw(shadow).rounded_rectangle(
-        [m * SS, round((m + drop - lift) * SS), W - m * SS, H - round((m - drop + lift) * SS)], RADIUS * SS, fill=alpha)
+        [(m - grow) * SS, round((m - grow + drop) * SS), W - (m - grow) * SS, H - round((m - grow - drop) * SS)],
+        (RADIUS + grow) * SS, fill=alpha)
     shadow = shadow.filter(ImageFilter.GaussianBlur(blur * SS))
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     img.putalpha(shadow)
     card = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     ImageDraw.Draw(card).rounded_rectangle(
-        [m * SS, (m - lift) * SS, W - m * SS, H - (m + lift) * SS], RADIUS * SS, fill=fill + (255,))
+        [(m - grow) * SS, (m - grow) * SS, W - (m - grow) * SS, H - (m - grow) * SS], (RADIUS + grow) * SS, fill=fill + (255,))
     img = Image.alpha_composite(img, card)
     return img.resize((w, h), Image.LANCZOS)
 
@@ -86,13 +96,30 @@ accent = tuple(int(color1[i:i + 2], 16) for i in (1, 3, 5))
 
 for name, (w, h, m) in SIZES.items():
     render(w, h, CARD, m=m).save(f"{CACHE}/rofi-card-{name}.png")
-    if name != "input":
-        render(w, h, accent, SEL_SHADOW_ALPHA, SEL_BLUR, SEL_DROP, SEL_LIFT, m).save(
-            f"{CACHE}/rofi-card-{name}-sel.png")
+    if name in SELECTED:
+        grow, alpha, blur, drop = SELECTED[name]
+        render(w, h, accent, alpha, blur, drop, grow, m, exact=True).save(f"{CACHE}/rofi-card-{name}-sel.png")
 
 _, tile_shading = recess(TILE, TILE, TILE_RADIUS, 2, 1.5, 0.6, 0.45)
 tile_shading.save(f"{CACHE}/rofi-icon-tile.png")  # no fill: the tile is the card's own color
 
-thumb_mask, thumb_shading = recess(*THUMB, THUMB_RADIUS, 4, 3.5, 0.7, 0.4)
+def photo_assets():
+    """Rounded-corner mask for a thumbnail, and the canvas-size shadow it sits on."""
+    w, h = THUMB
+    W, H = w + 2 * THUMB_MARGIN, h + 2 * THUMB_MARGIN
+    mask = Image.new("L", (w * SS, h * SS), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, w * SS - 1, h * SS - 1], THUMB_RADIUS * SS, fill=255)
+    shadow = Image.new("L", (W * SS, H * SS), 0)
+    m = THUMB_MARGIN * SS
+    ImageDraw.Draw(shadow).rounded_rectangle(
+        [m, m + THUMB_SHADOW_DROP * SS, W * SS - m - 1, H * SS - m - 1 + THUMB_SHADOW_DROP * SS],
+        THUMB_RADIUS * SS, fill=THUMB_SHADOW_ALPHA)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(THUMB_SHADOW_BLUR * SS))
+    layer = Image.new("RGBA", (W * SS, H * SS), (0, 0, 0, 0))
+    layer.putalpha(shadow)
+    return mask.resize((w, h), Image.LANCZOS), layer.resize((W, H), Image.LANCZOS)
+
+
+thumb_mask, thumb_shadow = photo_assets()
 thumb_mask.save(f"{CACHE}/rofi-thumb-mask.png")
-thumb_shading.save(f"{CACHE}/rofi-thumb-shade.png")
+thumb_shadow.save(f"{CACHE}/rofi-thumb-shadow.png")
