@@ -15,8 +15,8 @@ from PyQt6.QtGui import (QColor, QFont, QGuiApplication, QLinearGradient,
 from PyQt6.QtWidgets import QApplication, QWidget
 
 CONFIG = os.path.expanduser("~/.config/hypr/sysstats.json")
-INTERVALS = [1, 2, 5, 10]      # seconds between samples
-POINTS = [30, 60, 120, 240]    # samples kept per graph
+INTERVALS = [1, 2, 3, 5, 10]      # seconds between samples
+POINTS = [30, 60, 120, 240, 360, 480, 600]    # samples kept per graph
 CONTROLS_H = 40
 TICK_MS = 1000
 WAL_COLORS = os.path.expanduser("~/.cache/wal/colors.json")
@@ -51,9 +51,10 @@ class Palette:
                 j = json.load(f)
             c = j["colors"]
             self.bg = QColor(j["special"]["background"])
-            # Window: lighter color2 (inactive window border); cards: fixed light grey.
+            # Window: gradient from lighter color1 (active border) to lighter color2 (inactive border); cards: fixed light grey.
             # Everything drawn on them is dark, so it stays readable on any wallpaper.
             self.panel = mix(QColor(c["color2"]), QColor("white"), 0.35)
+            self.panel_start = mix(QColor(c["color1"]), QColor("white"), 0.35)
             self.card = QColor("#c3cadb")  # fixed light grey with a slight blue tint
             self.ink = self.bg
             self.muted = mix(self.ink, self.card, 0.45)
@@ -64,6 +65,7 @@ class Palette:
                 self.ink = QColor("#101010")
                 self.muted = QColor("#506070")
                 self.panel = QColor("#9ab0c8")
+                self.panel_start = QColor("#b4a0c8")
                 self.card = QColor("#c3cadb")
                 self.series = [QColor(h) for h in
                                ("#a03c45", "#2d6fb0", "#5a8a3a", "#a07a2a", "#8a3aa0", "#2a8a96")]
@@ -347,7 +349,10 @@ class Stats(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pal = self.pal
-        p.fillRect(self.rect(), pal.panel)
+        bg = QLinearGradient(0, 0, self.width(), self.height())  # background only; cards stay flat
+        bg.setColorAt(0, pal.panel_start)
+        bg.setColorAt(1, pal.panel)
+        p.fillRect(self.rect(), bg)
         s = pal.series
         x, w = PAD, self.width() - 2 * PAD
         gpus = sorted(self.gpu_hist)
