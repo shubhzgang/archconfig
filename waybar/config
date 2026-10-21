@@ -3,20 +3,89 @@
         "position": "top",
         "reload_style_on_change": true,
         "modules-left": ["custom/notification","clock","custom/pacman","tray"],
-        "modules-center": ["hyprland/workspaces"],
+        "modules-center": ["custom/ws1", "custom/ws2", "custom/ws3", "custom/ws4", "custom/ws5", "custom/ws6", "custom/ws7", "custom/ws8", "custom/ws9", "custom/ws10"],
         "modules-right": ["bluetooth","network"],
 
 
-        "hyprland/workspaces": {
-            "format": "{icon}",
-            "format-icons": {
-                "active": "",
-                "default": "",
-                "empty": ""
-            },
-            "persistent-workspaces": {
-                "*": [ 1,2,3,4,5,6,7,8,9,10 ]
-            }
+        "custom/ws1": {
+            "exec": "~/.config/waybar/scripts/ws.sh 1",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 1 })'"
+        },
+        "custom/ws2": {
+            "exec": "~/.config/waybar/scripts/ws.sh 2",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 2 })'"
+        },
+        "custom/ws3": {
+            "exec": "~/.config/waybar/scripts/ws.sh 3",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 3 })'"
+        },
+        "custom/ws4": {
+            "exec": "~/.config/waybar/scripts/ws.sh 4",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 4 })'"
+        },
+        "custom/ws5": {
+            "exec": "~/.config/waybar/scripts/ws.sh 5",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 5 })'"
+        },
+        "custom/ws6": {
+            "exec": "~/.config/waybar/scripts/ws.sh 6",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 6 })'"
+        },
+        "custom/ws7": {
+            "exec": "~/.config/waybar/scripts/ws.sh 7",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })'"
+        },
+        "custom/ws8": {
+            "exec": "~/.config/waybar/scripts/ws.sh 8",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 8 })'"
+        },
+        "custom/ws9": {
+            "exec": "~/.config/waybar/scripts/ws.sh 9",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 9 })'"
+        },
+        "custom/ws10": {
+            "exec": "~/.config/waybar/scripts/ws.sh 10",
+            "return-type": "json",
+            "interval": "once",
+            "signal": 9,
+            "tooltip": false,
+            "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 10 })'"
         },
         "custom/notification": {
             "tooltip": false,

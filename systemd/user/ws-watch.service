@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh waybar workspace dots on Hyprland events
+
+[Service]
+ExecStart=%h/.config/hypr/ws-watch.py
+Restart=on-failure
+RestartSec=2
