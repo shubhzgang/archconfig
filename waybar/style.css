@@ -1,4 +1,5 @@
 @import url('../../.cache/wal/colors-waybar.css');
+@import url('../../.cache/wal/colors-waybar-bar.css');
 
 * {
     font-size:15px;
@@ -12,7 +13,7 @@ window#waybar{
     margin:10px 0 15px 10px;
     border-radius:10px;
     border: 2px solid @color1;
-    background: @background;
+    background: linear-gradient(to right, @bar_end, @bar_start);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 .modules-center {
@@ -20,7 +21,7 @@ window#waybar{
     margin:10px 0 15px 0;
     border-radius:10px;
     border: 2px solid @color1;
-    background: shade(@color1, 0.6);
+    background: @bar_start;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 .modules-right {
@@ -29,7 +30,7 @@ window#waybar{
     margin: 10px 10px 15px 0;
     border-radius:10px;
     border: 2px solid @color1;
-    background: @background;
+    background: linear-gradient(to right, @bar_start, @bar_end);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
 }
 tooltip {
