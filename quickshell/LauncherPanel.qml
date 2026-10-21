@@ -27,8 +27,13 @@ Item {
     // ---- apps ----
     readonly property var allApps: {
         const out = []
-        for (const e of DesktopEntries.applications.values)
-            if (!e.noDisplay) out.push(e)
+        const seen = new Set()   // ~/.local/share/applications/snap links to snapd's dir, so snap apps are listed twice
+        for (const e of DesktopEntries.applications.values) {
+            const key = e.name + "\0" + e.execString
+            if (e.noDisplay || seen.has(key)) continue
+            seen.add(key)
+            out.push(e)
+        }
         out.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
         return out
     }
@@ -132,6 +137,7 @@ Item {
             model: panel.shown
             currentIndex: 0
             boundsBehavior: Flickable.StopAtBounds
+            interactive: false   // the WheelHandler below does all scrolling; Flickable's own wheel flick fought it and overshot
 
             // Mouse wheel: the default step is tiny. Each notch scrolls ~3.5 rows, eased over 160ms.
             NumberAnimation { id: scrollAnim; target: grid; property: "contentY"; duration: 160; easing.type: Easing.OutCubic }
