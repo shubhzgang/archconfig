@@ -299,6 +299,7 @@ hl.animation({
 hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on")
     hl.exec_cmd("hypridle")
+    hl.exec_cmd("systemctl --user start hotcorner.service")
     hl.exec_cmd("waybar")
     hl.exec_cmd("swww-daemon")
     hl.exec_cmd("swaync")

@@ -1,0 +1,7 @@
+[Unit]
+Description=Hyprland hot corner (top-left toggles rofi launcher)
+
+[Service]
+ExecStart=%h/.config/hypr/hotcorner.py
+Restart=on-failure
+RestartSec=2

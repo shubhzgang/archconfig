@@ -1,0 +1,10 @@
+[Unit]
+Description=FreeToken web UI (cache rebuild)
+
+[Service]
+WorkingDirectory=%h/repos/freetoken-webui
+ExecStart=/usr/bin/python3 %h/repos/freetoken-webui/ui.py 8091
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
