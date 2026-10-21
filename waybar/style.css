@@ -8,14 +8,6 @@
 window#waybar{
     all:unset;
 }
-.modules-left {
-    padding:7px;
-    margin:10px 0 15px 10px;
-    border-radius:10px;
-    border: 2px solid @color1;
-    background: linear-gradient(to right, @bar_end, @bar_start);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
-}
 .modules-center {
     padding:7px;
     margin:10px 0 15px 0;
@@ -27,26 +19,6 @@ window#waybar{
 tooltip {
     background:@background;
     color: @color7;
-}
-#clock:hover, #custom-pacman:hover, #custom-notification:hover,#bluetooth:hover,#network:hover{
-    transition: all .3s ease;
-    color:@color9;
-}
-#custom-notification {
-    padding: 0px 5px;
-    transition: all .3s ease;
-    color:@color7;
-}
-#clock{
-    padding: 0px 5px;
-    color:@color7;
-    transition: all .3s ease;
-}
-#custom-pacman{
-    padding: 0px 5px;
-    transition: all .3s ease;
-    color:@color7;
-
 }
 .ws {
     all:unset;
@@ -100,30 +72,4 @@ tooltip {
 .ws.empty.active:hover{
     background: @color2;
 }
-#bluetooth{
-    padding: 0px 5px;
-    transition: all .3s ease;
-    color:@color7;
 
-}
-#network{
-    padding: 0px 8px;
-    padding-right: 8px;
-    transition: all .3s ease;
-    color:@color7;
-
-}
-#tray{
-    padding: 0px 5px;
-    transition: all .3s ease; 
-
-}
-#tray menu * {
-    padding: 0px 5px;
-    transition: all .3s ease; 
-}
-
-#tray menu separator {
-    padding: 0px 5px;
-    transition: all .3s ease; 
-}

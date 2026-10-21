@@ -6,6 +6,8 @@ Canvas {
     property var series: []
     property real ymax: 100
     property int points: 120
+    property real interval: 1       // seconds between samples (for the time-ago labels)
+    readonly property int labelH: 16  // strip under the plot for the time-ago labels
     property color gridColor: "#26000000"
     property color labelColor: "#80101820"
     property string maxLabel: ""
@@ -18,13 +20,16 @@ Canvas {
     onSeriesChanged: requestPaint()
     onYmaxChanged: requestPaint()
     onYmax2Changed: requestPaint()
+    onIntervalChanged: requestPaint()
+    onPointsChanged: requestPaint()
     onMirroredChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d")
         ctx.reset()
-        const w = width, h = height
+        const w = width, h = height - labelH
         const step = w / (points - 1)
+        const quarter = Math.max(Math.floor(points / 4), 1)   // guides at 1/4, 2/4, 3/4 of the window
         const mid = Math.round(h / 2) + 0.5
         ctx.strokeStyle = gridColor
         ctx.lineWidth = 1
@@ -32,6 +37,21 @@ Canvas {
         for (const y of lines) {
             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke()
         }
+        const ago = sec => {
+            sec = Math.round(sec)
+            const m = Math.floor(sec / 60), r = sec % 60
+            return m ? "-" + m + "m" + (r ? " " + (r < 10 ? "0" : "") + r + "s" : "") : "-" + r + "s"
+        }
+        ctx.font = "12px sans-serif"
+        ctx.textAlign = "center"
+        for (let k = quarter; k < points; k += quarter) {
+            const x = Math.round(w - k * step) + 0.5
+            ctx.strokeStyle = gridColor
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke()
+            ctx.fillStyle = labelColor
+            ctx.fillText(ago(k * interval), x, h + 13)
+        }
+        ctx.textAlign = "left"
         const rgba = (c, a) => Qt.rgba(Qt.color(c).r, Qt.color(c).g, Qt.color(c).b, a)
         for (let k = 0; k < series.length; k++) {
             const s = series[k]

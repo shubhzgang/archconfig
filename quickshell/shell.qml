@@ -20,7 +20,14 @@ ShellRoot {
 
         // Only the corner takes mouse input; while it is open the whole screen does, so a
         // click outside closes it.
-        mask: Region { item: win.open ? backdrop : stats }
+        mask: Region {
+            regions: [
+                Region { item: win.open ? backdrop : stats },
+                Region { item: leftSection },
+                Region { item: leftSection.tipRect },
+                Region { item: leftSection.calendarRect }
+            ]
+        }
 
         Item {
             id: backdrop
@@ -54,6 +61,28 @@ ShellRoot {
                 shadowBlur: 0.85
                 shadowVerticalOffset: 4
             }
+        }
+
+        Rectangle {   // shadow twin for the left section (see the corner's)
+            anchors { top: parent.top; left: parent.left; topMargin: 10; leftMargin: 10 }
+            width: leftSection.width
+            height: leftSection.height
+            radius: leftSection.radius
+            color: "black"
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "black"
+                shadowOpacity: 0.85
+                shadowBlur: 0.85
+                shadowVerticalOffset: 4
+            }
+        }
+
+        LeftSection {
+            id: leftSection
+            theme: theme
+            win: win
         }
 
         StatsCorner {

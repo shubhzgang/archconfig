@@ -209,7 +209,7 @@ Rectangle {
                 Card {
                     theme: corner.theme; width: parent.width
                     GraphBlock {
-                        theme: corner.theme; width: parent.width; points: corner.points
+                        theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
                         title: "CPU"
                         value: corner.last(corner.st.cpu).toFixed(0) + "%   " + ((corner.st.freq || 0) / 1000).toFixed(1) + " GHz"
                         ymax: 100; maxLabel: "100%"
@@ -226,7 +226,7 @@ Rectangle {
                         ]
                         delegate: GraphBlock {
                             required property var modelData
-                            theme: corner.theme; width: parent.width; points: corner.points
+                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
                             title: "RAM " + modelData.name
                             value: corner.fmtBytes(corner.last(corner.st[modelData.key]))
                             ymax: corner.st.mem_total || 1
@@ -239,7 +239,7 @@ Rectangle {
                 Card {
                     theme: corner.theme; width: parent.width
                     GraphBlock {
-                        theme: corner.theme; width: parent.width; points: corner.points
+                        theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
                         mirrored: true
                         title: "Network"
                         value: "down " + corner.fmtBytes(corner.last(corner.st.net_down)) + "/s   up "
@@ -260,14 +260,14 @@ Rectangle {
                         readonly property var g: corner.st.gpus[modelData]
                         theme: corner.theme; width: parent.width
                         GraphBlock {
-                            theme: corner.theme; width: parent.width; points: corner.points
+                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
                             title: g.name + " usage"
                             value: corner.last(g.util).toFixed(0) + "%"
                             ymax: 100; maxLabel: "100%"
                             series: [{ values: g.util || [], color: corner.theme.series[5] }]
                         }
                         GraphBlock {
-                            theme: corner.theme; width: parent.width; points: corner.points
+                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
                             title: g.name + " memory"
                             value: corner.fmtBytes(corner.last(g.mem)) + " / " + corner.fmtBytes(g.mem_total)
                             ymax: g.mem_total || 1; maxLabel: corner.fmtBytes(g.mem_total || 0)
