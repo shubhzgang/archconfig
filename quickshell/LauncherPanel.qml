@@ -51,7 +51,11 @@ Item {
         entry.execute()
         panel.toggle()
     }
-    onOpenChanged: if (open) { search.text = ""; grid.currentIndex = 0; search.forceActiveFocus() }
+    onOpenChanged: {
+        scrollAnim.stop()
+        grid.contentY = grid.originY
+        if (open) { search.text = ""; grid.currentIndex = 0; search.forceActiveFocus() }
+    }
     onShownChanged: grid.currentIndex = 0
 
     // Eases out when opening and eases in when closing, like the other panels.
@@ -137,6 +141,7 @@ Item {
             model: panel.shown
             currentIndex: 0
             boundsBehavior: Flickable.StopAtBounds
+            onContentYChanged: if (contentY < originY) contentY = originY   // never show empty space above the first row
             interactive: false   // the WheelHandler below does all scrolling; Flickable's own wheel flick fought it and overshot
 
             // Mouse wheel: the default step is tiny. Each notch scrolls ~3.5 rows, eased over 160ms.
