@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/moon.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#150E00",
+        "foreground": "#D7D1BF",
+        "cursor": "#D7D1BF"
+    },
+    "colors": {
+        "color0": "#150E00",
+        "color1": "#B4AFA1",
+        "color2": "#7F7A6D",
+        "color3": "#8A8578",
+        "color4": "#7F7A6D",
+        "color5": "#A09B8D",
+        "color6": "#C9C4B6",
+        "color7": "#D7D1BF",
+        "color8": "#78715E",
+        "color9": "#D4CFC1",
+        "color10": "#9D988B",
+        "color11": "#A9A396",
+        "color12": "#9D988B",
+        "color13": "#BFBAAC",
+        "color14": "#E3DECF",
+        "color15": "#F0EBDC"
+    }
+}

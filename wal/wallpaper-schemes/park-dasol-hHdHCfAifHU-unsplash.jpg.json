@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/park-dasol-hHdHCfAifHU-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1C0906",
+        "foreground": "#E1CBC7",
+        "cursor": "#E1CBC7"
+    },
+    "colors": {
+        "color0": "#1C0906",
+        "color1": "#DD5239",
+        "color2": "#0D7DD4",
+        "color3": "#E1B62D",
+        "color4": "#B85C40",
+        "color5": "#B4853F",
+        "color6": "#4EABE7",
+        "color7": "#E1CBC7",
+        "color8": "#826C66",
+        "color9": "#FB785E",
+        "color10": "#3C9CF6",
+        "color11": "#FDD86F",
+        "color12": "#DA7A5D",
+        "color13": "#D4A45E",
+        "color14": "#83C9FB",
+        "color15": "#F8E7E3"
+    }
+}

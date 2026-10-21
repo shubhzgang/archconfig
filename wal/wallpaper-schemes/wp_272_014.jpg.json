@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/wp_272_014.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1B0A02",
+        "foreground": "#DFCDC2",
+        "cursor": "#DFCDC2"
+    },
+    "colors": {
+        "color0": "#1B0A02",
+        "color1": "#D07F4C",
+        "color2": "#8987BD",
+        "color3": "#A76753",
+        "color4": "#F4B1A8",
+        "color5": "#A4695A",
+        "color6": "#7175A9",
+        "color7": "#DFCDC2",
+        "color8": "#806D62",
+        "color9": "#F29E6B",
+        "color10": "#A7A6DE",
+        "color11": "#C88570",
+        "color12": "#FFD2CB",
+        "color13": "#C48777",
+        "color14": "#8E93C9",
+        "color15": "#F7E8DF"
+    }
+}

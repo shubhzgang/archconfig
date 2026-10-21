@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/AloneTree.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1C0904",
+        "foreground": "#E0CCC5",
+        "cursor": "#E0CCC5"
+    },
+    "colors": {
+        "color0": "#1C0904",
+        "color1": "#F18C68",
+        "color2": "#547BB5",
+        "color3": "#4882A4",
+        "color4": "#A77F51",
+        "color5": "#EE6D5A",
+        "color6": "#5A79B8",
+        "color7": "#E0CCC5",
+        "color8": "#826C65",
+        "color9": "#FCB8A1",
+        "color10": "#719AD5",
+        "color11": "#66A0C4",
+        "color12": "#C79E6E",
+        "color13": "#FE9B8A",
+        "color14": "#7798D9",
+        "color15": "#F8E7E1"
+    }
+}

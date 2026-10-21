@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/felix-dubois-robert-CuEvrPd3NYc-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#190914",
+        "foreground": "#DDCBD6",
+        "cursor": "#DDCBD6"
+    },
+    "colors": {
+        "color0": "#190914",
+        "color1": "#D84FB0",
+        "color2": "#B9D247",
+        "color3": "#4EC34A",
+        "color4": "#1789BF",
+        "color5": "#1CB3E1",
+        "color6": "#ACA430",
+        "color7": "#DDCBD6",
+        "color8": "#7E6B77",
+        "color9": "#FB70D0",
+        "color10": "#D2ED65",
+        "color11": "#70E56B",
+        "color12": "#42A8E0",
+        "color13": "#5CD3FF",
+        "color14": "#CBC455",
+        "color15": "#F5E6EF"
+    }
+}

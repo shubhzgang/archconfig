@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/prometey-sanchez-noskov-c6M7AoevSXE-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1C0A04",
+        "foreground": "#E0CCC4",
+        "cursor": "#E0CCC4"
+    },
+    "colors": {
+        "color0": "#1C0A04",
+        "color1": "#FC8044",
+        "color2": "#BF525A",
+        "color3": "#A96079",
+        "color4": "#E5C139",
+        "color5": "#98688D",
+        "color6": "#FDAC20",
+        "color7": "#E0CCC4",
+        "color8": "#816C63",
+        "color9": "#FCB495",
+        "color10": "#E27077",
+        "color11": "#CA7E97",
+        "color12": "#FDDC67",
+        "color13": "#B886AC",
+        "color14": "#FED7A4",
+        "color15": "#F8E7E1"
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/Sunset.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1B0A03",
+        "foreground": "#DFCDC3",
+        "cursor": "#DFCDC3"
+    },
+    "colors": {
+        "color0": "#1B0A03",
+        "color1": "#FB8E4C",
+        "color2": "#358890",
+        "color3": "#C06240",
+        "color4": "#3C8A7C",
+        "color5": "#3C859C",
+        "color6": "#8D9E66",
+        "color7": "#DFCDC3",
+        "color8": "#816D62",
+        "color9": "#FEBE9C",
+        "color10": "#56A7AF",
+        "color11": "#E2805E",
+        "color12": "#5CA99A",
+        "color13": "#5CA4BC",
+        "color14": "#ABBD84",
+        "color15": "#F7E8E0"
+    }
+}

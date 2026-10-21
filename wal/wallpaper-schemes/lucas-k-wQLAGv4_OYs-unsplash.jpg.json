@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/lucas-k-wQLAGv4_OYs-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1C0907",
+        "foreground": "#E1CBC8",
+        "cursor": "#E1CBC8"
+    },
+    "colors": {
+        "color0": "#1C0907",
+        "color1": "#DA3C31",
+        "color2": "#1C8ED2",
+        "color3": "#3A7DC4",
+        "color4": "#CB709F",
+        "color5": "#B15E61",
+        "color6": "#21BBEF",
+        "color7": "#E1CBC8",
+        "color8": "#826B68",
+        "color9": "#FF5F50",
+        "color10": "#46AEF3",
+        "color11": "#599CE5",
+        "color12": "#ED8FBF",
+        "color13": "#D27C7F",
+        "color14": "#84D8FC",
+        "color15": "#F8E7E4"
+    }
+}

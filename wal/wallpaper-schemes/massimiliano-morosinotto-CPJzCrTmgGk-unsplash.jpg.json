@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/massimiliano-morosinotto-CPJzCrTmgGk-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#01140F",
+        "foreground": "#C1D7D0",
+        "cursor": "#C1D7D0"
+    },
+    "colors": {
+        "color0": "#01140F",
+        "color1": "#3E8A79",
+        "color2": "#807A6C",
+        "color3": "#987243",
+        "color4": "#907E73",
+        "color5": "#3F8A78",
+        "color6": "#967342",
+        "color7": "#C1D7D0",
+        "color8": "#607871",
+        "color9": "#5EA996",
+        "color10": "#9E9889",
+        "color11": "#B79060",
+        "color12": "#AE9C91",
+        "color13": "#5FA995",
+        "color14": "#B6915F",
+        "color15": "#DEF0EB"
+    }
+}

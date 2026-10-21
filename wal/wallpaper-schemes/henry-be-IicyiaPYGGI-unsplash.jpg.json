@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/henry-be-IicyiaPYGGI-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#150E00",
+        "foreground": "#D7D1BF",
+        "cursor": "#D7D1BF"
+    },
+    "colors": {
+        "color0": "#150E00",
+        "color1": "#BEA154",
+        "color2": "#E0662F",
+        "color3": "#8B7A23",
+        "color4": "#DFBF88",
+        "color5": "#8B7A35",
+        "color6": "#C8C4B5",
+        "color7": "#D7D1BF",
+        "color8": "#78715E",
+        "color9": "#DEC174",
+        "color10": "#FE8A59",
+        "color11": "#AA9945",
+        "color12": "#F9D9A1",
+        "color13": "#AA9854",
+        "color14": "#E2DECF",
+        "color15": "#F0EBDC"
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/wallpaperflare.com_wallpaper.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#140B1B",
+        "foreground": "#D6CDDE",
+        "cursor": "#D6CDDE"
+    },
+    "colors": {
+        "color0": "#140B1B",
+        "color1": "#9D4ED2",
+        "color2": "#BD3DA7",
+        "color3": "#6564EC",
+        "color4": "#A054BC",
+        "color5": "#6B6AD8",
+        "color6": "#6771F4",
+        "color7": "#D6CDDE",
+        "color8": "#776D7F",
+        "color9": "#BC6EF4",
+        "color10": "#DF5EC8",
+        "color11": "#848BF9",
+        "color12": "#C073DE",
+        "color13": "#8789FA",
+        "color14": "#8997FA",
+        "color15": "#EFE8F6"
+    }
+}

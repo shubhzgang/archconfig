@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/marcel-strauss-3Fl7JAN-Xao-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#180D00",
+        "foreground": "#DBCFBF",
+        "cursor": "#DBCFBF"
+    },
+    "colors": {
+        "color0": "#180D00",
+        "color1": "#FDB126",
+        "color2": "#C45230",
+        "color3": "#E9730B",
+        "color4": "#B35F4D",
+        "color5": "#6E7D85",
+        "color6": "#C8500D",
+        "color7": "#DBCFBF",
+        "color8": "#7C6F5E",
+        "color9": "#FFD79F",
+        "color10": "#E7714F",
+        "color11": "#FE9C5F",
+        "color12": "#D57D6A",
+        "color13": "#8C9BA4",
+        "color14": "#EB7038",
+        "color15": "#F3EADD"
+    }
+}

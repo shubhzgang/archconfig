@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/tom-barrett-hgGplX3PFBg-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1B0B02",
+        "foreground": "#DFCDC2",
+        "cursor": "#DFCDC2"
+    },
+    "colors": {
+        "color0": "#1B0B02",
+        "color1": "#B86D34",
+        "color2": "#A56A4B",
+        "color3": "#3F849E",
+        "color4": "#A36A54",
+        "color5": "#DE8D42",
+        "color6": "#A26B4B",
+        "color7": "#DFCDC2",
+        "color8": "#806D61",
+        "color9": "#D98B54",
+        "color10": "#C58868",
+        "color11": "#5EA3BD",
+        "color12": "#C38871",
+        "color13": "#FCAF6B",
+        "color14": "#C28969",
+        "color15": "#F6E8DF"
+    }
+}

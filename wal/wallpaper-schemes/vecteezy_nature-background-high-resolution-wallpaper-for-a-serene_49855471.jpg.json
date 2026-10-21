@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/vecteezy_nature-background-high-resolution-wallpaper-for-a-serene_49855471.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#00121A",
+        "foreground": "#C1D5DE",
+        "cursor": "#C1D5DE"
+    },
+    "colors": {
+        "color0": "#00121A",
+        "color1": "#2887A8",
+        "color2": "#E2C160",
+        "color3": "#3EB3D1",
+        "color4": "#4283A4",
+        "color5": "#4B81A5",
+        "color6": "#AE8F55",
+        "color7": "#C1D5DE",
+        "color8": "#5F767F",
+        "color9": "#4CA6C8",
+        "color10": "#FDDB7A",
+        "color11": "#63D4F2",
+        "color12": "#61A1C3",
+        "color13": "#699FC5",
+        "color14": "#CEAE73",
+        "color15": "#DEEEF6"
+    }
+}

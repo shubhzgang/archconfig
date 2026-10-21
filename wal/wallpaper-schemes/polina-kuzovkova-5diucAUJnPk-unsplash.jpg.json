@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/polina-kuzovkova-5diucAUJnPk-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1A0B01",
+        "foreground": "#DDCEC1",
+        "cursor": "#DDCEC1"
+    },
+    "colors": {
+        "color0": "#1A0B01",
+        "color1": "#CE9259",
+        "color2": "#967342",
+        "color3": "#CBC4B2",
+        "color4": "#877B40",
+        "color5": "#A67D48",
+        "color6": "#B95B46",
+        "color7": "#DDCEC1",
+        "color8": "#7F6E60",
+        "color9": "#F0B178",
+        "color10": "#B5915F",
+        "color11": "#E5DECB",
+        "color12": "#A5995E",
+        "color13": "#C69C66",
+        "color14": "#DB7964",
+        "color15": "#F5E9DE"
+    }
+}

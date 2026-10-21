@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/038_Desktop Wallpapers 4K Ultra HD262.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#170E00",
+        "foreground": "#D9D0BF",
+        "cursor": "#D9D0BF"
+    },
+    "colors": {
+        "color0": "#170E00",
+        "color1": "#E1BA71",
+        "color2": "#7AABD7",
+        "color3": "#B88B60",
+        "color4": "#9C7046",
+        "color5": "#9D6F47",
+        "color6": "#CCC3B0",
+        "color7": "#D9D0BF",
+        "color8": "#7A705E",
+        "color9": "#FDD995",
+        "color10": "#99CBF8",
+        "color11": "#D9AA7E",
+        "color12": "#BB8E63",
+        "color13": "#BD8D65",
+        "color14": "#E6DDC9",
+        "color15": "#F2EADD"
+    }
+}

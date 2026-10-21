@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/ryan-hoffman-Pqk44XmCgpk-unsplash.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#01111D",
+        "foreground": "#C3D4E0",
+        "cursor": "#C3D4E0"
+    },
+    "colors": {
+        "color0": "#01111D",
+        "color1": "#59B2E8",
+        "color2": "#A66A43",
+        "color3": "#E59D40",
+        "color4": "#AB6738",
+        "color5": "#9ACAF6",
+        "color6": "#557EA8",
+        "color7": "#C3D4E0",
+        "color8": "#627481",
+        "color9": "#8CD1FE",
+        "color10": "#C68860",
+        "color11": "#FCC17C",
+        "color12": "#CB8656",
+        "color13": "#C5E2FD",
+        "color14": "#729CC8",
+        "color15": "#DFEDF7"
+    }
+}

@@ -44,6 +44,10 @@ local wal = read_hyprlang_vars(HOME .. "/.cache/wal/colors-hyprland")
 local color9 = wal.color9 or "rgba(ffffffaa)"
 local color5 = wal.color5 or "rgba(888888aa)"
 
+-- Match waybar workspace dots: color1 = active, color2 = inactive non-empty.
+local activeBorder = wal.color1 or color9
+local inactiveBorder = wal.color2 or color5
+
 -- ---------------------------------------------------------------------------
 -- External configs
 -- ---------------------------------------------------------------------------
@@ -99,10 +103,10 @@ hl.config({
     general = {
         gaps_in = 2,
         gaps_out = 10,
-        border_size = 0,
+        border_size = 1,
         col = {
-            active_border   = color9,
-            inactive_border = color5,
+            active_border   = activeBorder,
+            inactive_border = inactiveBorder,
         },
         resize_on_border = true,
         allow_tearing = false,

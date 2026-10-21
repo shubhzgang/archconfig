@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/260 (48).jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#0A1203",
+        "foreground": "#CBD5C4",
+        "cursor": "#CBD5C4"
+    },
+    "colors": {
+        "color0": "#0A1203",
+        "color1": "#6C9441",
+        "color2": "#61874B",
+        "color3": "#5F875A",
+        "color4": "#B55E45",
+        "color5": "#707F72",
+        "color6": "#D0B67D",
+        "color7": "#CBD5C4",
+        "color8": "#6C7563",
+        "color9": "#89B35F",
+        "color10": "#7FA668",
+        "color11": "#7CA577",
+        "color12": "#D67D62",
+        "color13": "#8E9D8F",
+        "color14": "#F1D69C",
+        "color15": "#E7EEE0"
+    }
+}

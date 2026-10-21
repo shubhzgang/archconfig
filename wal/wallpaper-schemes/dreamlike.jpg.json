@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/dreamlike.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#090E1F",
+        "foreground": "#CAD1E2",
+        "cursor": "#CAD1E2"
+    },
+    "colors": {
+        "color0": "#090E1F",
+        "color1": "#5D76C0",
+        "color2": "#04C3B5",
+        "color3": "#108BA6",
+        "color4": "#4283A0",
+        "color5": "#A886B7",
+        "color6": "#ECAFCD",
+        "color7": "#CAD1E2",
+        "color8": "#6A7184",
+        "color9": "#7A95E1",
+        "color10": "#4AE4D5",
+        "color11": "#40AAC5",
+        "color12": "#61A2C0",
+        "color13": "#C8A5D7",
+        "color14": "#FECFE5",
+        "color15": "#E5EBF9"
+    }
+}

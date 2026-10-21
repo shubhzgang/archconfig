@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/colorful_neon_light_room_4k_hd_neon-3840x2160.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1B0811",
+        "foreground": "#DFCBD3",
+        "cursor": "#DFCBD3"
+    },
+    "colors": {
+        "color0": "#1B0811",
+        "color1": "#DE4797",
+        "color2": "#8466C2",
+        "color3": "#FC797A",
+        "color4": "#D53543",
+        "color5": "#4ABBA4",
+        "color6": "#A55D97",
+        "color7": "#DFCBD3",
+        "color8": "#806B73",
+        "color9": "#FC6FB5",
+        "color10": "#A284E3",
+        "color11": "#FCB0AD",
+        "color12": "#FA5960",
+        "color13": "#6EDCC3",
+        "color14": "#C67AB6",
+        "color15": "#F7E6ED"
+    }
+}

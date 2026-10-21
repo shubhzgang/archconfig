@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/leaves.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#101101",
+        "foreground": "#D2D3C0",
+        "cursor": "#D2D3C0"
+    },
+    "colors": {
+        "color0": "#101101",
+        "color1": "#7B7C6A",
+        "color2": "#7A7C6E",
+        "color3": "#797C6F",
+        "color4": "#7A7C6B",
+        "color5": "#7A7C6C",
+        "color6": "#7E7B6B",
+        "color7": "#D2D3C0",
+        "color8": "#72735F",
+        "color9": "#999A88",
+        "color10": "#989A8C",
+        "color11": "#979A8C",
+        "color12": "#989A89",
+        "color13": "#989A8A",
+        "color14": "#9C9988",
+        "color15": "#ECEDDE"
+    }
+}

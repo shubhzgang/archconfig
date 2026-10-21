@@ -1,0 +1,27 @@
+{
+    "wallpaper": "/home/shubham/wallpapers/walls/wp10040709-alone-samurai-wallpapers.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#1C080B",
+        "foreground": "#E1CBCC",
+        "cursor": "#E1CBCC"
+    },
+    "colors": {
+        "color0": "#1C080B",
+        "color1": "#A4666D",
+        "color2": "#3C859C",
+        "color3": "#BD5263",
+        "color4": "#87D6C9",
+        "color5": "#5BACAE",
+        "color6": "#A66471",
+        "color7": "#E1CBCC",
+        "color8": "#826B6D",
+        "color9": "#C4848B",
+        "color10": "#5CA4BB",
+        "color11": "#E07180",
+        "color12": "#A1F0E3",
+        "color13": "#7BCCCD",
+        "color14": "#C7828F",
+        "color15": "#F8E6E7"
+    }
+}
