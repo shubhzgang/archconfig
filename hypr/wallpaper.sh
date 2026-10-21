@@ -26,19 +26,20 @@ menu() {
     printf '%s\0' "${files[@]}" | xargs -0 -P "$(nproc)" -n1 bash -c 'make_thumb "$@"' _
     local f
     for f in "${files[@]}"; do
-        echo "img:$THUMB_DIR/${f#"$WALLPAPER_DIR"/}.png"
+        rel="${f#"$WALLPAPER_DIR"/}"
+        printf '%s\0icon\x1f%s\n' "$rel" "$THUMB_DIR/$rel.png"
     done
 }
 
 main() {
-    choice=$(menu | wofi -c ~/.config/wofi/wallpaper -s ~/.config/wofi/style-wallpaper.css --show dmenu --prompt "Select Wallpaper:" -n)
+    choice=$(menu | rofi -dmenu -show-icons -theme ~/.config/rofi/wallpaper.rasi -p "Select Wallpaper")
     
-    # SAFETY CHECK: Exit the script immediately if you hit escape or close wofi without picking anything
+    # SAFETY CHECK: Exit the script immediately if you hit escape or close rofi without picking anything
     if [ -z "$choice" ]; then
         exit 0
     fi
 
-    selected_wallpaper=$(echo "$choice" | sed "s|^img:${THUMB_DIR}/|${WALLPAPER_DIR}/|; s|\.png$||")
+    selected_wallpaper="$WALLPAPER_DIR/$choice"
     
     # 1. Apply wallpaper
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5

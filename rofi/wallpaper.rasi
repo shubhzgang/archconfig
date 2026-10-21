@@ -1,0 +1,16 @@
+/* Thumbnail grid for hypr/wallpaper.sh. */
+@import "~/.config/rofi/theme.rasi"
+
+window { width: 900px; }
+listview {
+    columns: 4;
+    fixed-columns: true;
+    lines: 4;
+    spacing: 12px;
+}
+element {
+    orientation: vertical;
+    padding: 8px;
+}
+element-icon { size: 150px; horizontal-align: 0.5; }
+element-text { enabled: false; }

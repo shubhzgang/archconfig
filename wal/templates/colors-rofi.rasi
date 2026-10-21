@@ -1,0 +1,7 @@
+* {{
+    bg: {background};
+    bg-alt: {color8}33;
+    fg: {color7};
+    fg-dim: {color8};
+    accent: {color1};
+}}

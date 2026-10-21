@@ -1,5 +1,5 @@
 -- ~/.config/wal/templates/colors-hyprland.lua
-local colors = {
+local colors = {{
     color0 = "ff{color0.strip}",
     color1 = "ff{color1.strip}",
     color2 = "ff{color2.strip}",
@@ -18,6 +18,6 @@ local colors = {
     color15 = "ff{color15.strip}",
     background = "ff{background.strip}",
     foreground = "ff{foreground.strip}",
-}
+}}
 
 return colors

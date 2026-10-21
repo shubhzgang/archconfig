@@ -61,9 +61,7 @@ local inactiveBorder = wal.color2 or color5
 local terminal = "kitty"
 local fileManager = "nautilus"
 
-local wofiWidth = "80%"
-local wofiHeight = "80%"
-local menu = "wofi -n --width=" .. wofiWidth .. " --height=" .. wofiHeight
+local menu = "rofi -show drun"
 
 local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-1 $(~/.config/hypr/mpvpaper.sh)"
 
@@ -361,11 +359,7 @@ hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("pypr toggle taskbar"))
 
 hl.bind(mainMod .. " + V",
     hl.dsp.exec_cmd(
-        "cliphist list | wofi --dmenu --width=" ..
-        wofiWidth ..
-        " --height=" ..
-        wofiHeight ..
-        " | cliphist decode | wl-copy"
+        "cliphist list | rofi -dmenu -theme ~/.config/rofi/large.rasi -p Clipboard | cliphist decode | wl-copy"
     ))
 
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))

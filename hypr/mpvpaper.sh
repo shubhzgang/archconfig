@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# A script to select a link using wofi
+# A script to select a link using rofi
 
 # Use an associative array to map display names to links.
 # Syntax: [Display Name]="Link"
@@ -13,9 +13,9 @@ declare -A options=(
 )
 
 # Use printf to format the keys (display names) of the array,
-# separated by newlines, and pipe them into wofi.
+# separated by newlines, and pipe them into rofi.
 # The user's selection is stored in the 'selected_key' variable.
-selected_key=$(printf "%s\n" "${!options[@]}" | wofi --height=80% --width=80% -p "Choose a link:" --dmenu)
+selected_key=$(printf "%s\n" "${!options[@]}" | rofi -dmenu -theme ~/.config/rofi/large.rasi -p "Choose a link:")
 
 # Check if the user made a selection (i.e., didn't cancel).
 if [ -n "$selected_key" ]; then
