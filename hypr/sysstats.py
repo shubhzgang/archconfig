@@ -3,33 +3,39 @@
 
 Runs as a Wayland window with app_id "sysstats" so a pyprland scratchpad can
 slide it in (see pyprland.toml). Colors come from the active pywal scheme.
-History keeps sampling while the panel is hidden, so graphs are full on open.
+Samples and history come from sysstatsd.py (state.json), which also feeds
+waybar, so graphs are full as soon as the panel opens.
 """
 import json
 import math
 import os
-import subprocess
-import threading
-import time
-from collections import deque
-
-import psutil
 from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer
 from PyQt6.QtGui import (QColor, QFont, QGuiApplication, QLinearGradient,
                          QPainter, QPainterPath, QPen)
 from PyQt6.QtWidgets import QApplication, QWidget
 
-HISTORY = 120          # samples (1 per second)
+CONFIG = os.path.expanduser("~/.config/hypr/sysstats.json")
+INTERVALS = [1, 2, 5, 10]      # seconds between samples
+POINTS = [30, 60, 120, 240]    # samples kept per graph
+CONTROLS_H = 40
 TICK_MS = 1000
 WAL_COLORS = os.path.expanduser("~/.cache/wal/colors.json")
+STATE = os.path.join(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"), "sysstats", "state.json")
 FONT = "CodeNewRoman Nerd Font Mono"
 PAD = 28
-GAP = 26
-HEADER_H = 40
+CARD_PAD = 16     # inside each card
+CARD_GAP = 20     # between cards
+ROW_GAP = 10      # between graphs inside a card
+HEADER_H = 34
 LEGEND_H = 26
 
 
 # ---- palette ---------------------------------------------------------------
+def mix(a, b, t):
+    """a moved t of the way toward b."""
+    return QColor(*[round(x + (y - x) * t) for x, y in zip(a.getRgb()[:3], b.getRgb()[:3])])
+
+
 class Palette:
     def __init__(self):
         self.mtime = 0
@@ -45,47 +51,22 @@ class Palette:
                 j = json.load(f)
             c = j["colors"]
             self.bg = QColor(j["special"]["background"])
-            self.ink = QColor(c["color7"])
-            self.muted = QColor(c["color8"])
-            self.series = [QColor(c[f"color{i}"]) for i in range(1, 7)]
+            # Window: lighter color2 (inactive window border); cards: fixed light grey.
+            # Everything drawn on them is dark, so it stays readable on any wallpaper.
+            self.panel = mix(QColor(c["color2"]), QColor("white"), 0.35)
+            self.card = QColor("#c3cadb")  # fixed light grey with a slight blue tint
+            self.ink = self.bg
+            self.muted = mix(self.ink, self.card, 0.45)
+            self.series = [mix(QColor(c[f"color{i}"]), QColor("black"), 0.4) for i in range(1, 7)]
         except (OSError, KeyError, ValueError):
             if not hasattr(self, "bg"):
                 self.bg = QColor("#101010")
-                self.ink = QColor("#d8d8d8")
-                self.muted = QColor("#808080")
+                self.ink = QColor("#101010")
+                self.muted = QColor("#506070")
+                self.panel = QColor("#9ab0c8")
+                self.card = QColor("#c3cadb")
                 self.series = [QColor(h) for h in
-                               ("#e06c75", "#61afef", "#98c379", "#e5c07b", "#c678dd", "#56b6c2")]
-
-
-# ---- samplers --------------------------------------------------------------
-class GpuReader(threading.Thread):
-    """Keeps one persistent `nvidia-smi -l 1` running; no process spawn per tick."""
-
-    def __init__(self):
-        super().__init__(daemon=True)
-        self.gpus = {}  # index -> dict(name, util, mem_used, mem_total)
-
-    def run(self):
-        try:
-            proc = subprocess.Popen(
-                ["nvidia-smi", "--query-gpu=index,name,utilization.gpu,memory.used,memory.total",
-                 "--format=csv,noheader,nounits", "-l", "1"],
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-        except OSError:
-            return
-        for line in proc.stdout:
-            parts = [p.strip() for p in line.split(",")]
-            if len(parts) != 5:
-                continue
-            try:
-                self.gpus[int(parts[0])] = {
-                    "name": parts[1].replace("NVIDIA GeForce ", ""),
-                    "util": float(parts[2]),
-                    "mem_used": float(parts[3]) * 2**20,
-                    "mem_total": float(parts[4]) * 2**20,
-                }
-            except ValueError:
-                pass
+                               ("#a03c45", "#2d6fb0", "#5a8a3a", "#a07a2a", "#8a3aa0", "#2a8a96")]
 
 
 def fmt_bytes(n, rate=False):
@@ -94,6 +75,14 @@ def fmt_bytes(n, rate=False):
             s = f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
             return s + ("/s" if rate else "")
         n /= 1024
+
+
+def fmt_ago(seconds):
+    seconds = int(round(seconds))
+    mins, secs = divmod(seconds, 60)
+    if not mins:
+        return f"-{secs}s"
+    return f"-{mins}m" if not secs else f"-{mins}m {secs:02d}s"
 
 
 def nice_ceiling(v):
@@ -110,64 +99,42 @@ class Stats(QWidget):
     def __init__(self):
         super().__init__()
         self.pal = Palette()
-        self.cpu = deque(maxlen=HISTORY)
+        self.cpu = []
         self.freq = 0
-        self.mem_used = deque(maxlen=HISTORY)
-        self.mem_cached = deque(maxlen=HISTORY)
-        self.mem_free = deque(maxlen=HISTORY)
-        self.mem_total = psutil.virtual_memory().total
-        self.net_down = deque(maxlen=HISTORY)
-        self.net_up = deque(maxlen=HISTORY)
-        self.gpu_hist = {}  # index -> {"util": deque, "mem": deque}
-        self.gpu_reader = GpuReader()
-        self.gpu_reader.start()
-        self._net_prev = self._net_counters()
-        self._net_time = None
-        psutil.cpu_percent(interval=None)
+        self.mem_used = []
+        self.mem_cached = []
+        self.mem_free = []
+        self.mem_total = 1
+        self.net_down = []
+        self.net_up = []
+        self.interval, self.points = 1, 120
+        self.chips = []     # (QRectF, config key, value) for hit-testing clicks
+        self.gpus = {}      # index -> {"name", "mem_total"}
+        self.gpu_hist = {}  # index -> {"util": [...], "mem": [...]}
 
         self.setWindowTitle("System stats")
         self.resize(1152, 1728)
+        self.setMouseTracking(True)
         timer = QTimer(self)
         timer.timeout.connect(self.sample)
         timer.start(TICK_MS)
-
-    @staticmethod
-    def _net_counters():
-        rx = tx = 0
-        for nic, c in psutil.net_io_counters(pernic=True).items():
-            if nic != "lo":
-                rx += c.bytes_recv
-                tx += c.bytes_sent
-        return rx, tx
+        self.sample()
 
     def sample(self):
         self.pal.load()
-        self.cpu.append(psutil.cpu_percent(interval=None))
-        f = psutil.cpu_freq()
-        self.freq = f.current if f else 0
-
-        vm = psutil.virtual_memory()
-        self.mem_total = vm.total
-        free = vm.free
-        used = vm.total - vm.available
-        self.mem_used.append(used)
-        self.mem_free.append(free)
-        self.mem_cached.append(max(vm.total - used - free, 0))
-
-        now = time.monotonic()
-        rx, tx = self._net_counters()
-        if self._net_time is not None:
-            dt = now - self._net_time
-            self.net_down.append(max(rx - self._net_prev[0], 0) / dt)
-            self.net_up.append(max(tx - self._net_prev[1], 0) / dt)
-        self._net_prev = (rx, tx)
-        self._net_time = now
-
-        for idx, g in list(self.gpu_reader.gpus.items()):
-            h = self.gpu_hist.setdefault(idx, {"util": deque(maxlen=HISTORY),
-                                               "mem": deque(maxlen=HISTORY)})
-            h["util"].append(g["util"])
-            h["mem"].append(g["mem_used"])
+        try:
+            with open(STATE) as f:
+                st = json.load(f)
+        except (OSError, ValueError):
+            return  # sysstatsd not running yet; keep the last frame
+        self.interval, self.points = st["interval"], st["points"]
+        self.cpu, self.freq = st["cpu"], st["freq"]
+        self.mem_used, self.mem_cached, self.mem_free = st["mem_used"], st["mem_cached"], st["mem_free"]
+        self.mem_total = st["mem_total"]
+        self.net_down, self.net_up = st["net_down"], st["net_up"]
+        self.gpus = {int(i): {"name": g["name"], "mem_total": g["mem_total"]}
+                     for i, g in st["gpus"].items()}
+        self.gpu_hist = {int(i): {"util": g["util"], "mem": g["mem"]} for i, g in st["gpus"].items()}
         self.update()
 
     # ---- drawing helpers ----
@@ -210,7 +177,13 @@ class Stats(QWidget):
             p.drawLine(QPointF(rect.left(), y), QPointF(rect.right(), y))
         self.text(p, rect.left() + 4, rect.top() - 2, ymax_label, self.pal.muted, 13)
 
-        step = rect.width() / (HISTORY - 1)
+        step = rect.width() / (self.points - 1)
+        quarter = max(self.points // 4, 1)  # vertical guides at 1/4 of the window
+        p.setPen(QPen(grid, 1))
+        for k in range(quarter, self.points, quarter):
+            vx = rect.right() - k * step
+            p.drawLine(QPointF(vx, rect.top()), QPointF(vx, rect.bottom()))
+        self.time_labels(p, rect, step, quarter)
 
         def pt(i, n, v, base=0):
             x = rect.right() - (n - 1 - i) * step
@@ -266,7 +239,13 @@ class Stats(QWidget):
         self.text(p, rect.left() + 4, rect.top() - 2, label, self.pal.muted, 13)
         self.text(p, rect.left() + 4, rect.bottom() - HEADER_H + 2, label, self.pal.muted, 13)
 
-        step = rect.width() / (HISTORY - 1)
+        step = rect.width() / (self.points - 1)
+        quarter = max(self.points // 4, 1)  # vertical guides at 1/4 of the window
+        p.setPen(QPen(grid, 1))
+        for k in range(quarter, self.points, quarter):
+            vx = rect.right() - k * step
+            p.drawLine(QPointF(vx, rect.top()), QPointF(vx, rect.bottom()))
+        self.time_labels(p, rect, step, quarter)
         half = rect.height() / 2
         for dq, color, sign in ((down, self.pal.series[3], -1), (up, self.pal.series[4], 1)):
             vals = list(dq)
@@ -298,73 +277,142 @@ class Stats(QWidget):
                           Qt.PenJoinStyle.RoundJoin))
             p.drawPath(line)
 
+    def time_labels(self, p, rect, step, quarter):
+        """Small 'time ago' labels centered under each vertical guide line."""
+        for k in range(quarter, self.points, quarter):
+            self.text(p, rect.right() - k * step - 30, rect.bottom() - 9, fmt_ago(k * self.interval),
+                      self.pal.muted, 12, align=Qt.AlignmentFlag.AlignHCenter, w=60)
+
+    # ---- controls: sampling interval and history length ----
+    def draw_controls(self, p, x, y, w):
+        self.chips = []
+        pal = self.pal
+        cx = x
+        span = self.interval * self.points
+        for label, key, values, fmt in (("every", "interval", INTERVALS, lambda v: f"{v}s"),
+                                        ("points", "points", POINTS, str)):
+            self.text(p, cx, y, label, pal.ink, 15)
+            cx += 11 * len(label) + 14
+            for v in values:
+                text = fmt(v)
+                cw = 11 * len(text) + 22
+                rect = QRectF(cx, y + 5, cw, 26)
+                on = v == (self.interval if key == "interval" else self.points)
+                p.setPen(Qt.PenStyle.NoPen if on else QPen(pal.muted, 1))
+                p.setBrush(pal.series[0] if on else Qt.BrushStyle.NoBrush)
+                p.drawRoundedRect(rect, 8, 8)
+                self.text(p, rect.left(), y, text, pal.panel if on else pal.ink, 15,
+                          align=Qt.AlignmentFlag.AlignHCenter, w=cw)
+                self.chips.append((rect, key, v))
+                cx += cw + 6
+            cx += 24
+        mins, secs = divmod(int(round(span)), 60)
+        self.text(p, x + w, y, f"last {mins}m {secs:02d}s" if mins else f"last {secs}s",
+                  pal.ink, 16, align=Qt.AlignmentFlag.AlignRight, w=w * 0.4)
+
+    def mouseMoveEvent(self, e):
+        over = any(r.contains(e.position()) for r, _, _ in self.chips)
+        self.setCursor(Qt.CursorShape.PointingHandCursor if over else Qt.CursorShape.ArrowCursor)
+
+    def mouseReleaseEvent(self, e):
+        for rect, key, value in self.chips:
+            if rect.contains(e.position()):
+                try:
+                    with open(CONFIG) as f:
+                        cfg = json.load(f)
+                except (OSError, ValueError):
+                    cfg = {"interval": self.interval, "points": self.points}
+                cfg[key] = value
+                with open(CONFIG + ".tmp", "w") as f:
+                    json.dump(cfg, f, indent=2)
+                os.replace(CONFIG + ".tmp", CONFIG)  # sysstatsd applies it and resets the graphs
+                return
+
+    def draw_card(self, p, rect):
+        """Light grey card with a spread-out dark shadow."""
+        p.setPen(Qt.PenStyle.NoPen)
+        for i in range(11, 0, -1):  # stacked translucent rounded rects fake the blurred shadow
+            p.setBrush(QColor(0, 0, 0, 5))
+            p.drawRoundedRect(rect.adjusted(-i, -i + 3, i, i + 3), 10 + i, 10 + i)
+        p.setBrush(self.pal.card)
+        p.drawRoundedRect(rect, 10, 10)
+
     def paintEvent(self, _):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pal = self.pal
-        p.fillRect(self.rect(), pal.bg)
+        p.fillRect(self.rect(), pal.panel)
         s = pal.series
         x, w = PAD, self.width() - 2 * PAD
         gpus = sorted(self.gpu_hist)
+        self.draw_controls(p, x, PAD, w)
 
-        weights = [1.0, 1.25, 1.0] + ([0.9] * len(gpus))
-        total_gap = GAP * (len(weights) - 1)
-        extras = [0, 0, LEGEND_H] + [0] * len(gpus)  # blocks with a legend row
-        avail = self.height() - 2 * PAD - total_gap - HEADER_H * len(weights) - sum(extras)
-        unit = avail / sum(weights)
-        y = PAD
+        def last(dq):
+            return dq[-1] if dq else 0
 
-        def block(i):
-            nonlocal y
-            top = y
-            y += HEADER_H + extras[i] + unit * weights[i] + GAP
-            return top, QRectF(x, top + HEADER_H + extras[i] + 14, w, unit * weights[i] - 14)
+        # Cards: one raised box per device. Each row is (weight, legend?, draw(top, rect)),
+        # one full-width graph per row so the shared time axis lines up vertically.
+        cards = []
 
-        # CPU
-        top, r = block(0)
-        cpu_now = self.cpu[-1] if self.cpu else 0
-        self.header(p, x, top, w, "CPU", f"{cpu_now:.0f}%   {self.freq / 1000:.1f} GHz")
-        self.plot(p, r, 100, "100%", [(self.cpu, s[0])])
+        def cpu_row(top, r):
+            self.header(p, r.left(), top, r.width(), "CPU",
+                        f"{last(self.cpu):.0f}%   {self.freq / 1000:.1f} GHz")
+            self.plot(p, r, 100, "100%", [(self.cpu, s[4])])
+        cards.append([(1.0, False, cpu_row)])
 
-        # Memory: used / cached / free as separate graphs on a shared 0..total scale
-        top, r = block(1)
-        third = (w - 2 * GAP) / 3
-        mem = [("used", self.mem_used, s[1]), ("cached", self.mem_cached, s[2]),
-               ("free", self.mem_free, pal.ink)]
-        for k, (label, dq, color) in enumerate(mem):
-            cx = x + k * (third + GAP)
-            self.header(p, cx, top, third, f"RAM {label}", fmt_bytes(dq[-1] if dq else 0))
-            self.plot(p, QRectF(cx, r.top(), third, r.height()), self.mem_total,
-                      fmt_bytes(self.mem_total), [(dq, color)])
+        # RAM used / cached / free share the 0..total scale so heights compare directly
+        ram = []
+        for label, dq, color in (("used", self.mem_used, s[1]), ("cached", self.mem_cached, s[2]),
+                                 ("free", self.mem_free, pal.ink)):
+            def mem_row(top, r, label=label, dq=dq, color=color):
+                self.header(p, r.left(), top, r.width(), f"RAM {label}", fmt_bytes(last(dq)))
+                self.plot(p, r, self.mem_total, fmt_bytes(self.mem_total), [(dq, color)])
+            ram.append((0.8, False, mem_row))
+        cards.append(ram)
 
-        # Network
-        top, r = block(2)
-        down = self.net_down[-1] if self.net_down else 0
-        up = self.net_up[-1] if self.net_up else 0
-        peak = max(list(self.net_down) + list(self.net_up) + [100 * 1024])
-        ymax = nice_ceiling(peak * 1.1)
-        self.header(p, x, top, w, "Network", "",
-                    legend=[(f"down {fmt_bytes(down, True)}", s[3]),
-                            (f"up {fmt_bytes(up, True)}", s[4])])
-        self.plot_mirrored(p, r, ymax, fmt_bytes(ymax, True), self.net_up, self.net_down)
+        def net_row(top, r):
+            peak = max(list(self.net_down) + list(self.net_up) + [100 * 1024])
+            ymax = nice_ceiling(peak * 1.1)
+            self.header(p, r.left(), top, r.width(), "Network", "",
+                        legend=[(f"down {fmt_bytes(last(self.net_down), True)}", s[3]),
+                                (f"up {fmt_bytes(last(self.net_up), True)}", s[4])])
+            self.plot_mirrored(p, r, ymax, fmt_bytes(ymax, True), self.net_up, self.net_down)
+        cards.append([(1.3, True, net_row)])
 
-        # GPUs: usage | memory side by side
-        half = (w - GAP) / 2
-        for n, idx in enumerate(gpus):
-            g = self.gpu_reader.gpus.get(idx, {})
+        for idx in gpus:
+            g = self.gpus.get(idx, {})
             hist = self.gpu_hist[idx]
-            top, r = block(3 + n)
             name = g.get("name", f"GPU {idx}")
-            u = hist["util"][-1] if hist["util"] else 0
-            m = hist["mem"][-1] if hist["mem"] else 0
             mt = g.get("mem_total", 1)
-            self.header(p, x, top, half, f"{name} usage", f"{u:.0f}%")
-            self.header(p, x + half + GAP, top, half, f"{name} memory",
-                        f"{fmt_bytes(m)} / {fmt_bytes(mt)}")
-            left = QRectF(r.left(), r.top(), half, r.height())
-            right = QRectF(r.left() + half + GAP, r.top(), half, r.height())
-            self.plot(p, left, 100, "100%", [(hist["util"], s[5])])
-            self.plot(p, right, mt, fmt_bytes(mt), [(hist["mem"], s[1])])
+
+            def usage_row(top, r, name=name, hist=hist):
+                self.header(p, r.left(), top, r.width(), f"{name} usage", f"{last(hist['util']):.0f}%")
+                self.plot(p, r, 100, "100%", [(hist["util"], s[5])])
+
+            def memory_row(top, r, name=name, hist=hist, mt=mt):
+                self.header(p, r.left(), top, r.width(), f"{name} memory",
+                            f"{fmt_bytes(last(hist['mem']))} / {fmt_bytes(mt)}")
+                self.plot(p, r, mt, fmt_bytes(mt), [(hist["mem"], s[1])])
+            cards.append([(0.8, False, usage_row), (0.8, False, memory_row)])
+
+        rows_all = [row for card in cards for row in card]
+        fixed = (2 * PAD + CONTROLS_H + CARD_GAP * (len(cards) - 1) + 2 * CARD_PAD * len(cards)
+                 + ROW_GAP * (len(rows_all) - len(cards)) + HEADER_H * len(rows_all)
+                 + sum(LEGEND_H for _, legend, _ in rows_all if legend))
+        unit = (self.height() - fixed) / sum(row[0] for row in rows_all)
+        y = PAD + CONTROLS_H
+        for card in cards:
+            card_h = (2 * CARD_PAD + ROW_GAP * (len(card) - 1)
+                      + sum(HEADER_H + (LEGEND_H if legend else 0) + unit * weight
+                            for weight, legend, _ in card))
+            self.draw_card(p, QRectF(x, y, w, card_h))
+            ry = y + CARD_PAD
+            for weight, legend, draw in card:
+                extra = LEGEND_H if legend else 0
+                height = unit * weight
+                draw(ry, QRectF(x + CARD_PAD, ry + HEADER_H + extra + 10, w - 2 * CARD_PAD, height - 10))
+                ry += HEADER_H + extra + height + ROW_GAP
+            y += card_h + CARD_GAP
 
 
 def main():

@@ -1,0 +1,7 @@
+[Unit]
+Description=System stats sampler for waybar and the sysstats panel
+
+[Service]
+ExecStart=%h/.config/hypr/sysstatsd.py
+Restart=on-failure
+RestartSec=2

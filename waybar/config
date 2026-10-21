@@ -4,7 +4,7 @@
         "reload_style_on_change": true,
         "modules-left": ["custom/notification","clock","custom/pacman","tray"],
         "modules-center": ["custom/ws1", "custom/ws2", "custom/ws3", "custom/ws4", "custom/ws5", "custom/ws6", "custom/ws7", "custom/ws8", "custom/ws9", "custom/ws10"],
-        "modules-right": ["bluetooth","network"],
+        "modules-right": ["custom/cpu","custom/mem","custom/net","custom/gpu","bluetooth","network"],
 
 
         "custom/ws1": {
@@ -86,6 +86,26 @@
             "signal": 9,
             "tooltip": false,
             "on-click": "hyprctl dispatch 'hl.dsp.focus({ workspace = 10 })'"
+        },
+        "custom/cpu": {
+            "exec": "tail -n1 -F $XDG_RUNTIME_DIR/sysstats/cpu.json",
+            "return-type": "json",
+            "on-click": "pypr toggle taskbar"
+        },
+        "custom/mem": {
+            "exec": "tail -n1 -F $XDG_RUNTIME_DIR/sysstats/mem.json",
+            "return-type": "json",
+            "on-click": "pypr toggle taskbar"
+        },
+        "custom/net": {
+            "exec": "tail -n1 -F $XDG_RUNTIME_DIR/sysstats/net.json",
+            "return-type": "json",
+            "on-click": "pypr toggle taskbar"
+        },
+        "custom/gpu": {
+            "exec": "tail -n1 -F $XDG_RUNTIME_DIR/sysstats/gpu.json",
+            "return-type": "json",
+            "on-click": "pypr toggle taskbar"
         },
         "custom/notification": {
             "tooltip": false,
