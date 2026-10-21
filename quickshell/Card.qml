@@ -6,6 +6,7 @@ Rectangle {
     id: root
     required property var theme
     default property alias content: column.data
+    property color shadowColor: "#55000000"
 
     color: theme.card
     radius: 10
@@ -14,7 +15,7 @@ Rectangle {
     layer.enabled: true
     layer.effect: MultiEffect {
         shadowEnabled: true
-        shadowColor: "#55000000"
+        shadowColor: root.shadowColor
         shadowBlur: 0.45
         shadowVerticalOffset: 3
     }

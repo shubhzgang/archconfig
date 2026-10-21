@@ -33,24 +33,26 @@ ShellRoot {
 
     PanelWindow {
         id: win
-        property bool open: false
+        property bool open: false          // stats panel
+        property bool calOpen: false       // calendar panel
+        readonly property bool anyOpen: open || calOpen
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qs-shell"
-        WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: anyOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         // Only the bar items and the panel take mouse input; while the panel is open the whole
         // screen does, so a click outside closes it.
         mask: Region {
             regions: [
-                Region { item: win.open ? backdrop : stats },
+                Region { item: win.anyOpen ? backdrop : stats },
                 Region { item: leftSection },
                 Region { item: centerSection },
                 Region { item: leftSection.tipRect },
-                Region { item: leftSection.calendarRect }
+                Region { item: calendar }
             ]
         }
 
@@ -58,8 +60,8 @@ ShellRoot {
             id: backdrop
             anchors.fill: parent
             focus: true
-            Keys.onEscapePressed: win.open = false
-            MouseArea { anchors.fill: parent; onClicked: win.open = false }
+            Keys.onEscapePressed: { win.open = false; win.calOpen = false }
+            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false } }
         }
 
         IpcHandler {   // qs ipc call stats toggle|open|close|sampling <s> <points>
@@ -70,12 +72,28 @@ ShellRoot {
             function sampling(interval: int, points: int): void { stats.setSampling(interval, points) }
         }
 
-        // The frame around the monitor (the stats panel hangs from it, see Frame.qml)
+        IpcHandler {   // qs ipc call calendar toggle|open|close
+            target: "calendar"
+            function toggle(): void { win.calOpen = !win.calOpen }
+            function open(): void { win.calOpen = true }
+            function close(): void { win.calOpen = false }
+        }
+
+        // The frame around the monitor (the panels hang from it, see Frame.qml)
         Frame {
             id: frame
             theme: theme
             panelW: stats.panelW
             panelH: stats.panelH
+            leftW: calendar.panelW
+            leftH: calendar.panelH
+        }
+
+        CalendarPanel {
+            id: calendar
+            theme: theme
+            open: win.calOpen
+            onToggle: win.calOpen = !win.calOpen
         }
 
         CenterSection {
@@ -87,6 +105,7 @@ ShellRoot {
             id: leftSection
             theme: theme
             win: win
+            onCalendarToggle: win.calOpen = !win.calOpen
         }
 
         StatsCorner {

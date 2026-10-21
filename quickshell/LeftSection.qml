@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
@@ -7,14 +6,14 @@ import Quickshell.Networking
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
-// Top-left section, replicating waybar's: notifications button, clock (calendar on hover),
+// Top-left section, replicating waybar's: notifications button, clock (click opens the calendar panel),
 // pending pacman updates, tray, bluetooth and network.
 Item {
     id: section
     required property var theme
     required property var win           // the PanelWindow (tray menus anchor to it)
     readonly property alias tipRect: tip
-    readonly property alias calendarRect: calendar
+    signal calendarToggle()
 
     anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 14 + 8 }   // inside the frame's top band
     height: 39
@@ -22,7 +21,6 @@ Item {
 
     // ---- data ----
     SystemClock { id: clock; precision: SystemClock.Seconds }
-    property int monthShift: 0           // calendar: left click = next month, right click = previous
     property string pacmanCount: "?"
 
     Process {
@@ -79,64 +77,6 @@ Item {
         }
     }
 
-    // ---- calendar (hover over the clock) ----
-    Rectangle {
-        id: calendar
-        readonly property bool shown: clockMod.hovered
-        readonly property date shownDate: new Date(clock.date.getFullYear(), clock.date.getMonth() + section.monthShift, 1)
-        x: row.x + clockMod.x
-        y: section.height + 8
-        width: shown ? 300 : 0
-        height: shown ? cal.implicitHeight + 28 : 0
-        visible: shown
-        radius: 10
-        color: section.theme.barStart
-        border.width: 2
-        border.color: section.theme.accent
-        clip: true
-        Column {
-            id: cal
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
-            spacing: 6
-            Text {
-                text: Qt.formatDate(calendar.shownDate, "MMMM yyyy")
-                color: section.theme.ink
-                font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 16
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-            DayOfWeekRow {
-                width: parent.width
-                locale: Qt.locale()
-                delegate: Text {
-                    text: model.shortName
-                    color: section.theme.hover
-                    font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 13
-                    horizontalAlignment: Text.AlignHCenter
-                }
-            }
-            MonthGrid {
-                id: grid
-                width: parent.width
-                month: calendar.shownDate.getMonth()
-                year: calendar.shownDate.getFullYear()
-                locale: Qt.locale()
-                delegate: Text {
-                    required property var model
-                    text: model.day
-                    opacity: model.month === grid.month ? 1 : 0.35
-                    color: model.today && section.monthShift === 0 ? "#E5534B" : section.theme.ink
-                    font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 14
-                    font.bold: model.today && section.monthShift === 0
-                    horizontalAlignment: Text.AlignHCenter
-                }
-            }
-        }
-    }
-
     // ---- the modules ----
     Row {
         id: row
@@ -152,8 +92,7 @@ Item {
             id: clockMod
             theme: section.theme
             text: Qt.formatDateTime(clock.date, "hh:mm:ss AP") + " "
-            onHoveredChanged: if (!hovered) section.monthShift = 0
-            onClicked: mouse => section.monthShift += mouse.button === Qt.RightButton ? -1 : 1
+            onClicked: section.calendarToggle()
         }
         Mod {
             theme: section.theme
