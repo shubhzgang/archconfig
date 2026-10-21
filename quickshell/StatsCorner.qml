@@ -19,7 +19,6 @@ Item {
     readonly property var st: stateFile.value
     readonly property int points: st.points || 120
     readonly property real interval: st.interval || 1
-    readonly property int controlsH: 46
 
     // Sampling settings live in hypr/sysstats.json; sysstatsd.py applies a change at once and
     // restarts the graphs.
@@ -39,7 +38,7 @@ Item {
 
     // size of the panel below the band; expanded: fit the cards, same 16px space at top and bottom
     readonly property real openW: 1000
-    readonly property real openH: Math.min(parent.height - band - side - 20, cards.implicitHeight + 32 + controlsH)
+    readonly property real openH: Math.min(parent.height - band - side - 20, cards.implicitHeight + 32)
     property real panelW: collapsedW
     property real panelH: 0
     anchors { top: parent.top; right: parent.right; rightMargin: side }
@@ -105,7 +104,7 @@ Item {
         spacing: 0
         opacity: corner.open ? 0 : 1
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 180 } }
+        Behavior on opacity { NumberAnimation { duration: 90 } }   // gone before the controls fade in on the same line
 
         Repeater {
             model: [cpuFile, memFile, netFile, gpuFile]
@@ -131,24 +130,24 @@ Item {
         }
     }
 
-    // ---- expanded: the panel ----
+    // ---- expanded: the sampling controls, in line with the bar's contents ----
     Item {
-        id: panel
-        anchors { fill: parent; margins: 16; topMargin: corner.band + 16 }
-        clip: true
+        id: controlsBar
+        anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 16; rightMargin: 16 }
+        height: corner.band
         opacity: corner.open ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity {   // content fades in once the shape has started to grow
+        Behavior on opacity {
             SequentialAnimation {
-                PauseAnimation { duration: corner.open ? 90 : 0 }
+                PauseAnimation { duration: corner.open ? 140 : 0 }
                 NumberAnimation { duration: corner.open ? 260 : 100 }
             }
         }
 
         Row {
             id: controls
-            height: corner.controlsH - 16
-            spacing: 6
+        anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
             Text {
                 text: "every"
                 color: corner.theme.ink
@@ -188,14 +187,30 @@ Item {
             }
         }
         Text {
-            anchors { right: parent.right; verticalCenter: controls.verticalCenter }
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
             text: corner.span(corner.interval * corner.points)
             color: corner.theme.ink
             font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 16
         }
 
+    }
+
+    // ---- expanded: the panel ----
+    Item {
+        id: panel
+        anchors { fill: parent; margins: 16; topMargin: corner.band + 16 }
+        clip: true
+        opacity: corner.open ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity {   // content fades in once the shape has started to grow
+            SequentialAnimation {
+                PauseAnimation { duration: corner.open ? 90 : 0 }
+                NumberAnimation { duration: corner.open ? 260 : 100 }
+            }
+        }
+
         Flickable {
-            anchors { fill: parent; topMargin: corner.controlsH }
+            anchors.fill: parent
             interactive: contentHeight > height   // only scrolls if the cards outgrow the screen
             contentHeight: cards.implicitHeight
             clip: true
