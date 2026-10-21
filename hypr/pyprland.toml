@@ -20,8 +20,8 @@ offset = "200%"
 
 [scratchpads.taskbar]
 animation = "fromLeft"
-command = "kitty --class kitty-taskbar -e htop"
-class = "kitty-taskbar"
+command = "python3 /home/shubham/.config/hypr/sysstats.py"
+class = "sysstats"
 size = "30% 80%"
 offset = "200%"
 

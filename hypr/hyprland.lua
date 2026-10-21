@@ -497,6 +497,13 @@ hl.window_rule({
     float = true,
 })
 
+-- pyprland scratchpads (stats panel, drop terminal, ...) come up with a magenta
+-- border unless it is set explicitly.
+hl.window_rule({
+    match = { class = "^(sysstats|kitty-.*)$" },
+    border_color = activeBorder .. " " .. inactiveBorder,
+})
+
 hl.window_rule({
     match = { class = "jetbrains-idea" },
     opacity = "1.0",

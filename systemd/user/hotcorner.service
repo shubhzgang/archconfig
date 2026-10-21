@@ -1,5 +1,5 @@
 [Unit]
-Description=Hyprland hot corner (top-left toggles rofi launcher)
+Description=Hyprland hot corner (top-left corner: rofi launcher, left edge: btop)
 
 [Service]
 ExecStart=%h/.config/hypr/hotcorner.py
