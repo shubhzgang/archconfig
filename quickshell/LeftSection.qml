@@ -14,6 +14,7 @@ Item {
     required property var win           // the PanelWindow (tray menus anchor to it)
     readonly property alias tipRect: tip
     signal calendarToggle()
+    signal launcherToggle()
 
     anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 14 + 8 }   // inside the frame's top band
     height: 39
@@ -34,17 +35,6 @@ Item {
         command: ["kitty", "sh", "-c", "yay -Syu; echo Done - Press enter to exit; read"]
         onExited: pacmanCheck.running = true
     }
-    // Apps button: opens the launcher, or closes it if it is already open. Whether it was open is
-    // checked when the mouse goes DOWN (before anything the click itself might do to the launcher).
-    // Only a live rofi counts: an exited-but-unreaped (zombie) one still matches pgrep/pkill.
-    property bool launcherWasOpen: false
-    Process {
-        id: launcherCheck
-        command: ["sh", "-c", "ps -C rofi -o stat= | grep -q '^[^Z]'"]
-        onExited: (code, status) => section.launcherWasOpen = (code === 0)
-    }
-    Process { id: launcherOpen; command: ["rofi", "-show", "drun"] }
-    Process { id: launcherClose; command: ["pkill", "-x", "rofi"] }
     Process { id: blueman; command: ["blueman-manager"] }
     Process { id: nmtui; command: ["kitty", "nmtui"] }
 
@@ -98,8 +88,7 @@ Item {
             text: "Apps"
             font.pixelSize: 19
             font.weight: Font.ExtraBold
-            onPressed: launcherCheck.running = true
-            onClicked: section.launcherWasOpen ? launcherClose.running = true : launcherOpen.running = true
+            onClicked: section.launcherToggle()
         }
         Mod {
             id: clockMod

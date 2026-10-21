@@ -61,7 +61,6 @@ local inactiveBorder = wal.color2 or color5
 local terminal = "kitty"
 local fileManager = "nautilus"
 
-local menu = "rofi -show drun"
 
 local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-1 $(~/.config/hypr/mpvpaper.sh)"
 
@@ -300,7 +299,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl dispatch dpms off && sleep 0.5 && hyprctl dispatch dpms on")
     hl.exec_cmd("hypridle")
     hl.exec_cmd("systemctl --user start sysstatsd.service")
-    hl.exec_cmd("qs")  -- Quickshell: top-right stats that morph into the stats panel
+    hl.exec_cmd("QS_ICON_THEME=Adwaita qs")  -- Quickshell: the bar, panels and app launcher (Adwaita finds icons the default theme misses)
     hl.exec_cmd("swww-daemon")
     hl.exec_cmd("swaync")
     hl.exec_cmd("pypr")
@@ -354,7 +353,7 @@ hl.bind(mainMod .. " + P",
     hl.dsp.window.set_prop({ window = "active", prop = "opaque", value = "toggle" }))
 
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pypr toggle term"))
 
 hl.bind(mainMod .. " + V",
@@ -434,10 +433,6 @@ hl.bind("CTRL + Print",
     hl.dsp.exec_cmd("hyprshot -m region -o ~/Screenshots/"))
 
 -- Mouse binds.
--- Left click anywhere: lets the bar's Apps button close an open rofi launcher (rofi holds the
--- pointer while open, so the button never sees that click). The click itself is not consumed.
-hl.bind("mouse:272", hl.dsp.exec_cmd("~/.config/hypr/scripts/apps-click.sh"), { non_consuming = true })
-
 hl.bind(mainMod .. " + mouse:272",
     hl.dsp.window.drag(),
     { mouse = true })

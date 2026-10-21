@@ -35,7 +35,11 @@ ShellRoot {
         id: win
         property bool open: false          // stats panel
         property bool calOpen: false       // calendar panel
-        readonly property bool anyOpen: open || calOpen
+        property bool launcherOpen: false  // app launcher panel
+        readonly property bool anyOpen: open || calOpen || launcherOpen
+        // the two left panels share the same spot, so only one can be open
+        onCalOpenChanged: if (calOpen) launcherOpen = false
+        onLauncherOpenChanged: if (launcherOpen) calOpen = false
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -52,7 +56,8 @@ ShellRoot {
                 Region { item: leftSection },
                 Region { item: centerSection },
                 Region { item: leftSection.tipRect },
-                Region { item: calendar }
+                Region { item: calendar },
+                Region { item: launcher }
             ]
         }
 
@@ -60,8 +65,8 @@ ShellRoot {
             id: backdrop
             anchors.fill: parent
             focus: true
-            Keys.onEscapePressed: { win.open = false; win.calOpen = false }
-            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false } }
+            Keys.onEscapePressed: { win.open = false; win.calOpen = false; win.launcherOpen = false }
+            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false; win.launcherOpen = false } }
         }
 
         IpcHandler {   // qs ipc call stats toggle|open|close|sampling <s> <points>
@@ -70,6 +75,13 @@ ShellRoot {
             function open(): void { win.open = true }
             function close(): void { win.open = false }
             function sampling(interval: int, points: int): void { stats.setSampling(interval, points) }
+        }
+
+        IpcHandler {   // qs ipc call launcher toggle|open|close
+            target: "launcher"
+            function toggle(): void { win.launcherOpen = !win.launcherOpen }
+            function open(): void { win.launcherOpen = true }
+            function close(): void { win.launcherOpen = false }
         }
 
         IpcHandler {   // qs ipc call calendar toggle|open|close
@@ -85,8 +97,8 @@ ShellRoot {
             theme: theme
             panelW: stats.panelW
             panelH: stats.panelH
-            leftW: calendar.panelW
-            leftH: calendar.panelH
+            leftW: Math.max(calendar.panelW, launcher.panelW)
+            leftH: Math.max(calendar.panelH, launcher.panelH)
         }
 
         CalendarPanel {
@@ -94,6 +106,13 @@ ShellRoot {
             theme: theme
             open: win.calOpen
             onToggle: win.calOpen = !win.calOpen
+        }
+
+        LauncherPanel {
+            id: launcher
+            theme: theme
+            open: win.launcherOpen
+            onToggle: win.launcherOpen = !win.launcherOpen
         }
 
         CenterSection {
@@ -106,6 +125,7 @@ ShellRoot {
             theme: theme
             win: win
             onCalendarToggle: win.calOpen = !win.calOpen
+            onLauncherToggle: win.launcherOpen = !win.launcherOpen
         }
 
         StatsCorner {
