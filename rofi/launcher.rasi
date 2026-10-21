@@ -7,13 +7,15 @@ listview {
     fixed-columns: true;
 }
 
-/* 12px of each side's padding is the card image's shadow margin (see make-cards.py) */
+/* 12px of each side's padding is the card image's shadow margin (see make-cards.py);
+   the 44px icon tile (28px icon + 8px padding) sets the card's height */
 element {
-    padding: 22px 24px;
+    padding: 18px 24px;
     background-image: url("/home/shubham/.cache/wal/rofi-card-launcher.png", both);
 }
 
 element selected {
+    padding: 12px 24px 24px 24px;  /* content moves up 6px with the lifted card */
     background-image: url("/home/shubham/.cache/wal/rofi-card-launcher-sel.png", both);
 }
 
@@ -23,4 +25,10 @@ inputbar {
     border-radius: 0px;
     background-color: transparent;
     background-image: url("/home/shubham/.cache/wal/rofi-card-input.png", both);
+}
+
+element-icon {
+    size: 28px;
+    padding: 8px;
+    background-image: url("/home/shubham/.cache/wal/rofi-icon-tile.png", both);
 }

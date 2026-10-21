@@ -14,16 +14,17 @@ listview {
 
 element {
     orientation: vertical;
-    /* The icon box is square (150x150) but thumbnails are 16:9, so each image has ~33px of
-       blank above and below it; 33px of horizontal padding makes the gaps even. The extra
-       12px on each side is the card image's shadow margin (see make-cards.py). */
-    padding: 12px 45px;
+    /* 240x174 cell: 7px card-shadow margin + 15px of card space on every side of the
+       196x130 thumbnail (see make-cards.py). The icon box is square, so a negative vertical
+       margin trims it to the thumbnail's 130px height. */
+    padding: 22px 22px;
     background-image: url("/home/shubham/.cache/wal/rofi-card-wall.png", both);
 }
 
 element selected {
+    padding: 16px 22px 28px 22px;  /* content moves up 6px with the lifted card */
     background-image: url("/home/shubham/.cache/wal/rofi-card-wall-sel.png", both);
 }
 
-element-icon { size: 150px; horizontal-align: 0.5; }
+element-icon { size: 196px; margin: -33px 0px; horizontal-align: 0.5; }
 element-text { enabled: false; }

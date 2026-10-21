@@ -1,10 +1,15 @@
 #!/bin/bash
 WALLPAPER_DIR="$HOME/wallpapers/walls"
-THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-150x84"
-THUMB_W=150
-THUMB_H=84
+# 2x the 196x130 size they are shown at (center-cropped to the wallpaper picker card shape
+# so the card margin is even on all sides), so they stay sharp
+THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-392x260"
+THUMB_W=392
+THUMB_H=260
 
-export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H
+THUMB_MASK="$HOME/.cache/wal/rofi-thumb-mask.png"
+THUMB_SHADE="$HOME/.cache/wal/rofi-thumb-shade.png"
+
+export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H THUMB_MASK THUMB_SHADE
 
 make_thumb() {
     local file="$1"
@@ -14,7 +19,15 @@ make_thumb() {
     if [ -f "$thumb" ] && [ "$thumb" -nt "$file" ]; then
         return
     fi
-    magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" -quality 80 "$thumb" 2>/dev/null
+    # Crop to size, round the corners (mask) and add the recessed-edge shading, all rendered
+    # by rofi/make-cards.py; without them fall back to a plain thumbnail.
+    if [ -f "$THUMB_MASK" ] && [ -f "$THUMB_SHADE" ]; then
+        magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" \
+            "$THUMB_MASK" -alpha off -compose CopyOpacity -composite \
+            "$THUMB_SHADE" -compose over -composite "$thumb" 2>/dev/null
+    else
+        magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" -quality 80 "$thumb" 2>/dev/null
+    fi
 }
 export -f make_thumb
 
@@ -32,6 +45,9 @@ menu() {
 }
 
 main() {
+    # thumbnail shading assets (fresh checkout): render them before thumbnails are made
+    [ -f "$THUMB_MASK" ] || ~/.config/rofi/make-cards.py
+
     choice=$(menu | rofi -dmenu -show-icons -theme ~/.config/rofi/wallpaper.rasi -p "Select Wallpaper")
     
     # SAFETY CHECK: Exit the script immediately if you hit escape or close rofi without picking anything
