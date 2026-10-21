@@ -224,8 +224,12 @@ class Stats(QWidget):
             if stacked:
                 base_vals = [b + v for b, v in zip(bases, vals)]
 
-    def plot_mirrored(self, p, rect, ymax, label, up, down):
-        """Network graph like macOS: received grows up from a center line, sent grows down."""
+    def plot_mirrored(self, p, rect, up, down):
+        """Network graph like macOS: received grows up from a center line, sent grows down.
+        Each half has its own auto-scale, labeled at its outer edge."""
+        floor = 100 * 1024
+        scales = {id(down): nice_ceiling(max(list(down) + [floor]) * 1.1),
+                  id(up): nice_ceiling(max(list(up) + [floor]) * 1.1)}
         grid = QColor(self.pal.muted)
         grid.setAlpha(55)
         mid = rect.center().y()
@@ -236,8 +240,9 @@ class Stats(QWidget):
         center.setAlpha(120)
         p.setPen(QPen(center, 1))
         p.drawLine(QPointF(rect.left(), mid), QPointF(rect.right(), mid))
-        self.text(p, rect.left() + 4, rect.top() - 2, label, self.pal.muted, 13)
-        self.text(p, rect.left() + 4, rect.bottom() - HEADER_H + 2, label, self.pal.muted, 13)
+        self.text(p, rect.left() + 4, rect.top() - 2, fmt_bytes(scales[id(down)], True), self.pal.muted, 13)
+        self.text(p, rect.left() + 4, rect.bottom() - HEADER_H + 2, fmt_bytes(scales[id(up)], True),
+                  self.pal.muted, 13)
 
         step = rect.width() / (self.points - 1)
         quarter = max(self.points // 4, 1)  # vertical guides at 1/4 of the window
@@ -252,6 +257,7 @@ class Stats(QWidget):
             n = len(vals)
             if n < 2:
                 continue
+            ymax = scales[id(dq)]
             pts = [QPointF(rect.right() - (n - 1 - i) * step,
                            mid + sign * half * min(v / ymax, 1)) for i, v in enumerate(vals)]
             area = QPainterPath(QPointF(pts[0].x(), mid))
@@ -371,12 +377,10 @@ class Stats(QWidget):
         cards.append(ram)
 
         def net_row(top, r):
-            peak = max(list(self.net_down) + list(self.net_up) + [100 * 1024])
-            ymax = nice_ceiling(peak * 1.1)
             self.header(p, r.left(), top, r.width(), "Network", "",
                         legend=[(f"down {fmt_bytes(last(self.net_down), True)}", s[3]),
                                 (f"up {fmt_bytes(last(self.net_up), True)}", s[4])])
-            self.plot_mirrored(p, r, ymax, fmt_bytes(ymax, True), self.net_up, self.net_down)
+            self.plot_mirrored(p, r, self.net_up, self.net_down)
         cards.append([(1.3, True, net_row)])
 
         for idx in gpus:
