@@ -2,15 +2,14 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Shapes
 
-// The frame around the monitor. The top band (holding the bar) is filled with a gradient across
-// the screen; the left, right and bottom sides are only a 3px outline with no fill. When the
-// stats panel is open it hangs from the top band at the right, filled like the band, with the
-// outline flowing round it (concave joins where it meets the band and the right edge).
+// The frame around the monitor, drawn as one gradient-filled shape with no outline: the top band
+// (holding the bar) is 56px, the left, right and bottom bands 3px, and the inside edge has rounded
+// corners. When the stats panel is open it hangs from the top band at the right, filled like the
+// band, with concave joins where it meets the band and the right edge.
 Item {
     id: frame
     required property var theme
-    readonly property int line: 3         // outline width
-    readonly property real side: line / 2 // the left/right/bottom outline sits on the screen edge
+    readonly property int side: 10        // left/right/bottom band
     readonly property int band: 56        // top band (the bar)
     readonly property int corner: 28      // radius of the screen's inner corners
     property real panelW: 0               // stats panel hanging from the top band, right-aligned
@@ -30,7 +29,7 @@ Item {
 
     // The free area inside the frame, clockwise from the top-left corner. Closed: a rounded
     // rectangle. Open: the top edge turns down the panel's left side, round its bottom, and
-    // back out to the right edge. This is the outline.
+    // back out to the right edge. The frame is everything outside it.
     readonly property string hole: {
         const L = inL, T = inT, R = inR, B = inB, c = corner
         if (!panelOpen)
@@ -44,20 +43,36 @@ Item {
              + `L ${L} ${T + c} A ${c} ${c} 0 0 1 ${L + c} ${T} Z`
     }
 
-    // The filled area: the top band, the corner pieces where the rounded outline curves away
-    // from the screen corners (all four, extended past the screen edge so no gap shows), and
-    // (open) the panel with its two concave joins. Clockwise from the top left.
-    readonly property string fillArea: {
-        const L = inL, T = inT, R = inR, B = inB, c = corner, W = width, H = height
-        const head = `M -20 -20 L ${W + 20} -20 L ${W + 20} `
-        const tail = ` L ${L + c} ${T} A ${c} ${c} 0 0 0 ${L} ${T + c} L -20 ${T + c} Z `
-        const bottom = `M ${L} ${B - c} A ${c} ${c} 0 0 0 ${L + c} ${B} L ${L + c} ${H + 20} L -20 ${H + 20} L -20 ${B - c} Z `
-                     + `M ${R - c} ${B} A ${c} ${c} 0 0 0 ${R} ${B - c} L ${W + 20} ${B - c} L ${W + 20} ${H + 20} L ${R - c} ${H + 20} Z`
-        if (!panelOpen)
-            return head + `${T + c} L ${R} ${T + c} A ${c} ${c} 0 0 0 ${R - c} ${T}` + tail + bottom
-        return head + `${T + panelH + f} L ${R} ${T + panelH + f} A ${f} ${f} 0 0 0 ${R - f} ${T + panelH} `
-             + `L ${px + r} ${T + panelH} A ${r} ${r} 0 0 1 ${px} ${T + panelH - r} `
-             + `L ${px} ${T + f} A ${f} ${f} 0 0 0 ${px - f} ${T}` + tail + bottom
+    // ---- inlet shadow: dark for a while, then fading out (like a window's shadow) ----
+    // The frame's shape, grown inward by a black stroke along its inner edge (the dark stretch),
+    // then blurred (the fade). `shadowGrow` is how far in it stays dark; `shadowFade` is the blur.
+    readonly property real shadowGrow: 10
+    readonly property real shadowFade: 24
+    Shape {
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: frame.shadowFade
+            blur: 1.0
+        }
+        ShapePath {
+            fillRule: ShapePath.OddEvenFill
+            strokeColor: "transparent"
+            strokeWidth: 0
+            fillColor: "#a6000000"
+            PathSvg {
+                path: `M -20 -20 L ${frame.width + 20} -20 L ${frame.width + 20} ${frame.height + 20} `
+                    + `L -20 ${frame.height + 20} Z ` + frame.hole
+            }
+        }
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: "#a6000000"
+            strokeWidth: frame.shadowGrow * 2
+            PathSvg { path: frame.hole }
+        }
     }
 
     // ---- fill: gradient across the screen ----
@@ -65,6 +80,7 @@ Item {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
+            fillRule: ShapePath.OddEvenFill
             strokeColor: "transparent"
             strokeWidth: 0
             fillGradient: LinearGradient {
@@ -73,19 +89,10 @@ Item {
                 GradientStop { position: 0.5; color: frame.theme.barStart }
                 GradientStop { position: 1.0; color: frame.theme.barEnd }
             }
-            PathSvg { path: frame.fillArea }
-        }
-    }
-
-    // ---- outline: the whole frame edge, 3px, no fill ----
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-            fillColor: "transparent"
-            strokeColor: frame.theme.accent
-            strokeWidth: frame.line
-            PathSvg { path: frame.hole }
+            PathSvg {
+                path: `M -20 -20 L ${frame.width + 20} -20 L ${frame.width + 20} ${frame.height + 20} `
+                    + `L -20 ${frame.height + 20} Z ` + frame.hole
+            }
         }
     }
 }

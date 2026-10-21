@@ -12,9 +12,9 @@ ShellRoot {
     Variants {
         model: [
             { top: true, left: true, right: true, h: 56, w: 0, zone: 56 },
-            { top: true, left: true, bottom: true, h: 0, w: 3, zone: 3 },
-            { top: true, right: true, bottom: true, h: 0, w: 3, zone: 3 },
-            { left: true, right: true, bottom: true, h: 3, w: 0, zone: 3 }
+            { top: true, left: true, bottom: true, h: 0, w: 10, zone: 10 },
+            { top: true, right: true, bottom: true, h: 0, w: 10, zone: 10 },
+            { left: true, right: true, bottom: true, h: 10, w: 0, zone: 10 }
         ]
         delegate: PanelWindow {
             required property var modelData
