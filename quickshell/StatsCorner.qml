@@ -11,7 +11,7 @@ Rectangle {
     signal toggle()
 
     readonly property int collapsedW: 900
-    readonly property int collapsedH: 46
+    readonly property int collapsedH: 39   // same outer height as waybar's sections
     readonly property var st: stateFile.value
     readonly property int points: st.points || 120
     readonly property real interval: st.interval || 1

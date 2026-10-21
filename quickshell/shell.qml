@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -35,6 +36,24 @@ ShellRoot {
             function open(): void { win.open = true }
             function close(): void { win.open = false }
             function sampling(interval: int, points: int): void { stats.setSampling(interval, points) }
+        }
+
+        // Soft shadow under the corner, like waybar's `box-shadow: 0 2px 5px rgba(0,0,0,.85)`.
+        // A hidden twin of the corner casts it (the corner itself is clipped to its bounds).
+        Rectangle {
+            anchors { top: parent.top; right: parent.right; topMargin: 10; rightMargin: 10 }
+            width: stats.width
+            height: stats.height
+            radius: stats.radius
+            color: "black"
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "black"
+                shadowOpacity: 0.85
+                shadowBlur: 0.85
+                shadowVerticalOffset: 4
+            }
         }
 
         StatsCorner {
