@@ -132,7 +132,7 @@ def build_scheme(path):
         colors[f"color{i}"] = lch_to_hex(L, C, h)
     colors["color7"] = lch_to_hex(0.86, 0.025, bg_h)
     colors["color8"] = lch_to_hex(0.55, 0.03, bg_h)
-    # color9 backs the highlight/text color in rofi, hyprlock, wlogout: keep it
+    # color9 backs the highlight/text color in hyprlock, wlogout: keep it
     # recognisably color1's hue but lighter.
     L, C, h = base[0]
     colors["color9"] = lch_to_hex(min(L + 0.1, 0.9), C, h)

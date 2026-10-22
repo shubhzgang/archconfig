@@ -1,2 +1,0 @@
-/* Same size as the launcher; kept so dmenu pickers (clipboard, links) have their own entry point. */
-@import "~/.config/rofi/theme.rasi"

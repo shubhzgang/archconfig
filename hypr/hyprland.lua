@@ -512,6 +512,7 @@ hl.layer_rule({
 -- pyprland scratchpads (drop terminal, ...) come up with a magenta
 -- border unless it is set explicitly.
 hl.window_rule({
+    name = "scratchpad-border",   -- wallpaper.sh replaces it by name with the new palette's colors
     match = { class = "^kitty-.*$" },
     border_color = activeBorder .. " " .. inactiveBorder,
 })
