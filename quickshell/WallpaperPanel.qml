@@ -59,6 +59,7 @@ Item {
         current = Math.max(0, Math.min(files.length - 1, i))
         if (current < first) first = current
         else if (current > first + 4) first = current - 4
+        theme.preview(files[current])
     }
     function show(i) {   // select i and put it in the middle of the five if there's room, without sliding
         snap = true
@@ -93,9 +94,13 @@ Item {
     function apply(path) {
         if (!path) return
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", path])
+        theme.commitPreview()
         panel.toggle()
     }
-    onOpenChanged: if (open) { keys.forceActiveFocus(); now.running = true }
+    onOpenChanged: {
+        if (open) { keys.forceActiveFocus(); now.running = true }
+        else theme.endPreview()   // closed without applying: back to the real colors
+    }
 
     // Rises with an ease-out when opening and sinks with an ease-in when closing, like the other panels.
     states: State {
