@@ -38,7 +38,8 @@ Item {
 
     // size of the panel below the band; expanded: fit the cards, same 16px space at top and bottom
     readonly property real openW: 1000
-    readonly property real openH: Math.min(parent.height - band - side - 20, cards.implicitHeight + 32)
+    readonly property int controlsH: 34    // the sampling controls row above the cards
+    readonly property real openH: Math.min(parent.height - band - side - 20, controlsH + 12 + cards.implicitHeight + 32)
     property real panelW: collapsedW
     property real panelH: 0
     anchors { top: parent.top; right: parent.right; rightMargin: side }
@@ -96,15 +97,14 @@ Item {
         onClicked: corner.toggle()
     }
 
-    // ---- collapsed: the numbers, as in waybar ----
+    // ---- the numbers, as in waybar; they stay when the panel is open ----
     Row {
         id: numbers
         height: corner.collapsedH
-        anchors { top: parent.top; topMargin: (corner.band - corner.collapsedH) / 2; horizontalCenter: parent.horizontalCenter }
+        // stays where it is on screen (centered in the collapsed width) while the panel grows below it
+        anchors { top: parent.top; topMargin: (corner.band - corner.collapsedH) / 2
+                  right: parent.right; rightMargin: (corner.collapsedW - width) / 2 }
         spacing: 0
-        opacity: corner.open ? 0 : 1
-        visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 90 } }   // gone before the controls fade in on the same line
 
         Repeater {
             model: [cpuFile, memFile, netFile, gpuFile]
@@ -130,71 +130,6 @@ Item {
         }
     }
 
-    // ---- expanded: the sampling controls, in line with the bar's contents ----
-    Item {
-        id: controlsBar
-        anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 16; rightMargin: 16 }
-        height: corner.band
-        opacity: corner.open ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity {
-            SequentialAnimation {
-                PauseAnimation { duration: corner.open ? 300 : 0 }
-                NumberAnimation { duration: corner.open ? 150 : 100 }
-            }
-        }
-
-        Row {
-            id: controls
-        anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
-            Text {
-                text: "every"
-                color: corner.theme.ink
-                font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
-                anchors.verticalCenter: parent.verticalCenter
-                rightPadding: 6
-            }
-            Repeater {
-                model: [1, 2, 3, 5, 10]
-                delegate: Chip {
-                    required property int modelData
-                    theme: corner.theme
-                    anchors.verticalCenter: parent.verticalCenter
-                    label: modelData + "s"
-                    selected: corner.interval === modelData
-                    onClicked: corner.setSampling(modelData, corner.points)
-                }
-            }
-            Item { width: 18; height: 1 }
-            Text {
-                text: "points"
-                color: corner.theme.ink
-                font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
-                anchors.verticalCenter: parent.verticalCenter
-                rightPadding: 6
-            }
-            Repeater {
-                model: [30, 60, 120, 240, 360, 480, 600]
-                delegate: Chip {
-                    required property int modelData
-                    theme: corner.theme
-                    anchors.verticalCenter: parent.verticalCenter
-                    label: String(modelData)
-                    selected: corner.points === modelData
-                    onClicked: corner.setSampling(corner.interval, modelData)
-                }
-            }
-        }
-        Text {
-            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-            text: corner.span(corner.interval * corner.points)
-            color: corner.theme.ink
-            font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 16
-        }
-
-    }
-
     // ---- expanded: the panel ----
     Item {
         id: panel
@@ -209,8 +144,64 @@ Item {
             }
         }
 
+        // ---- the sampling controls, under the numbers ----
+        Item {
+            id: controlsBar
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: corner.controlsH
+
+            Row {
+                id: controls
+            anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+                Text {
+                    text: "every"
+                    color: corner.theme.ink
+                    font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
+                    anchors.verticalCenter: parent.verticalCenter
+                    rightPadding: 6
+                }
+                Repeater {
+                    model: [1, 2, 3, 5, 10]
+                    delegate: Chip {
+                        required property int modelData
+                        theme: corner.theme
+                        anchors.verticalCenter: parent.verticalCenter
+                        label: modelData + "s"
+                        selected: corner.interval === modelData
+                        onClicked: corner.setSampling(modelData, corner.points)
+                    }
+                }
+                Item { width: 18; height: 1 }
+                Text {
+                    text: "points"
+                    color: corner.theme.ink
+                    font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 15
+                    anchors.verticalCenter: parent.verticalCenter
+                    rightPadding: 6
+                }
+                Repeater {
+                    model: [30, 60, 120, 240, 360, 480, 600]
+                    delegate: Chip {
+                        required property int modelData
+                        theme: corner.theme
+                        anchors.verticalCenter: parent.verticalCenter
+                        label: String(modelData)
+                        selected: corner.points === modelData
+                        onClicked: corner.setSampling(corner.interval, modelData)
+                    }
+                }
+            }
+            Text {
+                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                text: corner.span(corner.interval * corner.points)
+                color: corner.theme.ink
+                font.family: "CodeNewRoman Nerd Font Mono"; font.pixelSize: 16
+            }
+        }
+
         Flickable {
-            anchors.fill: parent
+            anchors { top: controlsBar.bottom; topMargin: 12; left: parent.left; right: parent.right; bottom: parent.bottom }
             interactive: contentHeight > height   // only scrolls if the cards outgrow the screen
             contentHeight: cards.implicitHeight
             clip: true
