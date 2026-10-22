@@ -16,7 +16,7 @@ Item {
     signal calendarToggle()
     signal launcherToggle()
 
-    anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 14 + 8 }   // inside the frame's top band
+    anchors { top: parent.top; left: parent.left; topMargin: 4; leftMargin: 14 + 8 }   // inside the frame's top band
     height: 39
     width: row.implicitWidth
 

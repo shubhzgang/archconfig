@@ -11,8 +11,8 @@ ShellRoot {
     // it. These panels draw nothing and take no input; the frame itself is drawn below.
     Variants {
         model: [
-            { top: true, left: true, right: true, h: 56, w: 0, zone: 56 },
-            { top: true, left: true, bottom: true, h: 0, w: 10, zone: 10 },
+            { top: true, left: true, right: true, h: 48, w: 0, zone: 48 },
+            { top: true, left: true, bottom: true, h: 0, w: 48, zone: 48 },
             { top: true, right: true, bottom: true, h: 0, w: 10, zone: 10 },
             { left: true, right: true, bottom: true, h: 10, w: 0, zone: 10 }
         ]
@@ -62,7 +62,8 @@ ShellRoot {
                 Region { item: calendar },
                 Region { item: launcher },
                 Region { item: wallpaper },
-                Region { item: themeButton }
+                Region { item: themeButton },
+                Region { item: wallpaperButton }
             ]
         }
 
@@ -119,8 +120,6 @@ ShellRoot {
             leftH: Math.max(calendar.panelH, launcher.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
-            cornerW: themeButton.panelW
-            cornerH: themeButton.panelH
         }
 
         CalendarPanel {
@@ -160,7 +159,13 @@ ShellRoot {
         ThemeButton {
             id: themeButton
             theme: theme
-            wallOpen: win.wallOpen
+        }
+
+        WallpaperButton {
+            id: wallpaperButton
+            theme: theme
+            active: win.wallOpen
+            onClicked: win.wallOpen = !win.wallOpen
         }
 
         StatsCorner {

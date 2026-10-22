@@ -12,7 +12,7 @@ Item {
     property bool open: false
     signal toggle()
 
-    readonly property int band: 56
+    readonly property int band: 48
     readonly property int side: 10
     readonly property int columns: 4
     readonly property real openW: 1180
@@ -20,7 +20,7 @@ Item {
     property real panelW: 0
     property real panelH: 0
 
-    anchors { top: parent.top; left: parent.left; leftMargin: side }
+    anchors { top: parent.top; left: parent.left; leftMargin: band }
     width: panelW
     height: band + panelH
 
@@ -79,7 +79,7 @@ Item {
 
     Item {
         id: content
-        anchors { fill: parent; margins: 16; topMargin: panel.band + 16 }
+        anchors { fill: parent; margins: 16; topMargin: panel.band + 16; leftMargin: 0 }   // the frame's left band is already 48px of space on that side
         clip: true
         opacity: panel.open ? 1 : 0
         visible: opacity > 0

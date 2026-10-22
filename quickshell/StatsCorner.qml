@@ -12,7 +12,7 @@ Item {
 
     // Geometry shared with Frame.qml: the numbers live in the top band; the panel hangs from the
     // band at the right and is drawn by the frame itself (its outline flows into the frame).
-    readonly property int band: 56
+    readonly property int band: 48
     readonly property int side: 10         // the frame's side bands (Frame.qml)
     readonly property int collapsedW: 900
     readonly property int collapsedH: 39   // height of the numbers row

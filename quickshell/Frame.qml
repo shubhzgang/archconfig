@@ -3,14 +3,14 @@ import QtQuick.Effects
 import QtQuick.Shapes
 
 // The frame around the monitor, drawn as one gradient-filled shape with no outline: the top band
-// (holding the bar) is 56px, the left, right and bottom bands 3px, and the inside edge has rounded
+// (holding the bar) and the left band (holding the theme button) are 48px, the right and bottom bands 10px, and the inside edge has rounded
 // corners. The stats panel (right) and the calendar panel (left) hang from the top band when open,
 // filled like the band, with concave joins where they meet the band and the side edges.
 Item {
     id: frame
     required property var theme
-    readonly property int side: 10        // left/right/bottom band
-    readonly property int band: 56        // top band (the bar)
+    readonly property int side: 10        // right/bottom band
+    readonly property int band: 48        // top band (the bar)
     readonly property int corner: 28      // radius of the screen's inner corners
     property real panelW: 0               // stats panel hanging from the top band, right-aligned
     property real panelH: 0
@@ -18,13 +18,11 @@ Item {
     property real leftH: 0
     property real bottomW: 0              // wallpaper picker rising from the bottom band, centered
     property real bottomH: 0
-    property real cornerW: 0              // the theme button's tab in the bottom-right corner
-    property real cornerH: 0
 
     anchors.fill: parent
 
     // inside edge of the frame
-    readonly property real inL: side
+    readonly property real inL: band      // the left band is as thick as the top one
     readonly property real inT: band
     readonly property real inR: width - side
     readonly property real inB: height - side
@@ -36,15 +34,11 @@ Item {
     readonly property real lf: Math.min(20, leftH / 2, leftW / 2)        // left panel's concave joins
     readonly property real lr: Math.min(20, leftH, leftW / 2)            // its rounded bottom-right corner
     readonly property real lx: inL + leftW                               // left panel's right edge
-    readonly property bool cornerOpen: cornerH >= 1
-    readonly property real cf: Math.min(20, cornerH / 2, cornerW / 2)    // corner tab's concave joins
-    readonly property real cr: Math.min(20, cornerH, cornerW / 2)        // its rounded top-left corner
-    readonly property real cl: inR - cornerW                             // its left edge
     readonly property bool bottomOpen: bottomH >= 1
     readonly property real bf: Math.min(20, bottomH / 2, bottomW / 2)    // bottom panel's concave joins
     readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
-    readonly property real bl: (inL + inR) / 2 - bottomW / 2             // its left edge
-    readonly property real brt: (inL + inR) / 2 + bottomW / 2            // its right edge
+    readonly property real bl: width / 2 - bottomW / 2                   // its left edge (centered on the screen)
+    readonly property real brt: width / 2 + bottomW / 2                  // its right edge
 
     // The free area inside the frame, clockwise from the top-left corner. Closed: a rounded
     // rectangle. Open: the top edge turns down the panel's left side, round its bottom, and
@@ -61,12 +55,7 @@ Item {
         else
             d += `L ${R - c} ${T} A ${c} ${c} 0 0 1 ${R} ${T + c} `
         // down the right edge, along the bottom, up the left edge
-        if (cornerOpen)
-            d += `L ${R} ${B - cornerH - cf} A ${cf} ${cf} 0 0 1 ${R - cf} ${B - cornerH} `
-               + `L ${cl + cr} ${B - cornerH} A ${cr} ${cr} 0 0 0 ${cl} ${B - cornerH + cr} `
-               + `L ${cl} ${B - cf} A ${cf} ${cf} 0 0 1 ${cl - cf} ${B} `
-        else
-            d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
+        d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
         if (bottomOpen)
             d += `L ${brt + bf} ${B} A ${bf} ${bf} 0 0 1 ${brt} ${B - bf} `
                + `L ${brt} ${B - bottomH + br} A ${br} ${br} 0 0 0 ${brt - br} ${B - bottomH} `

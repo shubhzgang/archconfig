@@ -11,7 +11,7 @@ Item {
     id: section
     required property var theme
 
-    anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 8 }   // inside the frame's top band
+    anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 4 }   // inside the frame's top band
     height: 39
     width: row.implicitWidth
 

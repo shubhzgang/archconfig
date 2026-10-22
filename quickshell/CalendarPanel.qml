@@ -11,15 +11,14 @@ Item {
     property bool open: false
     signal toggle()
 
-    readonly property int band: 56
-    readonly property int side: 10
+    readonly property int band: 48
     readonly property real openW: 396
     readonly property real openH: card.implicitHeight + 48     // 24px of panel around the card, for its shadow
     property real panelW: 0
     property real panelH: 0
     property int monthShift: 0            // months away from the current one
 
-    anchors { top: parent.top; left: parent.left; leftMargin: side }
+    anchors { top: parent.top; left: parent.left; leftMargin: band }
     width: panelW
     height: band + panelH
 

@@ -159,9 +159,12 @@ def main():
             "tooltip": (f"Used {fmt_bytes(used)}\nCached {fmt_bytes(cached)}\n"
                         f"Free {fmt_bytes(free)}\nTotal {fmt_bytes(vm.total)}"),
         })
+        # totals are since boot (the kernel's interface counters, all interfaces but lo)
         publish("net.json", {
-            "text": f"󰇚 {fmt_bytes(down, short=True)}  󰕒 {fmt_bytes(up, short=True)}",
-            "tooltip": f"Down {fmt_bytes(down, True)}\nUp {fmt_bytes(up, True)}",
+            "text": f"󰇚 {fmt_bytes(down, short=True)} ({fmt_bytes(cur[0], short=True)})"
+                    f"  󰕒 {fmt_bytes(up, short=True)} ({fmt_bytes(cur[1], short=True)})",
+            "tooltip": (f"Down {fmt_bytes(down, True)}\nUp {fmt_bytes(up, True)}\n"
+                        f"Total since boot: down {fmt_bytes(cur[0])}, up {fmt_bytes(cur[1])}"),
         })
         if gpus:
             parts = [f"{g['name'].replace('RTX ', '')} {g['util']:.0f}% {fmt_bytes(g['mem_used'], short=True)}"
