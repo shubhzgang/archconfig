@@ -61,7 +61,8 @@ ShellRoot {
                 Region { item: leftSection.tipRect },
                 Region { item: calendar },
                 Region { item: launcher },
-                Region { item: wallpaper }
+                Region { item: wallpaper },
+                Region { item: themeButton }
             ]
         }
 
@@ -95,6 +96,12 @@ ShellRoot {
             function close(): void { win.wallOpen = false }
         }
 
+        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>
+            target: "theme"
+            function cycle(): void { theme.cycleMode() }
+            function set(mode: string): void { theme.setMode(mode) }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -112,6 +119,8 @@ ShellRoot {
             leftH: Math.max(calendar.panelH, launcher.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
+            cornerW: themeButton.panelW
+            cornerH: themeButton.panelH
         }
 
         CalendarPanel {
@@ -146,6 +155,12 @@ ShellRoot {
             win: win
             onCalendarToggle: win.calOpen = !win.calOpen
             onLauncherToggle: win.launcherOpen = !win.launcherOpen
+        }
+
+        ThemeButton {
+            id: themeButton
+            theme: theme
+            wallOpen: win.wallOpen
         }
 
         StatsCorner {

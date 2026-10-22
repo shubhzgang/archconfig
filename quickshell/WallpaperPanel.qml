@@ -37,8 +37,9 @@ Item {
         return arr[i] + (arr[i + 1] - arr[i]) * (a - i)
     }
 
-    readonly property real openW: centers[3] * 2 + thumbW * scales[3] + 2 * 24
-    readonly property real openH: thumbH + 2 * 24   // 24px around the thumbnails, for their shadows
+    readonly property int pad: 40   // room around the thumbnails for their shadows (the panel clips)
+    readonly property real openW: centers[3] * 2 + thumbW * scales[3] + 2 * pad
+    readonly property real openH: thumbH + 2 * pad
     readonly property real panelW: openW   // full width from the start: the panel rises, it doesn't expand
     property real panelH: 0
 
@@ -124,9 +125,9 @@ Item {
 
     Item {
         id: content
-        anchors { bottom: parent.bottom; bottomMargin: 24; horizontalCenter: parent.horizontalCenter }
-        width: panel.openW - 48      // fixed, so the thumbnails don't move while the panel grows
-        height: panel.openH - 48
+        anchors { bottom: parent.bottom; bottomMargin: panel.pad; horizontalCenter: parent.horizontalCenter }
+        width: panel.openW - 2 * panel.pad      // fixed, so the thumbnails don't move while the panel grows
+        height: panel.openH - 2 * panel.pad
         transformOrigin: Item.Bottom
         opacity: 0
         scale: 0.94
@@ -185,25 +186,27 @@ Item {
                     z: -Math.abs(d)
                     visible: opacity > 0
 
-                    // Shadow: 20% black, grown 8px past the thumbnail so it stays dark for 8px, then blurred
-                    // so it fades (same as the calendar's).
+                    // Soft shadow: 35% black, 3px past the thumbnail, blurred moderately. The blurred item is much
+                    // bigger than the shadow shape (`room`), because the blur can't spread past the item
+                    // it is applied to and would otherwise be cut off at its edge.
                     Item {
                         id: shadow
-                        readonly property real grow: 8
-                        x: -grow
-                        y: -grow + 3
-                        width: parent.width + 2 * grow
-                        height: parent.height + 2 * grow
+                        readonly property real grow: 3
+                        readonly property real room: 32
+                        x: -room
+                        y: -room + 5
+                        width: parent.width + 2 * room
+                        height: parent.height + 2 * room
                         layer.enabled: true
                         layer.effect: MultiEffect {
                             blurEnabled: true
-                            blurMax: 16
+                            blurMax: 24
                             blur: 1.0
                         }
                         Rectangle {
-                            anchors.fill: parent
+                            anchors { fill: parent; margins: shadow.room - shadow.grow }
                             radius: 14 + shadow.grow
-                            color: "#33000000"
+                            color: "#59000000"
                         }
                     }
                     ClippingRectangle {

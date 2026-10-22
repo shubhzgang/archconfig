@@ -35,6 +35,8 @@ Item {
     }
     Graph {
         id: graph
+        gridColor: Qt.rgba(root.theme.dark.r, root.theme.dark.g, root.theme.dark.b, 0.15)
+        labelColor: Qt.rgba(root.theme.dark.r, root.theme.dark.g, root.theme.dark.b, 0.5)
         anchors { top: titleText.bottom; topMargin: 8; left: parent.left; right: parent.right; bottom: parent.bottom }
     }
 }

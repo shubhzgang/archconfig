@@ -19,7 +19,7 @@ Rectangle {
         id: text
         anchors.centerIn: parent
         text: root.label
-        color: root.selected ? root.theme.dark : root.theme.ink
+        color: root.selected ? root.theme.textOnInk : root.theme.ink
         font.family: "CodeNewRoman Nerd Font Mono"
         font.pixelSize: 15
     }

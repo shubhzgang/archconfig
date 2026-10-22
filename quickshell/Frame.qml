@@ -18,6 +18,8 @@ Item {
     property real leftH: 0
     property real bottomW: 0              // wallpaper picker rising from the bottom band, centered
     property real bottomH: 0
+    property real cornerW: 0              // the theme button's tab in the bottom-right corner
+    property real cornerH: 0
 
     anchors.fill: parent
 
@@ -34,6 +36,10 @@ Item {
     readonly property real lf: Math.min(20, leftH / 2, leftW / 2)        // left panel's concave joins
     readonly property real lr: Math.min(20, leftH, leftW / 2)            // its rounded bottom-right corner
     readonly property real lx: inL + leftW                               // left panel's right edge
+    readonly property bool cornerOpen: cornerH >= 1
+    readonly property real cf: Math.min(20, cornerH / 2, cornerW / 2)    // corner tab's concave joins
+    readonly property real cr: Math.min(20, cornerH, cornerW / 2)        // its rounded top-left corner
+    readonly property real cl: inR - cornerW                             // its left edge
     readonly property bool bottomOpen: bottomH >= 1
     readonly property real bf: Math.min(20, bottomH / 2, bottomW / 2)    // bottom panel's concave joins
     readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
@@ -55,7 +61,12 @@ Item {
         else
             d += `L ${R - c} ${T} A ${c} ${c} 0 0 1 ${R} ${T + c} `
         // down the right edge, along the bottom, up the left edge
-        d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
+        if (cornerOpen)
+            d += `L ${R} ${B - cornerH - cf} A ${cf} ${cf} 0 0 1 ${R - cf} ${B - cornerH} `
+               + `L ${cl + cr} ${B - cornerH} A ${cr} ${cr} 0 0 0 ${cl} ${B - cornerH + cr} `
+               + `L ${cl} ${B - cf} A ${cf} ${cf} 0 0 1 ${cl - cf} ${B} `
+        else
+            d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
         if (bottomOpen)
             d += `L ${brt + bf} ${B} A ${bf} ${bf} 0 0 1 ${brt} ${B - bf} `
                + `L ${brt} ${B - bottomH + br} A ${br} ${br} 0 0 0 ${brt - br} ${B - bottomH} `

@@ -23,6 +23,8 @@ Canvas {
     onIntervalChanged: requestPaint()
     onPointsChanged: requestPaint()
     onMirroredChanged: requestPaint()
+    onGridColorChanged: requestPaint()
+    onLabelColorChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d")
