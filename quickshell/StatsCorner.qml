@@ -101,9 +101,11 @@ Item {
     Row {
         id: numbers
         height: corner.collapsedH
-        // stays where it is on screen (centered in the collapsed width) while the panel grows below it
+        // stays where it is on screen (centered in the collapsed width) while the panel grows below it;
+        // when the numbers get wider than that (a fast network speed) it grows to the left, never past
+        // 24px from the screen's edge
         anchors { top: parent.top; topMargin: (corner.band - corner.collapsedH) / 2
-                  right: parent.right; rightMargin: (corner.collapsedW - width) / 2 }
+                  right: parent.right; rightMargin: Math.max((corner.collapsedW - width) / 2, 24) }
         spacing: 0
 
         Repeater {

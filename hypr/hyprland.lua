@@ -484,6 +484,15 @@ hl.window_rule({
     float = true,
 })
 
+-- Blur behind the Quickshell frame and panels (the opacity slider makes them see-through).
+-- ignore_alpha: only blur where something is drawn, not the fully transparent rest of the screen-sized surface.
+hl.layer_rule({
+    name = "quickshell-blur",
+    match = { namespace = "^qs-shell$" },
+    blur = true,
+    ignore_alpha = 0.05,
+})
+
 -- pyprland scratchpads (drop terminal, ...) come up with a magenta
 -- border unless it is set explicitly.
 hl.window_rule({

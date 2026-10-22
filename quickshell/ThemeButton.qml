@@ -8,7 +8,7 @@ Item {
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int size: 44      // the icon's hit area, centered in the band
 
-    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 }
+    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + 48 }   // above the opacity button
     width: band
     height: size
 

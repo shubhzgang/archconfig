@@ -39,7 +39,8 @@ ShellRoot {
         property bool wallOpen: false      // wallpaper picker (bottom)
         property bool clipOpen: false      // clipboard history (bottom left)
         property bool liveOpen: false      // live wallpaper links (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen
+        property bool opacityOpen: false   // opacity slider (bottom left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || opacityOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -49,6 +50,7 @@ ShellRoot {
             if (except !== "wall") wallOpen = false
             if (except !== "clip") clipOpen = false
             if (except !== "live") liveOpen = false
+            if (except !== "opacity") opacityOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -56,6 +58,7 @@ ShellRoot {
         onWallOpenChanged: if (wallOpen) closeOthers("wall")
         onClipOpenChanged: if (clipOpen) closeOthers("clip")
         onLiveOpenChanged: if (liveOpen) closeOthers("live")
+        onOpacityOpenChanged: if (opacityOpen) closeOthers("opacity")
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -80,7 +83,9 @@ ShellRoot {
                 Region { item: clipboard },
                 Region { item: clipboardButton },
                 Region { item: live },
-                Region { item: liveButton }
+                Region { item: liveButton },
+                Region { item: opacityPanel },
+                Region { item: opacityButton }
             ]
         }
 
@@ -118,6 +123,7 @@ ShellRoot {
             target: "theme"
             function cycle(): void { theme.cycleMode() }
             function set(mode: string): void { theme.setMode(mode) }
+            function opacity(level: real): void { theme.setOpacity(level, true) }
         }
 
         IpcHandler {   // qs ipc call clipboard toggle|open|close
@@ -132,6 +138,13 @@ ShellRoot {
             function toggle(): void { win.liveOpen = !win.liveOpen }
             function open(): void { win.liveOpen = true }
             function close(): void { win.liveOpen = false }
+        }
+
+        IpcHandler {   // qs ipc call opacity toggle|open|close
+            target: "opacity"
+            function toggle(): void { win.opacityOpen = !win.opacityOpen }
+            function open(): void { win.opacityOpen = true }
+            function close(): void { win.opacityOpen = false }
         }
 
         IpcHandler {   // qs ipc call calendar toggle|open|close
@@ -151,10 +164,11 @@ ShellRoot {
             leftH: Math.max(calendar.panelH, launcher.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
-            // the bottom-left panel: whichever of the two is further out
-            clipW: Math.max(clipboard.panelW, live.panelW)
-            clipY: clipboard.panelW >= live.panelW ? clipboard.y : live.y
-            clipH: clipboard.panelW >= live.panelW ? clipboard.height : live.height
+            // the bottom-left panel: whichever of the three is furthest out
+            readonly property var leftPanel: [clipboard, live, opacityPanel].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            clipW: leftPanel.panelW
+            clipY: leftPanel.y
+            clipH: leftPanel.height
         }
 
         CalendarPanel {
@@ -192,6 +206,13 @@ ShellRoot {
             onToggle: win.liveOpen = !win.liveOpen
         }
 
+        OpacityPanel {
+            id: opacityPanel
+            theme: theme
+            open: win.opacityOpen
+            onToggle: win.opacityOpen = !win.opacityOpen
+        }
+
         CenterSection {
             id: centerSection
             theme: theme
@@ -208,6 +229,15 @@ ShellRoot {
         ThemeButton {
             id: themeButton
             theme: theme
+        }
+
+        DockButton {   // opacity slider, at the very bottom
+            id: opacityButton
+            theme: theme
+            glyph: 0xF1853
+            slot: -2
+            active: win.opacityOpen
+            onClicked: win.opacityOpen = !win.opacityOpen
         }
 
         DockButton {   // wallpaper picker

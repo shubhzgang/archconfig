@@ -38,6 +38,25 @@ Item {
         return Qt.hsla(c.hslHue, Math.min(0.9, Math.max(c.hslSaturation * 1.3, 0.55)), 0.24, 1)
     }
 
+    // ---- opacity: how see-through the frame (the bar and panels) and the cards are, 0.1 to 1 ----
+    property real opacityLevel: 1.0
+    readonly property string opacityFile: Quickshell.env("HOME") + "/.cache/quickshell-opacity"
+    function setOpacity(level, save) {   // save: the slider was let go (or a key pressed), not mid-drag
+        opacityLevel = Math.max(0.1, Math.min(1, level))
+        applyTheme()
+        if (save) savedOpacity.setText(String(opacityLevel))
+    }
+    FileView {
+        id: savedOpacity
+        path: root.opacityFile
+        printErrors: false
+        onLoaded: {
+            const v = parseFloat(text())
+            if (!isNaN(v)) root.setOpacity(v, false)
+        }
+    }
+    function alpha(c) { const q = Qt.color(c); return Qt.rgba(q.r, q.g, q.b, opacityLevel) }
+
     // ---- theme mode: the same palette, darker or lighter (Quickshell only) ----
     // dark: the bar and cards go dark, light text on them; light: the bar and cards go pale, dark text.
     property string mode: "normal"      // dark | normal | light
@@ -62,6 +81,39 @@ Item {
         return c
     }
 
+    // ---- live wallpaper: blue-tinted white, grey and black instead of the wallpaper's colors ----
+    // While mpvpaper is running there is no single wallpaper to take colors from, so the theme goes
+    // neutral (still darker or lighter by mode).
+    property bool live: false
+    Process {
+        id: liveCheck
+        command: ["pgrep", "-x", "mpvpaper"]
+        onExited: code => {
+            const running = code === 0
+            if (running === root.live) return
+            root.live = running
+            root.applyTheme()
+        }
+    }
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: liveCheck.running = true
+    }
+    readonly property var neutral: ({
+        dark: { bar: ["#0e1118", "#1b2230"], ink: "#e2e8f2", textOnInk: "#0e1118", hover: "#cfe0ff", dark: "#e8edf6",
+                card: "#232a36", accent: "#5f7088", accent2: "#a9b6c9", accent3: "#414c5e",
+                series: ["#dfe6f1", "#aebbd0", "#8394ad", "#c7d2e3", "#95a5be", "#b8c4d8"] },
+        normal: { bar: ["#34404f", "#566478"], ink: "#eef2f8", textOnInk: "#161c26", hover: "#ffffff", dark: "#131822",
+                  card: "#ccd4e0", accent: "#7b8ca5", accent2: "#c6d0df", accent3: "#6c7b92",
+                  series: ["#26303f", "#4d5b70", "#71829b", "#39465a", "#5d6d85", "#8496ae"] },
+        light: { bar: ["#eef3fa", "#9fb0c8"], ink: "#18202c", textOnInk: "#f3f6fb", hover: "#0a1a33", dark: "#18202c",
+                 card: "#f4f7fc", accent: "#8fa2bd", accent2: "#4f5f78", accent3: "#bac6d8",
+                 series: ["#26303f", "#4d5b70", "#71829b", "#39465a", "#5d6d85", "#8496ae"] }
+    })
+
     // The normal palette (what the wal files or a previewed scheme say) and the bar ends it came with;
     // everything shown is derived from them and the mode.
     property var baseValue: null
@@ -72,6 +124,14 @@ Item {
         applyTheme()
     }
     function applyTheme() {
+        if (live) {
+            const n = neutral[mode]
+            accent = n.accent; accent2 = n.accent2; accent3 = n.accent3
+            ink = n.ink; textOnInk = n.textOnInk; hover = n.hover; dark = n.dark; card = alpha(n.card)
+            series = n.series
+            barStart = alpha(n.bar[0]); barEnd = alpha(n.bar[1])
+            return
+        }
         const c = baseValue && baseValue.colors
         if (!c) return
         const bg = baseValue.special.background
@@ -82,10 +142,10 @@ Item {
         textOnInk = mode === "light" ? "#f1f3f8" : bg
         hover = mode === "light" ? darken(Qt.color(c.color9), 0.45) : c.color9
         dark = mode === "dark" ? "#e8ebf2" : bg
-        card = mode === "dark" ? "#2b303b" : mode === "light" ? "#f1f3f8" : "#c3cadb"
+        card = alpha(mode === "dark" ? "#2b303b" : mode === "light" ? "#f1f3f8" : "#c3cadb")
         // darkened accents read well on the pale cards; on the dark ones the plain colors do
         series = [1, 2, 3, 4, 5, 6].map(i => mode === "dark" ? Qt.color(c["color" + i]) : darken(Qt.color(c["color" + i]), 0.4))
-        if (baseBar) { barStart = tone(baseBar[0]); barEnd = tone(baseBar[1]) }
+        if (baseBar) { barStart = alpha(tone(baseBar[0])); barEnd = alpha(tone(baseBar[1])) }
     }
 
     // ---- wallpaper preview: show another wallpaper's palette without applying it ----
