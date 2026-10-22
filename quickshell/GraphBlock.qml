@@ -15,7 +15,7 @@ Item {
     property alias ymax2: graph.ymax2
     property alias maxLabel2: graph.maxLabel2
 
-    implicitHeight: 164
+    implicitHeight: 164   // the stats panel shrinks it so every graph fits
     height: implicitHeight
 
     Text {

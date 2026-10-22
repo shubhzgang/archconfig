@@ -13,6 +13,7 @@ Item {
     property bool active: true
     property bool watch: false
     property string lastText: ""
+    function load() { fv.reload() }   // read it now (e.g. once while not `active`)
 
     FileView {
         id: fv

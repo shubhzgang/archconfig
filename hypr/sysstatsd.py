@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """System stats sampler for the Quickshell stats corner and panel.
 
-Samples CPU, RAM, network and NVIDIA GPUs once a second and publishes, under
+Samples CPU, RAM, network and NVIDIA GPUs once per interval and publishes, under
 $XDG_RUNTIME_DIR/sysstats/:
   state.json                       full state + history, read by the Quickshell stats panel
-  cpu.json mem.json net.json gpu.json   one JSON line each (the numbers in the Quickshell corner)
+  cpu.json mem.json net.json gpu.json   one JSON line each (the numbers in the bar)
 Files are replaced atomically, so readers never see a partial write.
 
-Sampling interval and history length come from sysstats.json next to this file
-(there is no UI for it yet); edits are picked up immediately and reset the history.
+Sampling interval and history length come from sysstats.json next to this file (set from the stats
+panel); edits are picked up within half a second and reset the history. Everything, the NVIDIA
+readings included, is sampled once per interval and no more often.
 """
 import json
 import os
@@ -54,20 +55,35 @@ def fmt_bytes(n, rate=False, short=False):
 
 
 class GpuReader(threading.Thread):
-    """One persistent `nvidia-smi -l 1`; no process spawn per tick."""
+    """One persistent `nvidia-smi` looping at the sampling interval (no process spawn per tick);
+    restarted with the new interval when it changes."""
 
-    def __init__(self):
+    def __init__(self, interval):
         super().__init__(daemon=True)
         self.gpus = {}  # index -> dict(name, util, mem_used, mem_total)
+        self.interval = interval
+        self.proc = None
+
+    def set_interval(self, interval):
+        self.interval = interval
+        if self.proc:
+            self.proc.terminate()   # run() starts it again with the new interval
 
     def run(self):
-        try:
-            proc = subprocess.Popen(
-                ["nvidia-smi", "--query-gpu=index,name,utilization.gpu,memory.used,memory.total",
-                 "--format=csv,noheader,nounits", "-l", "1"],
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-        except OSError:
-            return
+        while True:
+            try:
+                self.proc = subprocess.Popen(
+                    ["nvidia-smi", "--query-gpu=index,name,utilization.gpu,memory.used,memory.total",
+                     "--format=csv,noheader,nounits", "-lms", str(round(self.interval * 1000))],
+                    stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            except OSError:
+                return
+            self.read(self.proc)
+            self.proc.wait()
+            if self.proc.returncode not in (0, -15):   # not stopped for a new interval: give up
+                return
+
+    def read(self, proc):
         for line in proc.stdout:
             parts = [p.strip() for p in line.split(",")]
             if len(parts) != 5:
@@ -102,9 +118,9 @@ def publish(name, data):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    gpu = GpuReader()
-    gpu.start()
     cfg, cfg_time = load_config(), config_mtime()
+    gpu = GpuReader(cfg["interval"])
+    gpu.start()
     keys = ("cpu", "mem_used", "mem_cached", "mem_free", "net_down", "net_up")
     hist = {k: deque(maxlen=cfg["points"]) for k in keys}
     gpu_hist = {}  # index -> {"util": deque, "mem": deque}
@@ -115,6 +131,7 @@ def main():
     while True:
         if config_mtime() != cfg_time:  # changed from the panel: apply and reset graphs
             cfg, cfg_time = load_config(), config_mtime()
+            gpu.set_interval(cfg["interval"])
             hist = {k: deque(maxlen=cfg["points"]) for k in keys}
             gpu_hist = {}
         cpu = psutil.cpu_percent(interval=None)
@@ -176,9 +193,10 @@ def main():
                     f"{fmt_bytes(g['mem_used'])} / {fmt_bytes(g['mem_total'])}"
                     for _, g in sorted(gpus.items())),
             })
+        # wait for the next sample, checking twice a second whether the settings changed
         deadline = time.monotonic() + cfg["interval"]
-        while time.monotonic() < deadline and config_mtime() == cfg_time:
-            time.sleep(0.1)
+        while config_mtime() == cfg_time and (left := deadline - time.monotonic()) > 0:
+            time.sleep(min(0.5, left))
 
 
 if __name__ == "__main__":

@@ -41,6 +41,14 @@ Item {
     readonly property int controlsH: 34    // the sampling controls row above the cards
     property real maxH: 1800               // the most the panel may grow below the band (shell.qml: its corner's size)
     readonly property real openH: Math.min(maxH, controlsH + 12 + cards.implicitHeight + 32)
+    // Every graph fits without scrolling: the graphs share the height left after the cards' fixed
+    // parts (padding, gaps), up to their full 164px
+    readonly property int gpuCount: Object.keys(st.gpus || {}).length
+    readonly property int cardCount: 3 + gpuCount
+    readonly property int graphCount: 5 + 2 * gpuCount
+    readonly property int innerGaps: 2 + gpuCount   // the 10px gaps between graphs inside a card (RAM: 2, each GPU: 1)
+    readonly property real blockH: Math.min(164, Math.floor((maxH - (controlsH + 12 + 32) - cardCount * 28
+                                                            - (cardCount - 1) * 16 - innerGaps * 10) / graphCount))
     property real panelW: collapsedW
     property real panelH: 0
     anchors { top: parent.top; right: parent.right; rightMargin: side }
@@ -83,9 +91,12 @@ Item {
     function last(a) { return a && a.length ? a[a.length - 1] : 0 }
 
     readonly property string rundir: Quickshell.env("XDG_RUNTIME_DIR") + "/sysstats/"
-    // the full history only matters while the panel is open (re-read at once when it opens); reading
-    // and parsing it every second while closed kept redrawing the screen-sized shell surface
-    JsonFile { id: stateFile; path: corner.rundir + "state.json"; active: corner.open }
+    // the full history only matters while the panel is open: read when it opens and then whenever the
+    // sampler writes it (once per sampling interval); once at startup, so the panel's size is known
+    // before it first opens
+    JsonFile { id: stateFile; path: corner.rundir + "state.json"; active: false; watch: corner.open }
+    Component.onCompleted: stateFile.load()
+    onOpenChanged: if (open) stateFile.load()
 
     // click anywhere on it to morph between the numbers and the panel (Escape and a click
     // outside also close it, see shell.qml). Declared before the panel so the buttons inside
@@ -181,7 +192,7 @@ Item {
                 Card {
                     theme: corner.theme; width: parent.width
                     GraphBlock {
-                        theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
+                        theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
                         title: "CPU"
                         value: corner.last(corner.st.cpu).toFixed(0) + "%   " + ((corner.st.freq || 0) / 1000).toFixed(1) + " GHz"
                         ymax: 100; maxLabel: "100%"
@@ -198,7 +209,7 @@ Item {
                         ]
                         delegate: GraphBlock {
                             required property var modelData
-                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
+                            theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
                             title: "RAM " + modelData.name
                             value: corner.fmtBytes(corner.last(corner.st[modelData.key]))
                             ymax: corner.st.mem_total || 1
@@ -211,7 +222,7 @@ Item {
                 Card {
                     theme: corner.theme; width: parent.width
                     GraphBlock {
-                        theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
+                        theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
                         mirrored: true
                         title: "Network"
                         value: "down " + corner.fmtBytes(corner.last(corner.st.net_down)) + "/s   up "
@@ -232,14 +243,14 @@ Item {
                         readonly property var g: corner.st.gpus[modelData]
                         theme: corner.theme; width: parent.width
                         GraphBlock {
-                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
+                            theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
                             title: g.name + " usage"
                             value: corner.last(g.util).toFixed(0) + "%"
                             ymax: 100; maxLabel: "100%"
                             series: [{ values: g.util || [], color: corner.theme.series[5] }]
                         }
                         GraphBlock {
-                            theme: corner.theme; width: parent.width; points: corner.points; interval: corner.interval
+                            theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
                             title: g.name + " memory"
                             value: corner.fmtBytes(corner.last(g.mem)) + " / " + corner.fmtBytes(g.mem_total)
                             ymax: g.mem_total || 1; maxLabel: corner.fmtBytes(g.mem_total || 0)

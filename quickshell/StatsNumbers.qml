@@ -22,10 +22,11 @@ Item {
     height: rowH
 
     readonly property string rundir: Quickshell.env("XDG_RUNTIME_DIR") + "/sysstats/"
-    JsonFile { id: cpuFile; path: root.rundir + "cpu.json" }
-    JsonFile { id: memFile; path: root.rundir + "mem.json" }
-    JsonFile { id: netFile; path: root.rundir + "net.json" }
-    JsonFile { id: gpuFile; path: root.rundir + "gpu.json" }
+    // read when the sampler writes them (once per sampling interval), not on a timer
+    JsonFile { id: cpuFile; path: root.rundir + "cpu.json"; watch: true }
+    JsonFile { id: memFile; path: root.rundir + "mem.json"; watch: true }
+    JsonFile { id: netFile; path: root.rundir + "net.json"; watch: true }
+    JsonFile { id: gpuFile; path: root.rundir + "gpu.json"; watch: true }
 
     MouseArea {
         anchors.fill: parent
