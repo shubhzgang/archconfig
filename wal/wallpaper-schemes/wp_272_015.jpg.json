@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/wp_272_015.jpg",
     "alpha": "100",
     "special": {
-        "background": "#011316",
-        "foreground": "#C5E1E5",
-        "cursor": "#C5E1E5"
+        "background": "#011315",
+        "foreground": "#C5E1E4",
+        "cursor": "#C5E1E4"
     },
     "colors": {
-        "color0": "#011316",
-        "color1": "#20D0B0",
-        "color2": "#1A90A0",
-        "color3": "#6E7372",
-        "color4": "#E0C8B8",
-        "color5": "#6AA040",
-        "color6": "#A0E8D8",
-        "color7": "#C5E1E5",
-        "color8": "#607A7E",
-        "color9": "#55F1D0",
-        "color10": "#45AFC0",
-        "color11": "#8B9190",
-        "color12": "#F1D9C8",
-        "color13": "#88C060",
-        "color14": "#A7EFDF",
-        "color15": "#E0F3F6"
+        "color0": "#011315",
+        "color1": "#68C0AD",
+        "color2": "#2A8E98",
+        "color3": "#6D7373",
+        "color4": "#D6BCA5",
+        "color5": "#809848",
+        "color6": "#A7DFD6",
+        "color7": "#C5E1E4",
+        "color8": "#607A7D",
+        "color9": "#89E1CD",
+        "color10": "#4FADB7",
+        "color11": "#8A9191",
+        "color12": "#F3D9C1",
+        "color13": "#9EB767",
+        "color14": "#B3EBE2",
+        "color15": "#E0F3F5"
     }
 }

@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/henry-be-IicyiaPYGGI-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#0F1103",
-        "foreground": "#DADDC7",
-        "cursor": "#DADDC7"
+        "background": "#121002",
+        "foreground": "#DEDCC6",
+        "cursor": "#DEDCC6"
     },
     "colors": {
-        "color0": "#0F1103",
-        "color1": "#F05030",
-        "color2": "#A0A860",
-        "color3": "#7A7A5A",
-        "color4": "#DBD7CF",
-        "color5": "#6A8A40",
-        "color6": "#C08A50",
-        "color7": "#DADDC7",
-        "color8": "#747763",
-        "color9": "#FE866D",
-        "color10": "#BFC87F",
-        "color11": "#989877",
-        "color12": "#E2DED5",
-        "color13": "#87A95E",
-        "color14": "#E1A96F",
-        "color15": "#EEF0E1"
+        "color0": "#121002",
+        "color1": "#EF5B23",
+        "color2": "#ABA047",
+        "color3": "#877824",
+        "color4": "#DDD7C9",
+        "color5": "#798533",
+        "color6": "#C19352",
+        "color7": "#DEDCC6",
+        "color8": "#787561",
+        "color9": "#FD8E69",
+        "color10": "#CBC067",
+        "color11": "#A59646",
+        "color12": "#E4DECF",
+        "color13": "#97A452",
+        "color14": "#E2B271",
+        "color15": "#F1EFE0"
     }
 }

@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/massimiliano-morosinotto-CPJzCrTmgGk-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#011410",
-        "foreground": "#C7E2DB",
-        "cursor": "#C7E2DB"
+        "background": "#001411",
+        "foreground": "#C6E2DD",
+        "cursor": "#C6E2DD"
     },
     "colors": {
-        "color0": "#011410",
-        "color1": "#E04A5A",
-        "color2": "#268272",
-        "color3": "#73735F",
-        "color4": "#C08A30",
-        "color5": "#D8D8D4",
-        "color6": "#75753B",
-        "color7": "#C7E2DB",
-        "color8": "#627B75",
-        "color9": "#FE717B",
-        "color10": "#4AA190",
-        "color11": "#91917C",
-        "color12": "#E1A953",
-        "color13": "#DEDEDA",
-        "color14": "#939358",
-        "color15": "#E1F3EF"
+        "color0": "#001411",
+        "color1": "#B66C78",
+        "color2": "#597974",
+        "color3": "#78715F",
+        "color4": "#B48136",
+        "color5": "#D3D8DB",
+        "color6": "#77725D",
+        "color7": "#C6E2DD",
+        "color8": "#617B76",
+        "color9": "#D78A96",
+        "color10": "#769792",
+        "color11": "#968F7C",
+        "color12": "#D5A056",
+        "color13": "#DADFE2",
+        "color14": "#95907A",
+        "color15": "#E1F3F0"
     }
 }

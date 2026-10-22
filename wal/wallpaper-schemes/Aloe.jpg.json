@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/Aloe.jpg",
     "alpha": "100",
     "special": {
-        "background": "#001410",
-        "foreground": "#C6E2DC",
-        "cursor": "#C6E2DC"
+        "background": "#01140F",
+        "foreground": "#C7E2D9",
+        "cursor": "#C7E2D9"
     },
     "colors": {
-        "color0": "#001410",
-        "color1": "#8AB8B0",
-        "color2": "#597973",
-        "color3": "#657673",
-        "color4": "#A8C8B8",
-        "color5": "#6A8A7A",
-        "color6": "#C8D8D0",
-        "color7": "#C6E2DC",
-        "color8": "#627B76",
-        "color9": "#A9D8D0",
-        "color10": "#769791",
-        "color11": "#829491",
-        "color12": "#C6E7D7",
-        "color13": "#88A998",
-        "color14": "#D2E3DA",
-        "color15": "#E1F3EF"
+        "color0": "#01140F",
+        "color1": "#82A29F",
+        "color2": "#587A70",
+        "color3": "#66776A",
+        "color4": "#99B2A4",
+        "color5": "#68897A",
+        "color6": "#ABC0C5",
+        "color7": "#C7E2D9",
+        "color8": "#637B73",
+        "color9": "#A1C1BE",
+        "color10": "#75988E",
+        "color11": "#839587",
+        "color12": "#B8D2C3",
+        "color13": "#86A898",
+        "color14": "#CBE0E6",
+        "color15": "#E2F3ED"
     }
 }

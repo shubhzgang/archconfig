@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/ryan-hoffman-Pqk44XmCgpk-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#04130A",
-        "foreground": "#CBE1D3",
-        "cursor": "#CBE1D3"
+        "background": "#041309",
+        "foreground": "#CCE1D2",
+        "cursor": "#CCE1D2"
     },
     "colors": {
-        "color0": "#04130A",
-        "color1": "#E07A20",
-        "color2": "#348359",
-        "color3": "#6E7274",
-        "color4": "#3A90E0",
-        "color5": "#F0C030",
-        "color6": "#D2D8DE",
-        "color7": "#CBE1D3",
-        "color8": "#677A6E",
-        "color9": "#FE9C53",
-        "color10": "#54A276",
-        "color11": "#8B9092",
-        "color12": "#63B0FC",
-        "color13": "#FEDA7F",
-        "color14": "#D9DFE5",
-        "color15": "#E4F3E9"
+        "color0": "#041309",
+        "color1": "#D57F22",
+        "color2": "#507E60",
+        "color3": "#787069",
+        "color4": "#3EA8E4",
+        "color5": "#EFB34C",
+        "color6": "#D3D7E0",
+        "color7": "#CCE1D2",
+        "color8": "#677A6D",
+        "color9": "#F79E49",
+        "color10": "#6D9C7D",
+        "color11": "#968E86",
+        "color12": "#72C7FC",
+        "color13": "#FFD79B",
+        "color14": "#DADEE7",
+        "color15": "#E5F3E9"
     }
 }

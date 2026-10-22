@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/MistyTrees.jpg",
     "alpha": "100",
     "special": {
-        "background": "#07101C",
-        "foreground": "#CFDCEF",
-        "cursor": "#CFDCEF"
+        "background": "#06101C",
+        "foreground": "#CEDCEF",
+        "cursor": "#CEDCEF"
     },
     "colors": {
-        "color0": "#07101C",
-        "color1": "#A8C0E0",
-        "color2": "#5C7394",
-        "color3": "#697282",
-        "color4": "#D0D8E4",
-        "color5": "#7A90B0",
+        "color0": "#06101C",
+        "color1": "#B0BCD4",
+        "color2": "#5F738C",
+        "color3": "#647483",
+        "color4": "#D2D8E4",
+        "color5": "#7790AE",
         "color6": "#627485",
-        "color7": "#CFDCEF",
-        "color8": "#6A7586",
-        "color9": "#C9E0FF",
-        "color10": "#7991B3",
-        "color11": "#8690A0",
-        "color12": "#D7DFEB",
-        "color13": "#98AFD0",
+        "color7": "#CEDCEF",
+        "color8": "#697686",
+        "color9": "#D0DCF5",
+        "color10": "#7C91AB",
+        "color11": "#8192A1",
+        "color12": "#D8DEEA",
+        "color13": "#95AFCE",
         "color14": "#7F92A3",
-        "color15": "#E6EFFC"
+        "color15": "#E6F0FC"
     }
 }

@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/lucas-k-wQLAGv4_OYs-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#05101C",
-        "foreground": "#CCDDEE",
-        "cursor": "#CCDDEE"
+        "background": "#04111B",
+        "foreground": "#CADEED",
+        "cursor": "#CADEED"
     },
     "colors": {
-        "color0": "#05101C",
-        "color1": "#FF6020",
-        "color2": "#2A90E0",
-        "color3": "#597686",
-        "color4": "#40D0F0",
-        "color5": "#F03050",
-        "color6": "#FFA030",
-        "color7": "#CCDDEE",
-        "color8": "#677686",
-        "color9": "#FE9E7E",
-        "color10": "#58B0FC",
-        "color11": "#7694A5",
-        "color12": "#A2EAFD",
-        "color13": "#FD747D",
-        "color14": "#FECFA3",
-        "color15": "#E4F0FC"
+        "color0": "#04111B",
+        "color1": "#FC5E05",
+        "color2": "#0192DC",
+        "color3": "#48798D",
+        "color4": "#06C1F1",
+        "color5": "#F12F2B",
+        "color6": "#FD8600",
+        "color7": "#CADEED",
+        "color8": "#657785",
+        "color9": "#FB9C78",
+        "color10": "#3DB2FE",
+        "color11": "#6597AC",
+        "color12": "#83DDFF",
+        "color13": "#FE7467",
+        "color14": "#FDB989",
+        "color15": "#E3F1FB"
     }
 }

@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/043_Desktop Wallpapers 4K Ultra HD262.jpg",
     "alpha": "100",
     "special": {
-        "background": "#0A0F1C",
-        "foreground": "#D3DAEF",
-        "cursor": "#D3DAEF"
+        "background": "#0B0E1C",
+        "foreground": "#D4DAEF",
+        "cursor": "#D4DAEF"
     },
     "colors": {
-        "color0": "#0A0F1C",
-        "color1": "#E0282A",
-        "color2": "#5C6EA8",
-        "color3": "#8A6A50",
-        "color4": "#E0B070",
-        "color5": "#5A9040",
-        "color6": "#C08060",
-        "color7": "#D3DAEF",
-        "color8": "#6D7487",
-        "color9": "#FF5A51",
-        "color10": "#798CC8",
-        "color11": "#A9876D",
-        "color12": "#FFD195",
-        "color13": "#78AF5E",
-        "color14": "#E19F7E",
-        "color15": "#E9EEFC"
+        "color0": "#0B0E1C",
+        "color1": "#D8231D",
+        "color2": "#6A7089",
+        "color3": "#896A56",
+        "color4": "#E4AF74",
+        "color5": "#6F864E",
+        "color6": "#B6836B",
+        "color7": "#D4DAEF",
+        "color8": "#6F7487",
+        "color9": "#FD4D3F",
+        "color10": "#878EA8",
+        "color11": "#A88773",
+        "color12": "#FED2A3",
+        "color13": "#8DA56B",
+        "color14": "#D7A289",
+        "color15": "#EAEEFC"
     }
 }

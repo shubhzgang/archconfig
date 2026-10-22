@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/wp10040709-alone-samurai-wallpapers.jpg",
     "alpha": "100",
     "special": {
-        "background": "#001410",
-        "foreground": "#C6E2DB",
-        "cursor": "#C6E2DB"
+        "background": "#001312",
+        "foreground": "#C6E2DE",
+        "cursor": "#C6E2DE"
     },
     "colors": {
-        "color0": "#001410",
-        "color1": "#E0283A",
-        "color2": "#6AC0B0",
-        "color3": "#627480",
-        "color4": "#A8E0D0",
-        "color5": "#C03B49",
-        "color6": "#4B7B81",
-        "color7": "#C6E2DB",
-        "color8": "#627B75",
-        "color9": "#FF5A5D",
-        "color10": "#8AE1D0",
-        "color11": "#7F929E",
-        "color12": "#B4ECDC",
-        "color13": "#E35C65",
-        "color14": "#68999F",
-        "color15": "#E1F3EF"
+        "color0": "#001312",
+        "color1": "#CE4759",
+        "color2": "#8ABCB6",
+        "color3": "#577788",
+        "color4": "#AADFD2",
+        "color5": "#B24B56",
+        "color6": "#507985",
+        "color7": "#C6E2DE",
+        "color8": "#617A77",
+        "color9": "#F16776",
+        "color10": "#A9DCD6",
+        "color11": "#7495A7",
+        "color12": "#B6EBDE",
+        "color13": "#D46973",
+        "color14": "#6D97A3",
+        "color15": "#E0F3F1"
     }
 }
