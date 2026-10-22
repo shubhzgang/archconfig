@@ -16,6 +16,8 @@ Item {
     property real panelH: 0
     property real leftW: 0                // calendar panel hanging from the top band, left-aligned
     property real leftH: 0
+    property real bottomW: 0              // wallpaper picker rising from the bottom band, centered
+    property real bottomH: 0
 
     anchors.fill: parent
 
@@ -32,6 +34,11 @@ Item {
     readonly property real lf: Math.min(20, leftH / 2, leftW / 2)        // left panel's concave joins
     readonly property real lr: Math.min(20, leftH, leftW / 2)            // its rounded bottom-right corner
     readonly property real lx: inL + leftW                               // left panel's right edge
+    readonly property bool bottomOpen: bottomH >= 1
+    readonly property real bf: Math.min(20, bottomH / 2, bottomW / 2)    // bottom panel's concave joins
+    readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
+    readonly property real bl: (inL + inR) / 2 - bottomW / 2             // its left edge
+    readonly property real brt: (inL + inR) / 2 + bottomW / 2            // its right edge
 
     // The free area inside the frame, clockwise from the top-left corner. Closed: a rounded
     // rectangle. Open: the top edge turns down the panel's left side, round its bottom, and
@@ -48,7 +55,13 @@ Item {
         else
             d += `L ${R - c} ${T} A ${c} ${c} 0 0 1 ${R} ${T + c} `
         // down the right edge, along the bottom, up the left edge
-        d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
+        d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
+        if (bottomOpen)
+            d += `L ${brt + bf} ${B} A ${bf} ${bf} 0 0 1 ${brt} ${B - bf} `
+               + `L ${brt} ${B - bottomH + br} A ${br} ${br} 0 0 0 ${brt - br} ${B - bottomH} `
+               + `L ${bl + br} ${B - bottomH} A ${br} ${br} 0 0 0 ${bl} ${B - bottomH + br} `
+               + `L ${bl} ${B - bf} A ${bf} ${bf} 0 0 1 ${bl - bf} ${B} `
+        d += `L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
         // up to the top-left corner, or round the calendar panel back up to the top edge
         if (leftOpen)
             d += `L ${L} ${T + leftH + lf} A ${lf} ${lf} 0 0 1 ${L + lf} ${T + leftH} `

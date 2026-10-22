@@ -428,7 +428,8 @@ hl.bind("ALT + right", hl.dsp.window.move({ direction = "right" }))
 hl.bind("ALT + t",
     hl.dsp.exec_cmd("/home/shubham/Downloads/trilium-linux-x64/trilium"))
 hl.bind("ALT + up", hl.dsp.window.move({ direction = "up" }))
-hl.bind("ALT + w", hl.dsp.exec_cmd("~/.config/hypr/wallpaper.sh"))
+hl.bind("ALT + w", hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
+hl.bind("ALT + SHIFT + w", hl.dsp.exec_cmd("~/.config/hypr/wallpaper.sh"))  -- old rofi picker, to be removed after testing
 hl.bind("CTRL + Print",
     hl.dsp.exec_cmd("hyprshot -m region -o ~/Screenshots/"))
 

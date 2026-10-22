@@ -36,10 +36,13 @@ ShellRoot {
         property bool open: false          // stats panel
         property bool calOpen: false       // calendar panel
         property bool launcherOpen: false  // app launcher panel
-        readonly property bool anyOpen: open || calOpen || launcherOpen
-        // the two left panels share the same spot, so only one can be open
-        onCalOpenChanged: if (calOpen) launcherOpen = false
-        onLauncherOpenChanged: if (launcherOpen) calOpen = false
+        property bool wallOpen: false      // wallpaper picker (bottom)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen
+        // the two left panels share the same spot, so only one can be open; the picker also takes the keyboard, so it is alone too
+        onCalOpenChanged: if (calOpen) { launcherOpen = false; wallOpen = false }
+        onLauncherOpenChanged: if (launcherOpen) { calOpen = false; wallOpen = false }
+        onWallOpenChanged: if (wallOpen) { open = false; calOpen = false; launcherOpen = false }
+        onOpenChanged: if (open) wallOpen = false
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -57,7 +60,8 @@ ShellRoot {
                 Region { item: centerSection },
                 Region { item: leftSection.tipRect },
                 Region { item: calendar },
-                Region { item: launcher }
+                Region { item: launcher },
+                Region { item: wallpaper }
             ]
         }
 
@@ -65,8 +69,8 @@ ShellRoot {
             id: backdrop
             anchors.fill: parent
             focus: true
-            Keys.onEscapePressed: { win.open = false; win.calOpen = false; win.launcherOpen = false }
-            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false; win.launcherOpen = false } }
+            Keys.onEscapePressed: { win.open = false; win.calOpen = false; win.launcherOpen = false; win.wallOpen = false }
+            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false; win.launcherOpen = false; win.wallOpen = false } }
         }
 
         IpcHandler {   // qs ipc call stats toggle|open|close|sampling <s> <points>
@@ -84,6 +88,13 @@ ShellRoot {
             function close(): void { win.launcherOpen = false }
         }
 
+        IpcHandler {   // qs ipc call wallpaper toggle|open|close
+            target: "wallpaper"
+            function toggle(): void { win.wallOpen = !win.wallOpen }
+            function open(): void { win.wallOpen = true }
+            function close(): void { win.wallOpen = false }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -99,6 +110,8 @@ ShellRoot {
             panelH: stats.panelH
             leftW: Math.max(calendar.panelW, launcher.panelW)
             leftH: Math.max(calendar.panelH, launcher.panelH)
+            bottomW: wallpaper.panelW
+            bottomH: wallpaper.panelH
         }
 
         CalendarPanel {
@@ -113,6 +126,13 @@ ShellRoot {
             theme: theme
             open: win.launcherOpen
             onToggle: win.launcherOpen = !win.launcherOpen
+        }
+
+        WallpaperPanel {
+            id: wallpaper
+            theme: theme
+            open: win.wallOpen
+            onToggle: win.wallOpen = !win.wallOpen
         }
 
         CenterSection {

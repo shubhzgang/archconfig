@@ -45,18 +45,23 @@ menu() {
 }
 
 main() {
-    # thumbnail shading assets (fresh checkout): render them before thumbnails are made
-    [ -f "$THUMB_MASK" ] || ~/.config/rofi/make-cards.py
+    if [ -n "$1" ]; then
+        # a path was given (the Quickshell wallpaper picker): no menu
+        selected_wallpaper="$1"
+    else
+        # thumbnail shading assets (fresh checkout): render them before thumbnails are made
+        [ -f "$THUMB_MASK" ] || ~/.config/rofi/make-cards.py
 
-    choice=$(menu | rofi -dmenu -show-icons -theme ~/.config/rofi/wallpaper.rasi -p "Select Wallpaper")
-    
-    # SAFETY CHECK: Exit the script immediately if you hit escape or close rofi without picking anything
-    if [ -z "$choice" ]; then
-        exit 0
+        choice=$(menu | rofi -dmenu -show-icons -theme ~/.config/rofi/wallpaper.rasi -p "Select Wallpaper")
+
+        # SAFETY CHECK: Exit the script immediately if you hit escape or close rofi without picking anything
+        if [ -z "$choice" ]; then
+            exit 0
+        fi
+
+        selected_wallpaper="$WALLPAPER_DIR/$choice"
     fi
 
-    selected_wallpaper="$WALLPAPER_DIR/$choice"
-    
     # 1. Apply wallpaper
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
     
@@ -109,4 +114,4 @@ main() {
     cp -r "$wallpaper" ~/wallpapers/pywallpaper.jpg 
 }
 
-main
+main "$@"
