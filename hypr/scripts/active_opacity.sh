@@ -19,11 +19,11 @@ STATE_DIR="/tmp/hypr_opacity"
 mkdir -p "$STATE_DIR"
 STATE_FILE="$STATE_DIR/$ADDRESS"
 
-# Assume fully opaque if we haven't tracked this window yet
+# Assume the default 0.9 if we haven't tracked this window yet
 if [ -f "$STATE_FILE" ]; then
     CURRENT=$(cat "$STATE_FILE")
 else
-    CURRENT=1.0
+    CURRENT=0.9
 fi
 
 if [ "$1" = "up" ]; then

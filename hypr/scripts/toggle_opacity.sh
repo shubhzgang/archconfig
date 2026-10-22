@@ -11,8 +11,8 @@ CURRENT_OPACITY=$(hyprctl getoption decoration:inactive_opacity -j | jq -r '.flo
 IS_OPAQUE=$(awk -v op="$CURRENT_OPACITY" 'BEGIN { print (op >= 0.99) ? 1 : 0 }')
 
 if [ "$IS_OPAQUE" -eq 1 ]; then
-    # Revert to defaults: active opaque, inactive 0.75
-    hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 0.75 } })'
+    # Revert to defaults: active 0.9, inactive 0.75
+    hyprctl eval 'hl.config({ decoration = { active_opacity = 0.9, inactive_opacity = 0.75 } })'
 else
     # Force all windows fully opaque globally
     hyprctl eval 'hl.config({ decoration = { active_opacity = 1.0, inactive_opacity = 1.0 } })'
@@ -21,7 +21,7 @@ else
     ADDRESS=$(hyprctl activewindow -j | jq -r '.address')
     if [ "$ADDRESS" != "null" ] && [ -n "$ADDRESS" ]; then
         hyprctl eval "hl.dispatch(hl.dsp.window.set_prop({ window = 'address:$ADDRESS', prop = 'opacity', value = '1.0 override 1.0 override' }))"
-        # Clear stored per-window state so active_opacity.sh resets to 1.0 next use
+        # Clear stored per-window state so active_opacity.sh resets next use
         rm -f "/tmp/hypr_opacity/$ADDRESS"
     fi
 fi
