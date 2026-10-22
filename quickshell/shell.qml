@@ -3,7 +3,6 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import QtQuick.Shapes
 
 ShellRoot {
     Theme { id: theme }
@@ -34,7 +33,7 @@ ShellRoot {
 
     // The frame's inner shadow, on its own surface just below the shell's: Hyprland blurs behind the
     // shell's surface (for the opacity slider), and that blur must not reach the windows under the shadow.
-    // The stats corner's shadow is drawn by its own surface (below), so it is cut out here.
+    // The panels' regions draw their own (FrameRegion.qml), so this one only covers the rest.
     PanelWindow {
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -44,33 +43,8 @@ ShellRoot {
         mask: Region {}
         FrameShadow {
             anchors.fill: parent
-            hole: frame.hole
-            keepPath: frame.holeWithoutStats
-        }
-    }
-
-    // The stats corner (statsRect) on its own surfaces: its shadow, and its piece of the frame with
-    // the stats panel. The stats animation then only redraws this corner, not the whole screen (the
-    // display runs on the integrated GPU). 40px larger than the corner on the left and below, so the
-    // shadow's blur has the frame's outline beyond the corner to work from and meets the screen's
-    // shadow without a seam.
-    PanelWindow {
-        id: statsShadowWin
-        anchors { top: true; right: true }
-        implicitWidth: frame.width - frame.statsRect[0] + 40
-        implicitHeight: frame.statsRect[1] + frame.statsRect[3] + 40
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Top
-        WlrLayershell.namespace: "qs-stats-shadow"
-        mask: Region {}
-        FrameShadow {
-            anchors.fill: parent
-            hole: frame.statsHole
-            originX: frame.width - width
-            screenW: frame.width
-            screenH: frame.height
-            keepRect: frame.statsRect
+            hole: frame.plainHole
+            keepRects: frame.baseKeep
         }
     }
 
@@ -108,23 +82,18 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qs-shell"
-        WlrLayershell.keyboardFocus: anyOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        // (the panels, and the keyboard while one is open, are on their regions' surfaces: see the
+        // FrameRegions below)
 
-        // Only the bar items and the panel take mouse input; while the panel is open the whole
-        // screen does, so a click outside closes it.
+        // Only the dock buttons take mouse input; while a panel is open the whole screen does, so a
+        // click outside closes it.
         mask: Region {
             regions: [
                 Region { item: win.anyOpen ? backdrop : nothing },
-                Region { item: calendar },
-                Region { item: launcher },
-                Region { item: wallpaper },
                 Region { item: themeButton },
                 Region { item: wallpaperButton },
-                Region { item: clipboard },
                 Region { item: clipboardButton },
-                Region { item: live },
                 Region { item: liveButton },
-                Region { item: opacityPanel },
                 Region { item: opacityButton }
             ]
         }
@@ -134,8 +103,6 @@ ShellRoot {
         Item {
             id: backdrop
             anchors.fill: parent
-            focus: true
-            Keys.onEscapePressed: win.closeOthers("")
             MouseArea { anchors.fill: parent; onClicked: win.closeOthers("") }
         }
 
@@ -211,48 +178,8 @@ ShellRoot {
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
-        }
-
-        CalendarPanel {
-            id: calendar
-            theme: theme
-            open: win.calOpen
-            onToggle: win.calOpen = !win.calOpen
-        }
-
-        LauncherPanel {
-            id: launcher
-            theme: theme
-            open: win.launcherOpen
-            onToggle: win.launcherOpen = !win.launcherOpen
-        }
-
-        WallpaperPanel {
-            id: wallpaper
-            theme: theme
-            open: win.wallOpen
-            onToggle: win.wallOpen = !win.wallOpen
-        }
-
-        ClipboardPanel {
-            id: clipboard
-            theme: theme
-            open: win.clipOpen
-            onToggle: win.clipOpen = !win.clipOpen
-        }
-
-        LiveWallpaperPanel {
-            id: live
-            theme: theme
-            open: win.liveOpen
-            onToggle: win.liveOpen = !win.liveOpen
-        }
-
-        OpacityPanel {
-            id: opacityPanel
-            theme: theme
-            open: win.opacityOpen
-            onToggle: win.opacityOpen = !win.opacityOpen
+            wallMaxW: wallpaper.openW
+            wallMaxH: wallpaper.openH
         }
 
         ThemeButton {
@@ -298,53 +225,88 @@ ShellRoot {
 
     }
 
-    // The stats corner's piece of the frame and the stats panel (see statsShadowWin above).
-    PanelWindow {
-        id: statsWin
-        anchors { top: true; right: true }
-        implicitWidth: frame.width - frame.statsRect[0]
-        implicitHeight: frame.statsRect[1] + frame.statsRect[3]
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.namespace: "qs-stats"
-        mask: Region { item: stats }
+    // ---- the panels' regions, each on its own surfaces (FrameRegion.qml, Frame.qml) ----
 
-        Item {   // the frame inside the corner: everything outside statsHole, clipped to statsRect
-            x: frame.statsRect[0] - (frame.width - statsWin.width)
-            y: frame.statsRect[1]
-            width: frame.statsRect[2]
-            height: frame.statsRect[3]
-            clip: true
-            Shape {
-                x: -frame.statsRect[0]
-                y: -frame.statsRect[1]
-                width: frame.width; height: frame.height
-                preferredRendererType: Shape.CurveRenderer
-                ShapePath {
-                    fillRule: ShapePath.OddEvenFill
-                    strokeColor: "transparent"
-                    strokeWidth: 0
-                    fillGradient: LinearGradient {   // the frame's gradient, in screen coordinates
-                        x1: 0; y1: 0; x2: frame.width; y2: 0
-                        GradientStop { position: 0.0; color: theme.barEnd }
-                        GradientStop { position: 0.5; color: theme.barStart }
-                        GradientStop { position: 1.0; color: theme.barEnd }
-                    }
-                    PathSvg {
-                        path: `M -20 -20 L ${frame.width + 20} -20 L ${frame.width + 20} ${frame.height + 20} `
-                            + `L -20 ${frame.height + 20} Z ` + frame.statsHole
-                    }
-                }
-            }
-        }
+    FrameRegion {   // top right: the stats panel
+        frame: frame
+        theme: theme
+        name: "stats"
+        rect: frame.statsRect
+        hole: frame.statsHole
+        keepRects: [frame.statsRect]
+        active: win.open
+        onDismiss: win.closeOthers("")
 
         StatsCorner {
             id: stats
             theme: theme
             open: win.open
-            maxH: frame.statsRect[3] - 20 - 40   // room below for its concave join and the shadows' overlap
+            maxH: frame.statsRect[3] - 60   // room below for its concave join and the shadows' overlap
             onToggle: win.open = !win.open
+        }
+    }
+
+    FrameRegion {   // the left column: calendar and launcher (top), clipboard, live wallpaper and opacity (bottom)
+        frame: frame
+        theme: theme
+        name: "left"
+        rect: frame.leftRect
+        hole: frame.leftHole
+        keepRects: frame.leftKeep
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.opacityOpen
+        onDismiss: win.closeOthers("")
+
+        CalendarPanel {
+            id: calendar
+            theme: theme
+            open: win.calOpen
+            onToggle: win.calOpen = !win.calOpen
+        }
+
+        LauncherPanel {
+            id: launcher
+            theme: theme
+            open: win.launcherOpen
+            onToggle: win.launcherOpen = !win.launcherOpen
+        }
+
+        ClipboardPanel {
+            id: clipboard
+            theme: theme
+            open: win.clipOpen
+            onToggle: win.clipOpen = !win.clipOpen
+        }
+
+        LiveWallpaperPanel {
+            id: live
+            theme: theme
+            open: win.liveOpen
+            onToggle: win.liveOpen = !win.liveOpen
+        }
+
+        OpacityPanel {
+            id: opacityPanel
+            theme: theme
+            open: win.opacityOpen
+            onToggle: win.opacityOpen = !win.opacityOpen
+        }
+    }
+
+    FrameRegion {   // bottom middle: the wallpaper picker
+        frame: frame
+        theme: theme
+        name: "wall"
+        rect: frame.wallRect
+        hole: frame.wallHole
+        keepRects: frame.wallKeep
+        active: win.wallOpen
+        onDismiss: win.closeOthers("")
+
+        WallpaperPanel {
+            id: wallpaper
+            theme: theme
+            open: win.wallOpen
+            onToggle: win.wallOpen = !win.wallOpen
         }
     }
 

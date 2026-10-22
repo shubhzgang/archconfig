@@ -7,9 +7,9 @@ import QtQuick.Shapes
 // behind the frame doesn't also smear the windows under the shadow, and it is cut away wherever the
 // frame is, so a see-through frame shows no shadow under itself.
 //
-// Used twice: for the whole screen (kept only outside the stats corner, `keepPath`) and for the stats
-// corner alone (`keepRect`, on a surface that only redraws when the stats panel moves). Both shadows
-// are computed from outlines that agree away from the stats panel, so they meet without a seam.
+// Used for the frame outside the panels' regions and for each region (Frame.qml): each keeps its
+// shadow only inside its own rectangles (`keepRects`), and the outlines they are computed from agree
+// away from the panels, so they meet without a seam.
 Item {
     id: root
     required property string hole       // the frame's inner outline, in screen coordinates
@@ -17,8 +17,7 @@ Item {
     property real originY: 0
     property real screenW: width
     property real screenH: height
-    property string keepPath: hole      // where the shadow is kept (by default: everywhere in the hole)
-    property var keepRect: null         // [x, y, w, h] on the screen: shadow only there
+    property var keepRects: null        // [[x, y, w, h], ...] on the screen: shadow only there (null: everywhere)
     // the frame's shape grown inward by a black stroke (`grow`: how far it stays dark), then blurred
     // (`fade`)
     readonly property real grow: 10
@@ -26,28 +25,32 @@ Item {
     readonly property string outside: `M -20 -20 L ${screenW + 20} -20 L ${screenW + 20} ${screenH + 20} `
                                       + `L -20 ${screenH + 20} Z ` + hole
 
-    Item {   // where the shadow is kept: the free area inside the frame (never shown itself)
+    Item {   // where the shadow is kept: the free area inside the frame, in keepRects (never shown itself)
         id: freeArea
         anchors.fill: parent
         visible: false
         layer.enabled: true
-        Item {
-            id: keep
-            x: root.keepRect ? root.keepRect[0] - root.originX : 0
-            y: root.keepRect ? root.keepRect[1] - root.originY : 0
-            width: root.keepRect ? root.keepRect[2] : root.width
-            height: root.keepRect ? root.keepRect[3] : root.height
-            clip: root.keepRect !== null
-            Shape {
-                x: -root.originX - keep.x
-                y: -root.originY - keep.y
-                width: root.screenW; height: root.screenH
-                preferredRendererType: Shape.CurveRenderer
-                ShapePath {
-                    strokeColor: "transparent"
-                    strokeWidth: 0
-                    fillColor: "white"
-                    PathSvg { path: root.keepPath }
+        Repeater {
+            model: root.keepRects || [[root.originX, root.originY, root.width, root.height]]
+            delegate: Item {
+                id: keep
+                required property var modelData
+                x: modelData[0] - root.originX
+                y: modelData[1] - root.originY
+                width: modelData[2]
+                height: modelData[3]
+                clip: true
+                Shape {
+                    x: -root.originX - keep.x
+                    y: -root.originY - keep.y
+                    width: root.screenW; height: root.screenH
+                    preferredRendererType: Shape.CurveRenderer
+                    ShapePath {
+                        strokeColor: "transparent"
+                        strokeWidth: 0
+                        fillColor: "white"
+                        PathSvg { path: root.hole }
+                    }
                 }
             }
         }
