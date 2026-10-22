@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/polina-kuzovkova-5diucAUJnPk-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#1A0B01",
-        "foreground": "#DDCEC1",
-        "cursor": "#DDCEC1"
+        "background": "#101002",
+        "foreground": "#DCDDC6",
+        "cursor": "#DCDDC6"
     },
     "colors": {
-        "color0": "#1A0B01",
-        "color1": "#CE9259",
-        "color2": "#967342",
-        "color3": "#CBC4B2",
-        "color4": "#877B40",
-        "color5": "#A67D48",
-        "color6": "#B95B46",
-        "color7": "#DDCEC1",
-        "color8": "#7F6E60",
-        "color9": "#F0B178",
-        "color10": "#B5915F",
-        "color11": "#E5DECB",
-        "color12": "#A5995E",
-        "color13": "#C69C66",
-        "color14": "#DB7964",
-        "color15": "#F5E9DE"
+        "color0": "#101002",
+        "color1": "#F04A28",
+        "color2": "#74754A",
+        "color3": "#73735F",
+        "color4": "#ECD4AC",
+        "color5": "#E8A050",
+        "color6": "#96653B",
+        "color7": "#DCDDC6",
+        "color8": "#757662",
+        "color9": "#FD8268",
+        "color10": "#929367",
+        "color11": "#91917C",
+        "color12": "#F3DBB2",
+        "color13": "#FDC58D",
+        "color14": "#B68358",
+        "color15": "#EFF0E1"
     }
 }

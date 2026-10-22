@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/lucas-k-wQLAGv4_OYs-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#1C0907",
-        "foreground": "#E1CBC8",
-        "cursor": "#E1CBC8"
+        "background": "#05101C",
+        "foreground": "#CCDDEE",
+        "cursor": "#CCDDEE"
     },
     "colors": {
-        "color0": "#1C0907",
-        "color1": "#DA3C31",
-        "color2": "#1C8ED2",
-        "color3": "#3A7DC4",
-        "color4": "#CB709F",
-        "color5": "#B15E61",
-        "color6": "#21BBEF",
-        "color7": "#E1CBC8",
-        "color8": "#826B68",
-        "color9": "#FF5F50",
-        "color10": "#46AEF3",
-        "color11": "#599CE5",
-        "color12": "#ED8FBF",
-        "color13": "#D27C7F",
-        "color14": "#84D8FC",
-        "color15": "#F8E7E4"
+        "color0": "#05101C",
+        "color1": "#FF6020",
+        "color2": "#2A90E0",
+        "color3": "#597686",
+        "color4": "#40D0F0",
+        "color5": "#F03050",
+        "color6": "#FFA030",
+        "color7": "#CCDDEE",
+        "color8": "#677686",
+        "color9": "#FE9E7E",
+        "color10": "#58B0FC",
+        "color11": "#7694A5",
+        "color12": "#A2EAFD",
+        "color13": "#FD747D",
+        "color14": "#FECFA3",
+        "color15": "#E4F0FC"
     }
 }

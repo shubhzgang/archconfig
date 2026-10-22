@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/vecteezy_nature-background-high-resolution-wallpaper-for-a-serene_49855471.jpg",
     "alpha": "100",
     "special": {
-        "background": "#00121A",
-        "foreground": "#C1D5DE",
-        "cursor": "#C1D5DE"
+        "background": "#02121A",
+        "foreground": "#C8DFEC",
+        "cursor": "#C8DFEC"
     },
     "colors": {
-        "color0": "#00121A",
-        "color1": "#2887A8",
-        "color2": "#E2C160",
-        "color3": "#3EB3D1",
-        "color4": "#4283A4",
-        "color5": "#4B81A5",
-        "color6": "#AE8F55",
-        "color7": "#C1D5DE",
-        "color8": "#5F767F",
-        "color9": "#4CA6C8",
-        "color10": "#FDDB7A",
-        "color11": "#63D4F2",
-        "color12": "#61A1C3",
-        "color13": "#699FC5",
-        "color14": "#CEAE73",
-        "color15": "#DEEEF6"
+        "color0": "#02121A",
+        "color1": "#F5C030",
+        "color2": "#2A98C8",
+        "color3": "#55768F",
+        "color4": "#50D0E8",
+        "color5": "#C07A30",
+        "color6": "#8AC0D8",
+        "color7": "#C8DFEC",
+        "color8": "#637883",
+        "color9": "#FEDA86",
+        "color10": "#51B8E9",
+        "color11": "#7294AE",
+        "color12": "#97EDFF",
+        "color13": "#E19952",
+        "color14": "#AAE1F9",
+        "color15": "#E2F1FA"
     }
 }

@@ -102,7 +102,7 @@ Item {
     function apply(path) {
         if (!path) return
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", path])
-        theme.commitPreview()
+        theme.commitPreview(path)
         panel.toggle()
     }
     onOpenChanged: {

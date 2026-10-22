@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/felix-dubois-robert-CuEvrPd3NYc-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#190914",
-        "foreground": "#DDCBD6",
-        "cursor": "#DDCBD6"
+        "background": "#071307",
+        "foreground": "#D0E0CE",
+        "cursor": "#D0E0CE"
     },
     "colors": {
-        "color0": "#190914",
-        "color1": "#D84FB0",
-        "color2": "#B9D247",
-        "color3": "#4EC34A",
-        "color4": "#1789BF",
-        "color5": "#1CB3E1",
-        "color6": "#ACA430",
-        "color7": "#DDCBD6",
-        "color8": "#7E6B77",
-        "color9": "#FB70D0",
-        "color10": "#D2ED65",
-        "color11": "#70E56B",
-        "color12": "#42A8E0",
-        "color13": "#5CD3FF",
-        "color14": "#CBC455",
-        "color15": "#F5E6EF"
+        "color0": "#071307",
+        "color1": "#FF20C0",
+        "color2": "#40D040",
+        "color3": "#647675",
+        "color4": "#20B0F0",
+        "color5": "#ECDC15",
+        "color6": "#F08020",
+        "color7": "#D0E0CE",
+        "color8": "#6B7969",
+        "color9": "#FE87D0",
+        "color10": "#67F264",
+        "color11": "#819493",
+        "color12": "#78CEFF",
+        "color13": "#F3E326",
+        "color14": "#FDAD77",
+        "color15": "#E7F2E6"
     }
 }

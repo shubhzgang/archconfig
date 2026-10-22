@@ -158,41 +158,45 @@ Item {
 
     // ---- wallpaper preview: show another wallpaper's palette without applying it ----
     // The real palette (the wal files) keeps being tracked underneath, so ending the preview
-    // returns to it. Applying the wallpaper keeps the preview showing until the wal files have
-    // caught up, so the colors don't flash back to the old ones.
+    // returns to it. Applying the wallpaper keeps the preview showing until the wal files are the
+    // applied wallpaper's (so the colors don't flash back to the old ones), then switches at once.
+    // Scheme files are read on every preview (they are small), so an edited palette shows right away.
     property bool previewing: false
     property bool committing: false
+    property string committed           // the wallpaper being applied
     property var realColors: null
-    property var realBar: null
-    property var schemes: ({})        // scheme path -> parsed json
     property string wanted            // the scheme path of the latest preview request
-    function applyReal() { if (realColors) setColors(realColors, realBar) }
+    // the bar's gradient ends: the same dark, saturated colour1/colour2 that scripts/bar-colors.py
+    // writes for kitty, computed here so they arrive together with the palette
+    function barOf(value) { return [vividDark(value.colors.color1), vividDark(value.colors.color2)] }
+    function applyReal() { if (realColors && realColors.colors) setColors(realColors, barOf(realColors)) }
     function preview(wallpaper) {
         const path = Quickshell.env("HOME") + "/.config/wal/wallpaper-schemes/" + wallpaper.split("/").pop() + ".json"
         previewing = true
         wanted = path
-        if (schemes[path]) showScheme(schemes[path])
-        else if (scheme.path === path) endPreview()   // already tried: it has no palette
+        if (scheme.path === path) scheme.reload()
         else scheme.path = path
     }
     function showScheme(value) {
         if (!previewing) return
-        setColors(value, [vividDark(value.colors.color1), vividDark(value.colors.color2)])
+        setColors(value, barOf(value))
     }
     function endPreview() {
         if (committing) return
         previewing = false
         applyReal()
     }
-    function commitPreview() {
+    function commitPreview(wallpaper) {
         if (!previewing) return
         committing = true
+        committed = wallpaper
         settle.restart()
     }
-    Timer {
+    function settled() { settle.stop(); committing = false; previewing = false; applyReal() }
+    Timer {   // in case the wal files never become the applied wallpaper's
         id: settle
-        interval: 4000
-        onTriggered: { root.committing = false; root.previewing = false; root.applyReal() }
+        interval: 6000
+        onTriggered: root.settled()
     }
     FileView {
         id: scheme
@@ -200,7 +204,6 @@ Item {
         onLoaded: {
             try {
                 const v = JSON.parse(scheme.text())
-                root.schemes[scheme.path] = v
                 if (scheme.path === root.wanted) root.showScheme(v)
             } catch (e) {}
         }
@@ -213,23 +216,8 @@ Item {
         watch: true
         onValueChanged: {
             root.realColors = value
-            if (!root.previewing) root.applyReal()
-        }
-    }
-    FileView {
-        id: barCss
-        path: Quickshell.env("HOME") + "/.cache/wal/colors-waybar-bar.css"
-        watchChanges: true
-        onFileChanged: reload()
-        property string lastText: ""
-        onLoaded: {
-            if (barCss.text() === lastText) return   // unchanged: don't re-apply (and redraw) the same colors
-            lastText = barCss.text()
-            const start = /bar_start (#\w{6})/.exec(barCss.text())
-            const end = /bar_end (#\w{6})/.exec(barCss.text())
-            if (!start || !end) return
-            root.realBar = [start[1], end[1]]
-            if (!root.previewing) root.setColors(root.realColors, root.realBar)
+            if (root.committing && value.wallpaper === root.committed) root.settled()
+            else if (!root.previewing) root.applyReal()
         }
     }
 }

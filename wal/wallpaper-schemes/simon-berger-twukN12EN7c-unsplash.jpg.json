@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/simon-berger-twukN12EN7c-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#160E00",
-        "foreground": "#D9D0BF",
-        "cursor": "#D9D0BF"
+        "background": "#180A14",
+        "foreground": "#E9D3E1",
+        "cursor": "#E9D3E1"
     },
     "colors": {
-        "color0": "#160E00",
-        "color1": "#EDBC51",
-        "color2": "#E48C6C",
-        "color3": "#A76B7F",
-        "color4": "#60BCD7",
-        "color5": "#C9C88B",
-        "color6": "#7D7884",
-        "color7": "#D9D0BF",
-        "color8": "#7A705E",
-        "color9": "#FDD98F",
-        "color10": "#FFAF93",
-        "color11": "#C7899D",
-        "color12": "#81DDF8",
-        "color13": "#E3E2A4",
-        "color14": "#9B95A3",
-        "color15": "#F1EADC"
+        "color0": "#180A14",
+        "color1": "#F5B830",
+        "color2": "#C070A8",
+        "color3": "#7C6A82",
+        "color4": "#F08060",
+        "color5": "#3AA8D0",
+        "color6": "#E4D4C5",
+        "color7": "#E9D3E1",
+        "color8": "#816E7A",
+        "color9": "#FDD996",
+        "color10": "#E18FC8",
+        "color11": "#9A87A0",
+        "color12": "#FDAD95",
+        "color13": "#5FC8F1",
+        "color14": "#EBDBCC",
+        "color15": "#F8EAF3"
     }
 }

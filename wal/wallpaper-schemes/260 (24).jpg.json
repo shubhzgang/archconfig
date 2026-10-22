@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/260 (24).jpg",
     "alpha": "100",
     "special": {
-        "background": "#190C01",
-        "foreground": "#DCCEC0",
-        "cursor": "#DCCEC0"
+        "background": "#051309",
+        "foreground": "#CDE1D1",
+        "cursor": "#CDE1D1"
     },
     "colors": {
-        "color0": "#190C01",
-        "color1": "#AB8255",
-        "color2": "#CEBCBA",
-        "color3": "#737B86",
-        "color4": "#6E7E7C",
-        "color5": "#6E7E7C",
-        "color6": "#6E7D83",
-        "color7": "#DCCEC0",
-        "color8": "#7E6F5F",
-        "color9": "#CCA172",
-        "color10": "#EBD9D7",
-        "color11": "#9199A5",
-        "color12": "#8B9C9A",
-        "color13": "#8B9C9A",
-        "color14": "#8C9BA1",
-        "color15": "#F4E9DD"
+        "color0": "#051309",
+        "color1": "#E0B040",
+        "color2": "#517E5C",
+        "color3": "#72726C",
+        "color4": "#C87838",
+        "color5": "#4A8A5A",
+        "color6": "#C8C4BC",
+        "color7": "#CDE1D1",
+        "color8": "#687A6C",
+        "color9": "#FFD16F",
+        "color10": "#6E9C79",
+        "color11": "#909089",
+        "color12": "#EA9758",
+        "color13": "#68A977",
+        "color14": "#E2DDD5",
+        "color15": "#E5F3E8"
     }
 }

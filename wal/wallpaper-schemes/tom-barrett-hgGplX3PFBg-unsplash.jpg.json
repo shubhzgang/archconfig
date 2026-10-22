@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/tom-barrett-hgGplX3PFBg-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#1B0B02",
-        "foreground": "#DFCDC2",
-        "cursor": "#DFCDC2"
+        "background": "#04111B",
+        "foreground": "#CBDEEE",
+        "cursor": "#CBDEEE"
     },
     "colors": {
-        "color0": "#1B0B02",
-        "color1": "#B86D34",
-        "color2": "#A56A4B",
-        "color3": "#3F849E",
-        "color4": "#A36A54",
-        "color5": "#DE8D42",
-        "color6": "#A26B4B",
-        "color7": "#DFCDC2",
-        "color8": "#806D61",
-        "color9": "#D98B54",
-        "color10": "#C58868",
-        "color11": "#5EA3BD",
-        "color12": "#C38871",
-        "color13": "#FCAF6B",
-        "color14": "#C28969",
-        "color15": "#F6E8DF"
+        "color0": "#04111B",
+        "color1": "#F5A030",
+        "color2": "#46779D",
+        "color3": "#627486",
+        "color4": "#E8C080",
+        "color5": "#7A98B8",
+        "color6": "#A45D24",
+        "color7": "#CBDEEE",
+        "color8": "#667785",
+        "color9": "#FFCA92",
+        "color10": "#6395BD",
+        "color11": "#7F92A5",
+        "color12": "#FED89C",
+        "color13": "#98B7D8",
+        "color14": "#C57B44",
+        "color15": "#E4F0FB"
     }
 }

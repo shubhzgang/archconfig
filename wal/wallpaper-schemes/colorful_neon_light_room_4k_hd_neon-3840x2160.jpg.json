@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/colorful_neon_light_room_4k_hd_neon-3840x2160.jpg",
     "alpha": "100",
     "special": {
-        "background": "#1B0811",
-        "foreground": "#DFCBD3",
-        "cursor": "#DFCBD3"
+        "background": "#100D1B",
+        "foreground": "#DBD7ED",
+        "cursor": "#DBD7ED"
     },
     "colors": {
-        "color0": "#1B0811",
-        "color1": "#DE4797",
-        "color2": "#8466C2",
-        "color3": "#FC797A",
-        "color4": "#D53543",
-        "color5": "#4ABBA4",
-        "color6": "#A55D97",
-        "color7": "#DFCBD3",
-        "color8": "#806B73",
-        "color9": "#FC6FB5",
-        "color10": "#A284E3",
-        "color11": "#FCB0AD",
-        "color12": "#FA5960",
-        "color13": "#6EDCC3",
-        "color14": "#C67AB6",
-        "color15": "#F7E6ED"
+        "color0": "#100D1B",
+        "color1": "#FF2A80",
+        "color2": "#7C4FD6",
+        "color3": "#7566A2",
+        "color4": "#FFB060",
+        "color5": "#30D8B0",
+        "color6": "#C040D0",
+        "color7": "#DBD7ED",
+        "color8": "#757185",
+        "color9": "#FC85A5",
+        "color10": "#996FF9",
+        "color11": "#9384C2",
+        "color12": "#FDD6B2",
+        "color13": "#5FFAD0",
+        "color14": "#E263F2",
+        "color15": "#EFECFB"
     }
 }

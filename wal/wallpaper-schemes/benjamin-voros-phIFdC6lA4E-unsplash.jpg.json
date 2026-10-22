@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/benjamin-voros-phIFdC6lA4E-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#05101E",
-        "foreground": "#C6D2E2",
-        "cursor": "#C6D2E2"
+        "background": "#090F1C",
+        "foreground": "#D1DBEF",
+        "cursor": "#D1DBEF"
     },
     "colors": {
-        "color0": "#05101E",
-        "color1": "#547CB0",
-        "color2": "#7175A9",
-        "color3": "#C19FD2",
-        "color4": "#5E7BAA",
-        "color5": "#8F87BD",
-        "color6": "#E9B0D4",
-        "color7": "#C6D2E2",
-        "color8": "#667383",
-        "color9": "#719BD0",
-        "color10": "#8F93C9",
-        "color11": "#E2BFF3",
-        "color12": "#7B99CA",
-        "color13": "#AEA6DE",
-        "color14": "#FDCEEB",
-        "color15": "#E2ECF9"
+        "color0": "#090F1C",
+        "color1": "#D890E0",
+        "color2": "#476EBF",
+        "color3": "#61738C",
+        "color4": "#8A70D0",
+        "color5": "#D4D8DF",
+        "color6": "#5A90C8",
+        "color7": "#D1DBEF",
+        "color8": "#6B7587",
+        "color9": "#F7B2FE",
+        "color10": "#638DE0",
+        "color11": "#7E91AB",
+        "color12": "#A88FF2",
+        "color13": "#DADEE5",
+        "color14": "#78AFE9",
+        "color15": "#E8EFFC"
     }
 }

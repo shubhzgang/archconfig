@@ -2,26 +2,26 @@
     "wallpaper": "/home/shubham/wallpapers/walls/prometey-sanchez-noskov-c6M7AoevSXE-unsplash.jpg",
     "alpha": "100",
     "special": {
-        "background": "#1C0A04",
-        "foreground": "#E0CCC4",
-        "cursor": "#E0CCC4"
+        "background": "#170A15",
+        "foreground": "#E7D4E3",
+        "cursor": "#E7D4E3"
     },
     "colors": {
-        "color0": "#1C0A04",
-        "color1": "#FC8044",
-        "color2": "#BF525A",
-        "color3": "#A96079",
-        "color4": "#E5C139",
-        "color5": "#98688D",
-        "color6": "#FDAC20",
-        "color7": "#E0CCC4",
-        "color8": "#816C63",
-        "color9": "#FCB495",
-        "color10": "#E27077",
-        "color11": "#CA7E97",
-        "color12": "#FDDC67",
-        "color13": "#B886AC",
-        "color14": "#FED7A4",
-        "color15": "#F8E7E1"
+        "color0": "#170A15",
+        "color1": "#FF9A20",
+        "color2": "#A04E95",
+        "color3": "#83658A",
+        "color4": "#E86080",
+        "color5": "#FFD040",
+        "color6": "#C04060",
+        "color7": "#E7D4E3",
+        "color8": "#806E7C",
+        "color9": "#FDCB9E",
+        "color10": "#C16CB4",
+        "color11": "#A282A9",
+        "color12": "#FD8DA2",
+        "color13": "#FDDB7D",
+        "color14": "#E3607D",
+        "color15": "#F7EAF4"
     }
 }
