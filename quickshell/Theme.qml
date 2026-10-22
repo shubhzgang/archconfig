@@ -95,8 +95,11 @@ Item {
 
     // ---- live wallpaper: blue-tinted white, grey and black instead of the wallpaper's colors ----
     // While mpvpaper is running there is no single wallpaper to take colors from, so the theme goes
-    // neutral (still darker or lighter by mode).
+    // neutral (still darker or lighter by mode). Checked once at startup, and again whenever
+    // hypr/mpvpaper.sh starts or ends a live wallpaper (`qs ipc call theme checkLive`).
     property bool live: false
+    function checkLive() { liveCheck.running = true }
+    Component.onCompleted: checkLive()
     Process {
         id: liveCheck
         command: ["pgrep", "-x", "mpvpaper"]
@@ -106,13 +109,6 @@ Item {
             root.live = running
             root.applyTheme()
         }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: liveCheck.running = true
     }
     readonly property var neutral: ({
         dark: { bar: ["#0e1118", "#1b2230"], ink: "#e2e8f2", textOnInk: "#0e1118", hover: "#cfe0ff", dark: "#e8edf6",
@@ -211,9 +207,10 @@ Item {
         onLoadFailed: root.endPreview()   // no palette for this wallpaper yet: show the current one
     }
 
+    // the wal files are watched: a new wallpaper's colors arrive as soon as they are written
     JsonFile {
         path: Quickshell.env("HOME") + "/.cache/wal/colors.json"
-        interval: 2000
+        watch: true
         onValueChanged: {
             root.realColors = value
             if (!root.previewing) root.applyReal()
@@ -222,6 +219,8 @@ Item {
     FileView {
         id: barCss
         path: Quickshell.env("HOME") + "/.cache/wal/colors-waybar-bar.css"
+        watchChanges: true
+        onFileChanged: reload()
         property string lastText: ""
         onLoaded: {
             if (barCss.text() === lastText) return   // unchanged: don't re-apply (and redraw) the same colors
@@ -232,12 +231,5 @@ Item {
             root.realBar = [start[1], end[1]]
             if (!root.previewing) root.setColors(root.realColors, root.realBar)
         }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: barCss.reload()
     }
 }

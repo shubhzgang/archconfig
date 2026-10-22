@@ -29,7 +29,9 @@ Item {
         command: ["sh", "-c", "checkupdates | wc -l"]
         stdout: StdioCollector { onStreamFinished: section.pacmanCount = text.trim() || "0" }
     }
-    Timer { interval: 30000; running: true; repeat: true; triggeredOnStart: true; onTriggered: pacmanCheck.running = true }
+    // every 30 minutes (checkupdates syncs a copy of the package databases over the network), and
+    // again after an update has run
+    Timer { interval: 30 * 60 * 1000; running: true; repeat: true; triggeredOnStart: true; onTriggered: pacmanCheck.running = true }
     Process {
         id: pacmanUpdate
         command: ["kitty", "sh", "-c", "yay -Syu; echo Done - Press enter to exit; read"]

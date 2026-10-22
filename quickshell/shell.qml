@@ -133,6 +133,7 @@ ShellRoot {
             function cycle(): void { theme.cycleMode() }
             function set(mode: string): void { theme.setMode(mode) }
             function opacity(level: real): void { theme.setOpacity(level, true) }
+            function checkLive(): void { theme.checkLive() }   // hypr/mpvpaper.sh: a live wallpaper started or ended
         }
 
         IpcHandler {   // qs ipc call clipboard toggle|open|close
