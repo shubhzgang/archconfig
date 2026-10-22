@@ -1,66 +1,8 @@
 #!/bin/bash
-WALLPAPER_DIR="$HOME/wallpapers/walls"
-# Photo 2x the 196x130 size it is shown at (center-cropped to the wallpaper picker card shape
-# so the card margin is even on all sides), so it stays sharp, plus a 12px margin for the shadow
-THUMB_DIR="$HOME/.cache/hypr-wallpaper-thumbs-416x284"
-THUMB_W=392
-THUMB_H=260
-
-THUMB_MASK="$HOME/.cache/wal/rofi-thumb-mask.png"
-THUMB_SHADOW="$HOME/.cache/wal/rofi-thumb-shadow.png"
-
-export WALLPAPER_DIR THUMB_DIR THUMB_W THUMB_H THUMB_MASK THUMB_SHADOW
-
-make_thumb() {
-    local file="$1"
-    local rel="${file#"$WALLPAPER_DIR"/}"
-    local thumb="$THUMB_DIR/$rel.png"
-    mkdir -p "$(dirname "$thumb")"
-    if [ -f "$thumb" ] && [ "$thumb" -nt "$file" ]; then
-        return
-    fi
-    # Crop to size, round the corners (mask) and set the photo on its soft shadow, both
-    # rendered by rofi/make-cards.py; without them fall back to a plain thumbnail.
-    if [ -f "$THUMB_MASK" ] && [ -f "$THUMB_SHADOW" ]; then
-        magick "$THUMB_SHADOW" \( "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" \
-            "$THUMB_MASK" -alpha off -compose CopyOpacity -composite \) \
-            -gravity center -compose over -composite "$thumb" 2>/dev/null
-    else
-        magick "${file}[0]" -resize "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" -quality 80 "$thumb" 2>/dev/null
-    fi
-}
-export -f make_thumb
-
-menu() {
-    local files=()
-    while IFS= read -r -d '' f; do files+=("$f"); done < <(
-        find "${WALLPAPER_DIR}" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) -print0
-    )
-    printf '%s\0' "${files[@]}" | xargs -0 -P "$(nproc)" -n1 bash -c 'make_thumb "$@"' _
-    local f
-    for f in "${files[@]}"; do
-        rel="${f#"$WALLPAPER_DIR"/}"
-        printf '%s\0icon\x1f%s\n' "$rel" "$THUMB_DIR/$rel.png"
-    done
-}
-
+# Applies the wallpaper given as the first argument (the Quickshell wallpaper picker runs this).
 main() {
-    if [ -n "$1" ]; then
-        # a path was given (the Quickshell wallpaper picker): no menu
-        selected_wallpaper="$1"
-    else
-        # thumbnail shading assets (fresh checkout): render them before thumbnails are made
-        [ -f "$THUMB_MASK" ] || ~/.config/rofi/make-cards.py
-
-        choice=$(menu | rofi -dmenu -show-icons -theme ~/.config/rofi/wallpaper.rasi -p "Select Wallpaper")
-
-        # SAFETY CHECK: Exit the script immediately if you hit escape or close rofi without picking anything
-        if [ -z "$choice" ]; then
-            exit 0
-        fi
-
-        selected_wallpaper="$WALLPAPER_DIR/$choice"
-    fi
+    selected_wallpaper="$1"
+    [ -f "$selected_wallpaper" ] || { echo "usage: $0 <wallpaper image>" >&2; exit 1; }
 
     # 1. Apply wallpaper
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
