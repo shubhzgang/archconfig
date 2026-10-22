@@ -485,12 +485,25 @@ hl.window_rule({
 })
 
 -- Blur behind the Quickshell frame and panels (the opacity slider makes them see-through).
--- ignore_alpha: only blur where something is drawn, not the fully transparent rest of the screen-sized surface.
+-- ignore_alpha sits just under the frame's own opacity (saved by the slider), so only the frame is
+-- blurred: not the transparent rest of the screen-sized surface, and not the frame's fainter
+-- anti-aliased edge pixels, where the blur would pull light from under the frame into a thin line
+-- along its curves. Quickshell sets the same rule live when the slider moves (Theme.qml).
+local function quickshell_opacity()
+    local file = io.open(HOME .. "/.cache/quickshell-opacity", "r")
+    if not file then
+        return 1
+    end
+    local value = tonumber(file:read("*l"))
+    file:close()
+    return value or 1
+end
+
 hl.layer_rule({
     name = "quickshell-blur",
     match = { namespace = "^qs-shell$" },
     blur = true,
-    ignore_alpha = 0.05,
+    ignore_alpha = quickshell_opacity() * 0.9,
 })
 
 -- pyprland scratchpads (drop terminal, ...) come up with a magenta

@@ -11,8 +11,8 @@ Item {
 
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int side: 10      // its bottom band
-    readonly property real openW: 480
-    readonly property real openH: 130
+    readonly property real openW: 260
+    readonly property real openH: 74
     property real panelW: 0
 
     readonly property real minLevel: 0.10
@@ -57,9 +57,9 @@ Item {
 
     Item {
         id: content
-        x: 24; y: 20
-        width: panel.openW - 48      // fixed, so nothing reflows while the panel slides out
-        height: panel.openH - 40
+        x: 14; y: 10
+        width: panel.openW - 28      // fixed, so nothing reflows while the panel slides out
+        height: panel.openH - 20
         opacity: 0
         visible: opacity > 0
 
@@ -75,7 +75,7 @@ Item {
             text: "Opacity"
             color: panel.theme.ink
             font.family: "CodeNewRoman Nerd Font Mono"
-            font.pixelSize: 19
+            font.pixelSize: 14
             font.bold: true
         }
         Text {
@@ -83,18 +83,18 @@ Item {
             text: Math.round(panel.theme.opacityLevel * 100) + "%"
             color: panel.theme.ink
             font.family: "CodeNewRoman Nerd Font Mono"
-            font.pixelSize: 19
+            font.pixelSize: 14
         }
 
         Item {
             id: slider
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-            height: 40
+            height: 26
             readonly property real frac: (panel.theme.opacityLevel - panel.minLevel) / (1 - panel.minLevel)
 
             Rectangle {   // track
                 anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
-                height: 8; radius: 4
+                height: 6; radius: 3
                 color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.25)
                 Rectangle {   // the part up to the handle
                     width: parent.width * slider.frac
@@ -105,7 +105,7 @@ Item {
             Rectangle {   // handle
                 x: (slider.width - width) * slider.frac
                 anchors.verticalCenter: parent.verticalCenter
-                width: 26; height: 26; radius: 13
+                width: 18; height: 18; radius: 9
                 color: panel.theme.ink
                 border.width: 3
                 border.color: panel.theme.accent
@@ -114,7 +114,7 @@ Item {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 function setFrom(x, final) {
-                    const f = Math.max(0, Math.min(1, (x - 13) / (width - 26)))
+                    const f = Math.max(0, Math.min(1, (x - 9) / (width - 18)))
                     const v = panel.minLevel + f * (1 - panel.minLevel)
                     panel.theme.setOpacity(Math.round(v / panel.step) * panel.step, final)
                 }

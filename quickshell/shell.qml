@@ -31,6 +31,21 @@ ShellRoot {
         }
     }
 
+    // The frame's inner shadow, on its own surface just below the shell's: Hyprland blurs behind the
+    // shell's surface (for the opacity slider), and that blur must not reach the windows under the shadow.
+    PanelWindow {
+        anchors { top: true; left: true; right: true; bottom: true }
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.namespace: "qs-shadow"
+        mask: Region {}
+        FrameShadow {
+            anchors.fill: parent
+            frame: frame
+        }
+    }
+
     PanelWindow {
         id: win
         property bool open: false          // stats panel

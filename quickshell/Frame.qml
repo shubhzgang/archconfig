@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Shapes
 
 // The frame around the monitor, drawn as one gradient-filled shape with no outline: the top band
@@ -85,37 +84,7 @@ Item {
         return d
     }
 
-    // ---- inlet shadow: dark for a while, then fading out (like a window's shadow) ----
-    // The frame's shape, grown inward by a black stroke along its inner edge (the dark stretch),
-    // then blurred (the fade). `shadowGrow` is how far in it stays dark; `shadowFade` is the blur.
-    readonly property real shadowGrow: 10
-    readonly property real shadowFade: 24
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            blurEnabled: true
-            blurMax: frame.shadowFade
-            blur: 1.0
-        }
-        ShapePath {
-            fillRule: ShapePath.OddEvenFill
-            strokeColor: "transparent"
-            strokeWidth: 0
-            fillColor: "#a6000000"
-            PathSvg {
-                path: `M -20 -20 L ${frame.width + 20} -20 L ${frame.width + 20} ${frame.height + 20} `
-                    + `L -20 ${frame.height + 20} Z ` + frame.hole
-            }
-        }
-        ShapePath {
-            fillColor: "transparent"
-            strokeColor: "#a6000000"
-            strokeWidth: frame.shadowGrow * 2
-            PathSvg { path: frame.hole }
-        }
-    }
+    // (the frame's inner shadow is drawn by FrameShadow.qml, on its own surface below this one)
 
     // ---- fill: gradient across the screen ----
     Shape {

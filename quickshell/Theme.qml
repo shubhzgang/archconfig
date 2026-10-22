@@ -42,9 +42,21 @@ Item {
     property real opacityLevel: 1.0
     readonly property string opacityFile: Quickshell.env("HOME") + "/.cache/quickshell-opacity"
     function setOpacity(level, save) {   // save: the slider was let go (or a key pressed), not mid-drag
-        opacityLevel = Math.max(0.1, Math.min(1, level))
+        level = Math.max(0.1, Math.min(1, level))
+        if (level !== opacityLevel || !blurSynced) syncBlur(level)
+        opacityLevel = level
         applyTheme()
         if (save) savedOpacity.setText(String(opacityLevel))
+    }
+    // Hyprland blurs behind the shell only where it is at least this opaque: just under the frame's
+    // own opacity, so the frame's fainter anti-aliased edge pixels aren't blurred (the blur pulled
+    // light from under the frame into a thin line along its curves). Same rule as in hyprland.lua,
+    // which reads the saved level when the config is reloaded.
+    property bool blurSynced: false
+    function syncBlur(level) {
+        blurSynced = true
+        Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
+            + "match = { namespace = \"^qs-shell$\" }, blur = true, ignore_alpha = " + (level * 0.9).toFixed(3) + " })"])
     }
     FileView {
         id: savedOpacity
