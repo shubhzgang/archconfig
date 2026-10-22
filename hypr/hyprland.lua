@@ -503,7 +503,7 @@ end
 
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-shell$" },
+    match = { namespace = "^qs-(shell|stats)$" },
     blur = true,
     xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,

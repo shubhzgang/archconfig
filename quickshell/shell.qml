@@ -3,6 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import QtQuick.Shapes
 
 ShellRoot {
     Theme { id: theme }
@@ -33,6 +34,7 @@ ShellRoot {
 
     // The frame's inner shadow, on its own surface just below the shell's: Hyprland blurs behind the
     // shell's surface (for the opacity slider), and that blur must not reach the windows under the shadow.
+    // The stats corner's shadow is drawn by its own surface (below), so it is cut out here.
     PanelWindow {
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -42,7 +44,33 @@ ShellRoot {
         mask: Region {}
         FrameShadow {
             anchors.fill: parent
-            frame: frame
+            hole: frame.hole
+            keepPath: frame.holeWithoutStats
+        }
+    }
+
+    // The stats corner (statsRect) on its own surfaces: its shadow, and its piece of the frame with
+    // the stats panel. The stats animation then only redraws this corner, not the whole screen (the
+    // display runs on the integrated GPU). 40px larger than the corner on the left and below, so the
+    // shadow's blur has the frame's outline beyond the corner to work from and meets the screen's
+    // shadow without a seam.
+    PanelWindow {
+        id: statsShadowWin
+        anchors { top: true; right: true }
+        implicitWidth: frame.width - frame.statsRect[0] + 40
+        implicitHeight: frame.statsRect[1] + frame.statsRect[3] + 40
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.namespace: "qs-stats-shadow"
+        mask: Region {}
+        FrameShadow {
+            anchors.fill: parent
+            hole: frame.statsHole
+            originX: frame.width - width
+            screenW: frame.width
+            screenH: frame.height
+            keepRect: frame.statsRect
         }
     }
 
@@ -86,7 +114,7 @@ ShellRoot {
         // screen does, so a click outside closes it.
         mask: Region {
             regions: [
-                Region { item: win.anyOpen ? backdrop : stats },
+                Region { item: win.anyOpen ? backdrop : nothing },
                 Region { item: calendar },
                 Region { item: launcher },
                 Region { item: wallpaper },
@@ -100,6 +128,8 @@ ShellRoot {
                 Region { item: opacityButton }
             ]
         }
+
+        Item { id: nothing }   // an empty input region
 
         Item {
             id: backdrop
@@ -266,10 +296,54 @@ ShellRoot {
             onClicked: win.liveOpen = !win.liveOpen
         }
 
+    }
+
+    // The stats corner's piece of the frame and the stats panel (see statsShadowWin above).
+    PanelWindow {
+        id: statsWin
+        anchors { top: true; right: true }
+        implicitWidth: frame.width - frame.statsRect[0]
+        implicitHeight: frame.statsRect[1] + frame.statsRect[3]
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.namespace: "qs-stats"
+        mask: Region { item: stats }
+
+        Item {   // the frame inside the corner: everything outside statsHole, clipped to statsRect
+            x: frame.statsRect[0] - (frame.width - statsWin.width)
+            y: frame.statsRect[1]
+            width: frame.statsRect[2]
+            height: frame.statsRect[3]
+            clip: true
+            Shape {
+                x: -frame.statsRect[0]
+                y: -frame.statsRect[1]
+                width: frame.width; height: frame.height
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    fillRule: ShapePath.OddEvenFill
+                    strokeColor: "transparent"
+                    strokeWidth: 0
+                    fillGradient: LinearGradient {   // the frame's gradient, in screen coordinates
+                        x1: 0; y1: 0; x2: frame.width; y2: 0
+                        GradientStop { position: 0.0; color: theme.barEnd }
+                        GradientStop { position: 0.5; color: theme.barStart }
+                        GradientStop { position: 1.0; color: theme.barEnd }
+                    }
+                    PathSvg {
+                        path: `M -20 -20 L ${frame.width + 20} -20 L ${frame.width + 20} ${frame.height + 20} `
+                            + `L -20 ${frame.height + 20} Z ` + frame.statsHole
+                    }
+                }
+            }
+        }
+
         StatsCorner {
             id: stats
             theme: theme
             open: win.open
+            maxH: frame.statsRect[3] - 20 - 40   // room below for its concave join and the shadows' overlap
             onToggle: win.open = !win.open
         }
     }

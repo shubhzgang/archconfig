@@ -11,7 +11,7 @@ Item {
     signal toggle()
 
     // Geometry shared with Frame.qml: the numbers live in the top band; the panel hangs from the
-    // band at the right and is drawn by the frame itself (its outline flows into the frame).
+    // band at the right and its piece of the frame is drawn on the stats corner's surface (shell.qml).
     readonly property int band: 48
     readonly property int side: 10         // the frame's side bands (Frame.qml)
     readonly property int collapsedW: 900
@@ -39,7 +39,8 @@ Item {
     // size of the panel below the band; expanded: fit the cards, same 16px space at top and bottom
     readonly property real openW: 1000
     readonly property int controlsH: 34    // the sampling controls row above the cards
-    readonly property real openH: Math.min(parent.height - band - side - 20, controlsH + 12 + cards.implicitHeight + 32)
+    property real maxH: 1800               // the most the panel may grow below the band (shell.qml: its corner's size)
+    readonly property real openH: Math.min(maxH, controlsH + 12 + cards.implicitHeight + 32)
     property real panelW: collapsedW
     property real panelH: 0
     anchors { top: parent.top; right: parent.right; rightMargin: side }
