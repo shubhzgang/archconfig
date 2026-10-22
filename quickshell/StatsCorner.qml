@@ -82,11 +82,9 @@ Item {
     function last(a) { return a && a.length ? a[a.length - 1] : 0 }
 
     readonly property string rundir: Quickshell.env("XDG_RUNTIME_DIR") + "/sysstats/"
-    JsonFile { id: stateFile; path: corner.rundir + "state.json" }
-    JsonFile { id: cpuFile; path: corner.rundir + "cpu.json" }
-    JsonFile { id: memFile; path: corner.rundir + "mem.json" }
-    JsonFile { id: netFile; path: corner.rundir + "net.json" }
-    JsonFile { id: gpuFile; path: corner.rundir + "gpu.json" }
+    // the full history only matters while the panel is open (re-read at once when it opens); reading
+    // and parsing it every second while closed kept redrawing the screen-sized shell surface
+    JsonFile { id: stateFile; path: corner.rundir + "state.json"; active: corner.open }
 
     // click anywhere on it to morph between the numbers and the panel (Escape and a click
     // outside also close it, see shell.qml). Declared before the panel so the buttons inside
@@ -97,40 +95,7 @@ Item {
         onClicked: corner.toggle()
     }
 
-    // ---- the numbers, as in waybar; they stay when the panel is open ----
-    Row {
-        id: numbers
-        height: corner.collapsedH
-        // stays where it is on screen (centered in the collapsed width) while the panel grows below it;
-        // when the numbers get wider than that (a fast network speed) it grows to the left, never past
-        // 24px from the screen's edge
-        anchors { top: parent.top; topMargin: (corner.band - corner.collapsedH) / 2
-                  right: parent.right; rightMargin: Math.max((corner.collapsedW - width) / 2, 24) }
-        spacing: 0
-
-        Repeater {
-            model: [cpuFile, memFile, netFile, gpuFile]
-            delegate: Item {
-                required property var modelData
-                required property int index
-                width: label.implicitWidth + 36
-                height: corner.collapsedH
-                Rectangle {   // thin divider between modules
-                    visible: index > 0
-                    width: 1; height: parent.height - 12; anchors.verticalCenter: parent.verticalCenter
-                    color: Qt.rgba(corner.theme.ink.r, corner.theme.ink.g, corner.theme.ink.b, 0.2)
-                }
-                Text {
-                    id: label
-                    anchors.centerIn: parent
-                    text: modelData.value.text || ""
-                    color: corner.theme.ink
-                    font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 15
-                }
-            }
-        }
-    }
+    // (the numbers themselves are StatsNumbers.qml, on the bar surface above this one)
 
     // ---- expanded: the panel ----
     Item {

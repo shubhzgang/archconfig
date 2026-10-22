@@ -87,9 +87,6 @@ ShellRoot {
         mask: Region {
             regions: [
                 Region { item: win.anyOpen ? backdrop : stats },
-                Region { item: leftSection },
-                Region { item: centerSection },
-                Region { item: leftSection.tipRect },
                 Region { item: calendar },
                 Region { item: launcher },
                 Region { item: wallpaper },
@@ -228,19 +225,6 @@ ShellRoot {
             onToggle: win.opacityOpen = !win.opacityOpen
         }
 
-        CenterSection {
-            id: centerSection
-            theme: theme
-        }
-
-        LeftSection {
-            id: leftSection
-            theme: theme
-            win: win
-            onCalendarToggle: win.calOpen = !win.calOpen
-            onLauncherToggle: win.launcherOpen = !win.launcherOpen
-        }
-
         ThemeButton {
             id: themeButton
             theme: theme
@@ -286,6 +270,47 @@ ShellRoot {
             id: stats
             theme: theme
             open: win.open
+            onToggle: win.open = !win.open
+        }
+    }
+
+    // The bar's own items (clock, tray, workspace dots, stats numbers) on a thin surface above the
+    // shell's: they change every second, and on the screen-sized shell surface each change redrew and
+    // recomposited the whole screen (the display runs on the integrated GPU). Tall enough for the
+    // left section's tooltips, which hang below the bar; only the items take the mouse.
+    PanelWindow {
+        id: barWin
+        anchors { top: true; left: true; right: true }
+        implicitHeight: 120
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.namespace: "qs-bar"
+        mask: Region {
+            regions: [
+                Region { item: leftSection },
+                Region { item: leftSection.tipRect },
+                Region { item: centerSection },
+                Region { item: statsNumbers }
+            ]
+        }
+
+        LeftSection {
+            id: leftSection
+            theme: theme
+            win: barWin
+            onCalendarToggle: win.calOpen = !win.calOpen
+            onLauncherToggle: win.launcherOpen = !win.launcherOpen
+        }
+
+        CenterSection {
+            id: centerSection
+            theme: theme
+        }
+
+        StatsNumbers {
+            id: statsNumbers
+            theme: theme
             onToggle: win.open = !win.open
         }
     }

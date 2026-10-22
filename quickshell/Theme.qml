@@ -222,7 +222,10 @@ Item {
     FileView {
         id: barCss
         path: Quickshell.env("HOME") + "/.cache/wal/colors-waybar-bar.css"
+        property string lastText: ""
         onLoaded: {
+            if (barCss.text() === lastText) return   // unchanged: don't re-apply (and redraw) the same colors
+            lastText = barCss.text()
             const start = /bar_start (#\w{6})/.exec(barCss.text())
             const end = /bar_end (#\w{6})/.exec(barCss.text())
             if (!start || !end) return
