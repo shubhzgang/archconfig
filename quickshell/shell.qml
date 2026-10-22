@@ -37,12 +37,25 @@ ShellRoot {
         property bool calOpen: false       // calendar panel
         property bool launcherOpen: false  // app launcher panel
         property bool wallOpen: false      // wallpaper picker (bottom)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen
-        // the two left panels share the same spot, so only one can be open; the picker also takes the keyboard, so it is alone too
-        onCalOpenChanged: if (calOpen) { launcherOpen = false; wallOpen = false }
-        onLauncherOpenChanged: if (launcherOpen) { calOpen = false; wallOpen = false }
-        onWallOpenChanged: if (wallOpen) { open = false; calOpen = false; launcherOpen = false }
-        onOpenChanged: if (open) wallOpen = false
+        property bool clipOpen: false      // clipboard history (bottom left)
+        property bool liveOpen: false      // live wallpaper links (bottom left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen
+        // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
+        // live wallpaper list also take the keyboard, so they are alone too
+        function closeOthers(except) {
+            if (except !== "stats") open = false
+            if (except !== "cal") calOpen = false
+            if (except !== "launcher") launcherOpen = false
+            if (except !== "wall") wallOpen = false
+            if (except !== "clip") clipOpen = false
+            if (except !== "live") liveOpen = false
+        }
+        onOpenChanged: if (open) closeOthers("stats")
+        onCalOpenChanged: if (calOpen) closeOthers("cal")
+        onLauncherOpenChanged: if (launcherOpen) closeOthers("launcher")
+        onWallOpenChanged: if (wallOpen) closeOthers("wall")
+        onClipOpenChanged: if (clipOpen) closeOthers("clip")
+        onLiveOpenChanged: if (liveOpen) closeOthers("live")
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -63,7 +76,11 @@ ShellRoot {
                 Region { item: launcher },
                 Region { item: wallpaper },
                 Region { item: themeButton },
-                Region { item: wallpaperButton }
+                Region { item: wallpaperButton },
+                Region { item: clipboard },
+                Region { item: clipboardButton },
+                Region { item: live },
+                Region { item: liveButton }
             ]
         }
 
@@ -71,8 +88,8 @@ ShellRoot {
             id: backdrop
             anchors.fill: parent
             focus: true
-            Keys.onEscapePressed: { win.open = false; win.calOpen = false; win.launcherOpen = false; win.wallOpen = false }
-            MouseArea { anchors.fill: parent; onClicked: { win.open = false; win.calOpen = false; win.launcherOpen = false; win.wallOpen = false } }
+            Keys.onEscapePressed: win.closeOthers("")
+            MouseArea { anchors.fill: parent; onClicked: win.closeOthers("") }
         }
 
         IpcHandler {   // qs ipc call stats toggle|open|close|sampling <s> <points>
@@ -103,6 +120,20 @@ ShellRoot {
             function set(mode: string): void { theme.setMode(mode) }
         }
 
+        IpcHandler {   // qs ipc call clipboard toggle|open|close
+            target: "clipboard"
+            function toggle(): void { win.clipOpen = !win.clipOpen }
+            function open(): void { win.clipOpen = true }
+            function close(): void { win.clipOpen = false }
+        }
+
+        IpcHandler {   // qs ipc call mpvpaper toggle|open|close
+            target: "mpvpaper"
+            function toggle(): void { win.liveOpen = !win.liveOpen }
+            function open(): void { win.liveOpen = true }
+            function close(): void { win.liveOpen = false }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -120,6 +151,10 @@ ShellRoot {
             leftH: Math.max(calendar.panelH, launcher.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
+            // the bottom-left panel: whichever of the two is further out
+            clipW: Math.max(clipboard.panelW, live.panelW)
+            clipY: clipboard.panelW >= live.panelW ? clipboard.y : live.y
+            clipH: clipboard.panelW >= live.panelW ? clipboard.height : live.height
         }
 
         CalendarPanel {
@@ -143,6 +178,20 @@ ShellRoot {
             onToggle: win.wallOpen = !win.wallOpen
         }
 
+        ClipboardPanel {
+            id: clipboard
+            theme: theme
+            open: win.clipOpen
+            onToggle: win.clipOpen = !win.clipOpen
+        }
+
+        LiveWallpaperPanel {
+            id: live
+            theme: theme
+            open: win.liveOpen
+            onToggle: win.liveOpen = !win.liveOpen
+        }
+
         CenterSection {
             id: centerSection
             theme: theme
@@ -161,11 +210,31 @@ ShellRoot {
             theme: theme
         }
 
-        WallpaperButton {
+        DockButton {   // wallpaper picker
             id: wallpaperButton
             theme: theme
+            glyph: 0xF0E09
+            slot: 0
             active: win.wallOpen
             onClicked: win.wallOpen = !win.wallOpen
+        }
+
+        DockButton {   // clipboard history
+            id: clipboardButton
+            theme: theme
+            glyph: 0xF014C
+            slot: 1
+            active: win.clipOpen
+            onClicked: win.clipOpen = !win.clipOpen
+        }
+
+        DockButton {   // live wallpaper
+            id: liveButton
+            theme: theme
+            glyph: 0xF0FCF
+            slot: 2
+            active: win.liveOpen
+            onClicked: win.liveOpen = !win.liveOpen
         }
 
         StatsCorner {

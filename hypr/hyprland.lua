@@ -62,7 +62,6 @@ local terminal = "kitty"
 local fileManager = "nautilus"
 
 
-local mpvpaper = "pkill mpvpaper; mpvpaper HDMI-A-1 $(~/.config/hypr/mpvpaper.sh)"
 
 local mainMod = "SUPER"
 
@@ -341,7 +340,7 @@ hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("pypr toggle music"))
-hl.bind(mainMod .. " + I", hl.dsp.exec_cmd(mpvpaper))
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call mpvpaper toggle"))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("mpv $(wl-paste)"))
@@ -356,10 +355,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pypr toggle term"))
 
-hl.bind(mainMod .. " + V",
-    hl.dsp.exec_cmd(
-        "cliphist list | rofi -dmenu -theme ~/.config/rofi/large.rasi -p Clipboard | cliphist decode | wl-copy"
-    ))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))

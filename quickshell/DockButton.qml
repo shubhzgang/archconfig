@@ -1,21 +1,24 @@
 import QtQuick
 
-// Button in the frame's left band, above the theme button, that opens the wallpaper picker.
+// Icon button in the frame's left band, stacked above the theme button (slot 0 is the first one
+// above it). It sits in the frame, where no windows are, so it can always take the mouse.
 Item {
     id: root
     required property var theme
-    property bool active: false         // the picker is open
+    required property int glyph         // Nerd Font code point
+    required property int slot
+    property bool active: false         // the panel it opens is open
     signal clicked()
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int size: 44      // the icon's hit area, centered in the band
 
-    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + size + 4 }   // above the theme button
+    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + (slot + 1) * (size + 4) }
     width: band
     height: size
 
     Text {
         anchors.centerIn: parent
-        text: String.fromCodePoint(0xF0E09)   // wallpaper
+        text: String.fromCodePoint(root.glyph)
         color: area.containsMouse || root.active ? root.theme.hover : root.theme.ink
         font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 26

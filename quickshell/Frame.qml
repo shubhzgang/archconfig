@@ -18,6 +18,9 @@ Item {
     property real leftH: 0
     property real bottomW: 0              // wallpaper picker rising from the bottom band, centered
     property real bottomH: 0
+    property real clipW: 0                // clipboard panel sliding out of the left band, in the bottom-left corner; clipY: its top
+    property real clipY: 0
+    property real clipH: 0
 
     anchors.fill: parent
 
@@ -34,6 +37,9 @@ Item {
     readonly property real lf: Math.min(20, leftH / 2, leftW / 2)        // left panel's concave joins
     readonly property real lr: Math.min(20, leftH, leftW / 2)            // its rounded bottom-right corner
     readonly property real lx: inL + leftW                               // left panel's right edge
+    readonly property bool clipOpen: clipW >= 1
+    readonly property real kf: Math.min(20, clipW / 2, clipH / 2)        // clipboard panel's concave joins
+    readonly property real kr: Math.min(20, clipW / 2, clipH / 2)        // its rounded top-right corner
     readonly property bool bottomOpen: bottomH >= 1
     readonly property real bf: Math.min(20, bottomH / 2, bottomW / 2)    // bottom panel's concave joins
     readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
@@ -61,7 +67,14 @@ Item {
                + `L ${brt} ${B - bottomH + br} A ${br} ${br} 0 0 0 ${brt - br} ${B - bottomH} `
                + `L ${bl + br} ${B - bottomH} A ${br} ${br} 0 0 0 ${bl} ${B - bottomH + br} `
                + `L ${bl} ${B - bf} A ${bf} ${bf} 0 0 1 ${bl - bf} ${B} `
-        d += `L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
+        // along the bottom edge to the left edge, round the clipboard panel in the bottom-left corner if it is out
+        if (clipOpen) {
+            const y0 = clipY, x1 = L + clipW
+            d += `L ${x1 + kf} ${B} A ${kf} ${kf} 0 0 1 ${x1} ${B - kf} `
+               + `L ${x1} ${y0 + kr} A ${kr} ${kr} 0 0 0 ${x1 - kr} ${y0} `
+               + `L ${L + kf} ${y0} A ${kf} ${kf} 0 0 1 ${L} ${y0 - kf} `
+        } else
+            d += `L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
         // up to the top-left corner, or round the calendar panel back up to the top edge
         if (leftOpen)
             d += `L ${L} ${T + leftH + lf} A ${lf} ${lf} 0 0 1 ${L + lf} ${T + leftH} `
