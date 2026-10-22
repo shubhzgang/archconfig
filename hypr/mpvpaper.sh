@@ -4,7 +4,7 @@
 URL="$1"
 [ -n "$URL" ] || { echo "usage: $0 <link>" >&2; exit 1; }
 
-pkill mpvpaper
+pkill -9 -x mpvpaper   # a plain kill leaves players that failed to load a link running
 if [[ "$URL" == *"list="* ]]; then
     exec mpvpaper HDMI-A-1 -o --shuffle "$URL"
 else

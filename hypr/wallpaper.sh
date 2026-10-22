@@ -4,6 +4,9 @@ main() {
     selected_wallpaper="$1"
     [ -f "$selected_wallpaper" ] || { echo "usage: $0 <wallpaper image>" >&2; exit 1; }
 
+    # 0. Stop any live wallpaper (a plain kill leaves players that failed to load a link running)
+    pkill -9 -x mpvpaper
+
     # 1. Apply wallpaper
     swww img "$selected_wallpaper" --transition-type any --resize crop --transition-fps 144 --transition-duration 1.5
     
