@@ -48,10 +48,15 @@ Item {
         Shape {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
+            // rendered and blurred at half resolution (a quarter of the pixels; a soft shadow looks
+            // the same): the display runs on the integrated GPU and this is redrawn on every frame of
+            // every panel animation. The blur works in texture pixels, so its radius is halved too.
             layer.enabled: true
+            layer.textureSize: Qt.size(width / 2, height / 2)
+            layer.smooth: true
             layer.effect: MultiEffect {
                 blurEnabled: true
-                blurMax: root.fade
+                blurMax: root.fade / 2
                 blur: 1.0
             }
             ShapePath {

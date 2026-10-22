@@ -126,7 +126,9 @@ hl.config({
             passes = 2,
             new_optimizations = true,
             ignore_opacity = true,
-            xray = false,
+            -- blur only the (cached) wallpaper, not whatever is behind each window: the display runs on
+            -- the integrated GPU, and re-blurring live content every frame halves the frame rate
+            xray = true,
             popups = true,
         },
 
@@ -503,6 +505,7 @@ hl.layer_rule({
     name = "quickshell-blur",
     match = { namespace = "^qs-shell$" },
     blur = true,
+    xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 

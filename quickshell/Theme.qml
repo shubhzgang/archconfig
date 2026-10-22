@@ -56,7 +56,7 @@ Item {
     function syncBlur(level) {
         blurSynced = true
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
-            + "match = { namespace = \"^qs-shell$\" }, blur = true, ignore_alpha = " + (level * 0.9).toFixed(3) + " })"])
+            + "match = { namespace = \"^qs-shell$\" }, blur = true, xray = true, ignore_alpha = " + (level * 0.9).toFixed(3) + " })"])
     }
     FileView {
         id: savedOpacity
