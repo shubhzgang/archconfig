@@ -7,7 +7,8 @@ import Quickshell.Widgets
 // Wallpaper picker that grows up out of the bottom band, drawn by the frame like the other panels.
 // A carousel of five equal thumbnails with a smaller one peeking in at each end. Left/Right (or the
 // wheel) move the selection across the five; the carousel only slides, by one, when the selection
-// steps onto a peeking one. It opens on the current wallpaper. Enter or a click on the selected
+// steps onto a peeking one. It wraps around at both ends (after the last wallpaper comes the first).
+// It opens on the current wallpaper. Enter or a click on the selected
 // one applies it (hypr/wallpaper.sh), a click on another one selects it, Escape closes.
 Item {
     id: panel
@@ -50,22 +51,28 @@ Item {
 
     // ---- wallpapers ----
     property var files: []
-    property int current: 0     // the selected wallpaper
+    // The carousel wraps around: after the last wallpaper comes the first again, and before the
+    // first the last. `cursor` and `first` count on without wrapping (so the slide always goes the
+    // short way, even across the wrap); `current` is the wallpaper they point at.
+    property int cursor: 0      // the selection
     property int first: 0       // the leftmost of the five shown at full size
+    readonly property int current: wrap(cursor)   // the selected wallpaper (index into files)
     property real position: 0   // `first`, animated
     property bool snap: false   // jump instead of sliding
     onFirstChanged: position = first
     Behavior on position { enabled: !panel.snap; NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-    function select(i) {
-        current = Math.max(0, Math.min(files.length - 1, i))
-        if (current < first) first = current
-        else if (current > first + 4) first = current - 4
+    function wrap(i) { const n = files.length; return n ? ((i % n) + n) % n : 0 }
+    function offset(d) { const n = files.length; return n ? d - n * Math.round(d / n) : d }   // shortest way round
+    function select(c) {   // move the selection to cursor value c
+        cursor = c
+        if (cursor < first) first = cursor
+        else if (cursor > first + 4) first = cursor - 4
         theme.preview(files[current])
     }
-    function show(i) {   // select i and put it in the middle of the five if there's room, without sliding
+    function show(i) {   // select wallpaper i and put it in the middle of the five, without sliding
         snap = true
-        current = i
-        first = Math.max(0, Math.min(files.length - 5, i - 2))
+        cursor = i
+        first = i - 2
         position = first
         snap = false
     }
@@ -91,7 +98,7 @@ Item {
         }
     }
 
-    function move(by) { select(current + by) }
+    function move(by) { if (files.length) select(cursor + by) }
     function apply(path) {
         if (!path) return
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", path])
@@ -177,7 +184,8 @@ Item {
                     id: thumb
                     required property string modelData
                     required property int index
-                    readonly property real d: index - panel.position - 2   // distance from the middle of the five
+                    // distance from the middle of the five, the short way round
+                    readonly property real d: panel.offset(index - panel.position - 2)
                     width: panel.thumbW; height: panel.thumbH
                     x: content.width / 2 - width / 2 + Math.sign(d) * panel.lerp(panel.centers, d)
                     y: 0
@@ -228,7 +236,8 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: index === panel.current ? panel.apply(thumb.modelData) : panel.select(index)
+                        onClicked: index === panel.current ? panel.apply(thumb.modelData)
+                                                           : panel.select(panel.cursor + panel.offset(index - panel.current))
                     }
                 }
             }
