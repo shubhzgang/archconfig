@@ -126,8 +126,9 @@ hl.config({
             passes = 2,
             new_optimizations = true,
             ignore_opacity = true,
-            -- blur only the (cached) wallpaper, not whatever is behind each window: the display runs on
-            -- the integrated GPU, and re-blurring live content every frame halves the frame rate
+            -- blur only the (cached) wallpaper, not whatever is behind each window, so most blur is
+            -- computed once; overlays (special workspaces, the launcher's column) opt out below to show
+            -- the windows behind them
             xray = true,
             popups = true,
         },
@@ -504,10 +505,27 @@ end
 
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-(shell|region-.+)$" },
+    match = { namespace = "^qs-(shell|region-stats|region-wall)$" },
     blur = true,
     xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,
+})
+
+-- the left column (launcher, calendar, clipboard, live wallpaper, opacity) shows the windows behind it
+hl.layer_rule({
+    name = "quickshell-blur-left",
+    match = { namespace = "^qs-region-left$" },
+    blur = true,
+    xray = false,
+    ignore_alpha = quickshell_opacity() * 0.9,
+})
+
+-- windows on special workspaces (Super+S, Alt+1-4, the pyprland scratchpads) show the workspace
+-- behind them instead of just the wallpaper
+hl.window_rule({
+    name = "special-see-through",
+    match = { workspace = "s[true]" },
+    xray = false,
 })
 
 -- pyprland scratchpads (drop terminal, ...) come up with a magenta
