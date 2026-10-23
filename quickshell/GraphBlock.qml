@@ -14,6 +14,7 @@ Item {
     property alias mirrored: graph.mirrored
     property alias ymax2: graph.ymax2
     property alias maxLabel2: graph.maxLabel2
+    property alias stacked: graph.stacked
 
     implicitHeight: 164   // the stats panel shrinks it so every graph fits
     height: implicitHeight

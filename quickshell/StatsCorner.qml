@@ -42,13 +42,13 @@ Item {
     property real maxH: 1800               // the most the panel may grow below the band (shell.qml: its corner's size)
     readonly property real openH: Math.min(maxH, controlsH + 12 + cards.implicitHeight + 32)
     // Every graph fits without scrolling: the graphs share the height left after the cards' fixed
-    // parts (padding, gaps), up to their full 164px
+    // parts (padding, gaps), up to their full 164px; the network graph gets two shares
     readonly property int gpuCount: Object.keys(st.gpus || {}).length
     readonly property int cardCount: 3 + gpuCount
-    readonly property int graphCount: 5 + 2 * gpuCount
-    readonly property int innerGaps: 2 + gpuCount   // the 10px gaps between graphs inside a card (RAM: 2, each GPU: 1)
+    readonly property int graphShares: 4 + 2 * gpuCount   // CPU 1, RAM 1, network 2, each GPU 2
+    readonly property int innerGaps: gpuCount   // the 10px gaps between graphs inside a card (each GPU: 1)
     readonly property real blockH: Math.min(164, Math.floor((maxH - (controlsH + 12 + 32) - cardCount * 28
-                                                            - (cardCount - 1) * 16 - innerGaps * 10) / graphCount))
+                                                            - (cardCount - 1) * 16 - innerGaps * 10) / graphShares))
     property real panelW: collapsedW
     property real panelH: 0
     anchors { top: parent.top; right: parent.right; rightMargin: side }
@@ -201,28 +201,31 @@ Item {
                 }
                 Card {
                     theme: corner.theme; width: parent.width
-                    Repeater {
-                        model: [
-                            { name: "used", key: "mem_used", color: 1 },
-                            { name: "cached", key: "mem_cached", color: 2 },
-                            { name: "free", key: "mem_free", color: -1 }
-                        ]
-                        delegate: GraphBlock {
-                            required property var modelData
-                            theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
-                            title: "RAM " + modelData.name
-                            value: corner.fmtBytes(corner.last(corner.st[modelData.key]))
-                            ymax: corner.st.mem_total || 1
-                            maxLabel: corner.fmtBytes(corner.st.mem_total || 0)
-                            series: [{ values: corner.st[modelData.key] || [],
-                                       color: modelData.color < 0 ? corner.theme.dark : corner.theme.series[modelData.color] }]
-                        }
+                    // used, with cached stacked on it; scaled to their peak (most of the RAM is
+                    // usually free, so a scale up to the total would squash both to the bottom)
+                    GraphBlock {
+                        readonly property var used: corner.st.mem_used || []
+                        readonly property var cached: corner.st.mem_cached || []
+                        readonly property string usedColor: String(corner.theme.series[1])
+                        readonly property string cachedColor: String(corner.theme.series[2])
+                        theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
+                        title: "RAM"
+                        value: "<font color='" + usedColor + "'>■</font> used " + corner.fmtBytes(corner.last(used))
+                               + "   <font color='" + cachedColor + "'>■</font> cached " + corner.fmtBytes(corner.last(cached))
+                               + "   free " + corner.fmtBytes(corner.last(corner.st.mem_free))
+                        stacked: true
+                        readonly property real gib: 1073741824
+                        ymax: Math.min(corner.st.mem_total || 1,
+                                       gib * corner.niceCeiling(Math.max(1, ...used.map((u, i) => (u + (cached[i] || 0)) / gib)) * 1.1))
+                        maxLabel: corner.fmtBytes(ymax)
+                        series: [{ values: used, color: usedColor },
+                                 { values: cached, color: cachedColor }]
                     }
                 }
                 Card {
                     theme: corner.theme; width: parent.width
                     GraphBlock {
-                        theme: corner.theme; width: parent.width; implicitHeight: corner.blockH; points: corner.points; interval: corner.interval
+                        theme: corner.theme; width: parent.width; implicitHeight: 2 * corner.blockH; points: corner.points; interval: corner.interval
                         mirrored: true
                         title: "Network"
                         value: "down " + corner.fmtBytes(corner.last(corner.st.net_down)) + "/s   up "

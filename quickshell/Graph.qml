@@ -1,6 +1,7 @@
 import QtQuick
 
 // Line graph with faint grid; one shared y-axis from zero. series: [{values: [], color: "#hex"}]
+// (series values must all be the same length when stacked)
 Canvas {
     id: root
     // painted on its own thread: repainting every graph when the stats panel opens would otherwise
@@ -19,6 +20,8 @@ Canvas {
     property bool mirrored: false
     property real ymax2: 100
     property string maxLabel2: ""
+    // stacked (RAM): each series is drawn on top of the ones before it, filled down to them
+    property bool stacked: false
 
     onSeriesChanged: requestPaint()
     onYmaxChanged: requestPaint()
@@ -26,6 +29,7 @@ Canvas {
     onIntervalChanged: requestPaint()
     onPointsChanged: requestPaint()
     onMirroredChanged: requestPaint()
+    onStackedChanged: requestPaint()
     onGridColorChanged: requestPaint()
     onLabelColorChanged: requestPaint()
 
@@ -58,7 +62,29 @@ Canvas {
         }
         ctx.textAlign = "left"
         const rgba = (c, a) => Qt.rgba(Qt.color(c).r, Qt.color(c).g, Qt.color(c).b, a)
-        for (let k = 0; k < series.length; k++) {
+        if (stacked) {
+            const px = (i, n) => w - (n - 1 - i) * step
+            const py = val => h - 1 - (h - 2) * Math.min(val / ymax, 1)
+            let below = null   // running totals of the series drawn so far
+            for (const s of series) {
+                const v = s.values
+                if (!v || v.length < 2) continue
+                const n = v.length
+                const top = v.map((x, i) => x + (below ? below[i] : 0))
+                ctx.beginPath()
+                ctx.moveTo(px(0, n), py(top[0]))
+                for (let i = 1; i < n; i++) ctx.lineTo(px(i, n), py(top[i]))
+                ctx.strokeStyle = s.color
+                ctx.lineWidth = 2
+                ctx.lineJoin = "round"
+                ctx.stroke()
+                for (let i = n - 1; i >= 0; i--) ctx.lineTo(px(i, n), py(below ? below[i] : 0))
+                ctx.closePath()
+                ctx.fillStyle = rgba(s.color, 0.3)
+                ctx.fill()
+                below = top
+            }
+        } else for (let k = 0; k < series.length; k++) {
             const s = series[k]
             const v = s.values
             if (!v || v.length < 2) continue
