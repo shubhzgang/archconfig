@@ -520,11 +520,18 @@ hl.layer_rule({
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
--- windows on special workspaces (Super+S, Alt+1-4, the pyprland scratchpads) show the workspace
--- behind them instead of just the wallpaper
+-- windows on special workspaces (Super+S, Alt+1-4) show the workspace behind them instead of just
+-- the wallpaper
 hl.window_rule({
     name = "special-see-through",
     match = { workspace = "s[true]" },
+    xray = false,
+})
+
+-- so do the pyprland scratchpads, which are moved onto the current workspace while shown
+hl.window_rule({
+    name = "scratchpad-see-through",
+    match = { class = "^kitty-(dropterm|pulsemixer)$" },
     xray = false,
 })
 
