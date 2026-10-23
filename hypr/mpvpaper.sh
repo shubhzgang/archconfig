@@ -7,11 +7,14 @@
 URL="$1"
 [ -n "$URL" ] || { echo "usage: $0 <link>" >&2; exit 1; }
 
+# The monitor is looked up each time, so it follows whichever connector the screen is plugged into.
+OUTPUT=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
+
 pkill -9 -x mpvpaper   # a plain kill leaves players that failed to load a link running
 if [[ "$URL" == *"list="* ]]; then
-    mpvpaper HDMI-A-1 -o --shuffle "$URL" &
+    mpvpaper "$OUTPUT" -o --shuffle "$URL" &
 else
-    mpvpaper HDMI-A-1 "$URL" &
+    mpvpaper "$OUTPUT" "$URL" &
 fi
 qs ipc call theme checkLive
 wait
