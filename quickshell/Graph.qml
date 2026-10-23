@@ -3,6 +3,9 @@ import QtQuick
 // Line graph with faint grid; one shared y-axis from zero. series: [{values: [], color: "#hex"}]
 Canvas {
     id: root
+    // painted on its own thread: repainting every graph when the stats panel opens would otherwise
+    // hold up the panel's opening animation
+    renderStrategy: Canvas.Threaded
     property var series: []
     property real ymax: 100
     property int points: 120
