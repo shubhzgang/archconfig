@@ -86,13 +86,13 @@ Item {
     }
     Component.onCompleted: lister.running = true
 
-    // the wallpaper swww is showing now ("... currently displaying: image: /path")
+    // the wallpaper wpaperd is showing now ("MONITOR: /path")
     Process {
         id: now
-        command: ["swww", "query"]
+        command: ["wpaperctl", "get-all"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const m = /image: (.+)/.exec(text)
+                const m = /: (.+)/.exec(text)
                 panel.show(Math.max(0, panel.files.indexOf(m ? m[1].trim() : "")))
             }
         }

@@ -1,0 +1,11 @@
+# wpaperd (started by hyprland.lua): draws the wallpaper and its transitions on the GPU.
+# At login it shows the last wallpaper (wallpaper.sh keeps a copy in pywallpaper.jpg); after that
+# wallpaper.sh switches images with `wpaperctl set`.
+[default]
+path = "/home/shubham/wallpapers/pywallpaper.jpg"
+mode = "center"
+transition-time = 750
+initial-transition = false
+
+[default.transition.circle-open]
+smoothness = 0.1   # width of the soft edge (0.3 by default)
