@@ -1,7 +1,7 @@
 import QtQuick
 
 // Icon button in the frame's left band; slots count up from the bottom (slot 0 is the first one above
-// the opacity button and the theme button, which sit at the bottom). It sits in the frame, where no windows are, so it can always take the mouse.
+// the theme button, which sits at the bottom). It sits in the frame, where no windows are, so it can always take the mouse.
 Item {
     id: root
     required property var theme
@@ -12,7 +12,7 @@ Item {
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int size: 44      // the icon's hit area, centered in the band
 
-    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + (slot + 2) * (size + 4) }
+    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + (slot + 1) * (size + 4) }
     width: band
     height: size
 

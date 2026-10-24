@@ -42,7 +42,7 @@ Item {
     // ---- opacity: how see-through the frame (the bar and panels) and the cards are, 0.1 to 1 ----
     property real opacityLevel: 1.0
     readonly property string opacityFile: Quickshell.env("HOME") + "/.cache/quickshell-opacity"
-    function setOpacity(level, save) {   // save: the slider was let go (or a key pressed), not mid-drag
+    function setOpacity(level, save) {   // save: remember it (paper/glass, qs ipc call theme opacity)
         level = Math.max(0.1, Math.min(1, level))
         if (level !== opacityLevel || !blurSynced) syncBlur(level)
         opacityLevel = level
@@ -109,9 +109,8 @@ Item {
         style = s
         savedStyle.setText(s)
         syncKitty()
-        // paper is opaque; glass starts see-through, the slider still sets how much
-        if (s === "paper") setOpacity(1, true)
-        else if (opacityLevel > 0.9) setOpacity(0.6, true)
+        // paper is opaque, glass see-through
+        setOpacity(s === "paper" ? 1 : 0.6, true)
     }
     function syncKitty() {
         Quickshell.execDetached(["hyprctl", "eval", "hl.window_rule({ name = \"kitty-style\", match = { class = \"^kitty$\" }, "

@@ -502,11 +502,11 @@ hl.window_rule({
     float = true,
 })
 
--- Blur behind the Quickshell frame and panels (the opacity slider makes them see-through).
--- ignore_alpha sits just under the frame's own opacity (saved by the slider), so only the frame is
+-- Blur behind the Quickshell frame and panels (the glass style makes them see-through).
+-- ignore_alpha sits just under the frame's own opacity (saved by Quickshell), so only the frame is
 -- blurred: not the transparent rest of the screen-sized surface, and not the frame's fainter
 -- anti-aliased edge pixels, where the blur would pull light from under the frame into a thin line
--- along its curves. Quickshell sets the same rule live when the slider moves (Theme.qml).
+-- along its curves. Quickshell sets the same rule live when the opacity changes (Theme.qml).
 local function quickshell_opacity()
     local file = io.open(HOME .. "/.cache/quickshell-opacity", "r")
     if not file then

@@ -42,7 +42,7 @@ ShellRoot {
     }
 
     // The frame's inner shadow, on its own surface just below the shell's: Hyprland blurs behind the
-    // shell's surface (for the opacity slider), and that blur must not reach the windows under the shadow.
+    // shell's surface (for the glass style), and that blur must not reach the windows under the shadow.
     // The panels' regions draw their own (FrameRegion.qml), so this one only covers the rest.
     PanelWindow {
         anchors { top: true; left: true; right: true; bottom: true }
@@ -67,8 +67,7 @@ ShellRoot {
         property bool wallOpen: false      // wallpaper picker (bottom)
         property bool clipOpen: false      // clipboard history (bottom left)
         property bool liveOpen: false      // live wallpaper links (bottom left)
-        property bool opacityOpen: false   // opacity slider (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || opacityOpen
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -78,7 +77,6 @@ ShellRoot {
             if (except !== "wall") wallOpen = false
             if (except !== "clip") clipOpen = false
             if (except !== "live") liveOpen = false
-            if (except !== "opacity") opacityOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -86,7 +84,6 @@ ShellRoot {
         onWallOpenChanged: if (wallOpen) closeOthers("wall")
         onClipOpenChanged: if (clipOpen) closeOthers("clip")
         onLiveOpenChanged: if (liveOpen) closeOthers("live")
-        onOpacityOpenChanged: if (opacityOpen) closeOthers("opacity")
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -106,7 +103,6 @@ ShellRoot {
                 Region { item: wallpaperButton },
                 Region { item: clipboardButton },
                 Region { item: liveButton },
-                Region { item: opacityButton },
                 Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
@@ -164,13 +160,6 @@ ShellRoot {
             function close(): void { win.liveOpen = false }
         }
 
-        IpcHandler {   // qs ipc call opacity toggle|open|close
-            target: "opacity"
-            function toggle(): void { win.opacityOpen = !win.opacityOpen }
-            function open(): void { win.opacityOpen = true }
-            function close(): void { win.opacityOpen = false }
-        }
-
         IpcHandler {   // qs ipc call shell toggle|show|hide
             target: "shell"
             function toggle(): void { root.hidden = !root.hidden }
@@ -196,7 +185,7 @@ ShellRoot {
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
             // the bottom-left panel: whichever of the three is furthest out
-            readonly property var leftPanel: [clipboard, live, opacityPanel].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            readonly property var leftPanel: [clipboard, live].reduce((a, b) => b.panelW > a.panelW ? b : a)
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
@@ -207,15 +196,6 @@ ShellRoot {
         ThemeButton {
             id: themeButton
             theme: theme
-        }
-
-        DockButton {   // opacity slider, at the very bottom
-            id: opacityButton
-            theme: theme
-            glyph: 0xF1853
-            slot: -2
-            active: win.opacityOpen
-            onClicked: win.opacityOpen = !win.opacityOpen
         }
 
         DockButton {   // wallpaper picker
@@ -269,14 +249,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), clipboard, live wallpaper and opacity (bottom)
+    FrameRegion {   // the left column: calendar and launcher (top), clipboard and live wallpaper (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         hole: frame.leftHole
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.opacityOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -306,13 +286,6 @@ ShellRoot {
             theme: theme
             open: win.liveOpen
             onToggle: win.liveOpen = !win.liveOpen
-        }
-
-        OpacityPanel {
-            id: opacityPanel
-            theme: theme
-            open: win.opacityOpen
-            onToggle: win.opacityOpen = !win.opacityOpen
         }
     }
 

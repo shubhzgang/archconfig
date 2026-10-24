@@ -6,7 +6,7 @@ import QtQuick
 //
 // To keep animations cheap (the display runs on the integrated GPU), the screen is split into
 // regions that are drawn on their own surfaces (FrameRegion.qml): the stats corner (top right), the
-// left column (calendar, launcher, clipboard, live wallpaper, opacity) and the bottom strip
+// left column (calendar, launcher, clipboard, live wallpaper) and the bottom strip
 // (wallpaper picker). A panel's animation then only redraws its own region. This item draws the
 // rest of the frame, which never changes shape. Each region draws the frame inside its rectangle
 // from an outline with only its own panels' notches (statsHole, leftHole, wallHole).
