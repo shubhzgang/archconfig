@@ -23,6 +23,7 @@ Item {
     anchors { top: parent.top; left: parent.left; leftMargin: band }
     width: panelW
     height: band + panelH
+    clip: true
 
     // ---- apps ----
     readonly property var allApps: {
@@ -79,14 +80,18 @@ Item {
 
     Item {
         id: content
-        anchors { fill: parent; margins: 16; topMargin: panel.band + 16; leftMargin: 0 }   // the frame's left band is already 48px of space on that side
+        // 16px in, but none on the left: the frame's left band is already 48px of space on that side.
+        // A fixed size, so nothing reflows while the panel grows; the panel clips it meanwhile.
+        x: 0; y: panel.band + 16
+        width: panel.openW - 16
+        height: panel.openH - 32
         clip: true
         opacity: panel.open ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity {
+        Behavior on opacity {   // content fades in once the shape has (nearly) finished growing
             SequentialAnimation {
-                PauseAnimation { duration: panel.open ? 140 : 0 }
-                NumberAnimation { duration: panel.open ? 260 : 100 }
+                PauseAnimation { duration: panel.open ? 300 : 0 }
+                NumberAnimation { duration: panel.open ? 150 : 100 }
             }
         }
 

@@ -21,6 +21,7 @@ Item {
     anchors { top: parent.top; left: parent.left; leftMargin: band }
     width: panelW
     height: band + panelH
+    clip: true
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
     readonly property date shown: new Date(clock.date.getFullYear(), clock.date.getMonth() + monthShift, 1)
@@ -56,14 +57,17 @@ Item {
         id: content
         // The card sits 24px in from the panel's edge (4px margin here + 20px inset below): room for
         // the card's shadow, which the clip would otherwise cut off
-        anchors { fill: parent; margins: 4; topMargin: panel.band + 4 }
+        // (a fixed size, so nothing reflows while the panel grows; the panel clips it meanwhile)
+        x: 4; y: panel.band + 4
+        width: panel.openW - 8
+        height: panel.openH - 8
         clip: true
         opacity: panel.open ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity {
+        Behavior on opacity {   // content fades in once the shape has (nearly) finished growing
             SequentialAnimation {
-                PauseAnimation { duration: panel.open ? 90 : 0 }
-                NumberAnimation { duration: panel.open ? 260 : 100 }
+                PauseAnimation { duration: panel.open ? 300 : 0 }
+                NumberAnimation { duration: panel.open ? 150 : 100 }
             }
         }
 
