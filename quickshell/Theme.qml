@@ -59,7 +59,7 @@ Item {
         blurSynced = true
         const alpha = (level * 0.9).toFixed(3)
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
-            + "match = { namespace = \"^qs-(shell|region-stats|region-left)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-(shell|region-stats|region-left|region-top)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur-wall\", "
             + "match = { namespace = \"^qs-region-wall$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
     }

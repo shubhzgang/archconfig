@@ -6,10 +6,11 @@ import QtQuick
 //
 // To keep animations cheap (the display runs on the integrated GPU), the screen is split into
 // regions that are drawn on their own surfaces (FrameRegion.qml): the stats corner (top right), the
-// left column (calendar, launcher, clipboard, live wallpaper, media) and the bottom strip
-// (wallpaper picker). A panel's animation then only redraws its own region. This item draws the
-// rest of the frame, which never changes shape. Each region draws the frame inside its rectangle
-// from an outline with only its own panels' notches (statsHole, leftHole, wallHole).
+// left column (calendar, launcher, clipboard, live wallpaper, media), the workspace overview (top
+// middle) and the bottom strip (wallpaper picker). A panel's animation then only redraws its own
+// region. This item draws the rest of the frame, which never changes shape. Each region draws the
+// frame inside its rectangle from an outline with only its own panels' notches (statsHole, leftHole,
+// wallHole, topHole).
 Item {
     id: frame
     required property var theme
@@ -30,6 +31,10 @@ Item {
     property real midH: 0
     property real wallMaxW: 0             // the wallpaper picker's full size (its region's size)
     property real wallMaxH: 0
+    property real topW: 0                 // workspace overview hanging from the top band, centered
+    property real topH: 0
+    property real topMaxW: 0              // its largest size (its region's size)
+    property real topMaxH: 0
 
     anchors.fill: parent
 
@@ -57,10 +62,16 @@ Item {
     readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
     readonly property real bl: width / 2 - bottomW / 2                   // its left edge (centered on the screen)
     readonly property real brt: width / 2 + bottomW / 2                  // its right edge
+    readonly property bool topOpen: topH >= 1
+    readonly property real tf: Math.min(20, topH / 2, topW / 2)          // workspace overview's concave joins
+    readonly property real tr: Math.min(20, topH, topW / 2)              // its rounded bottom corners
+    readonly property real tl: width / 2 - topW / 2                      // its left edge (centered on the screen)
+    readonly property real trt: width / 2 + topW / 2                     // its right edge
 
     // ---- regions, [x, y, w, h] on the screen ----
     // each is its panels' largest size plus 20px for the concave joins and 40px for the shadows to
-    // meet seamlessly at the edges; they only overlap where the left column meets the bottom strip.
+    // meet seamlessly at the edges. They overlap where the left column meets the bottom strip, and
+    // where the workspace overview's (wide, along the top) meets the left column's and the stats corner's.
     // Each is 1px larger all round: the glass edge (FrameFill.qml) is a 1px line centred on the
     // inside edge, so half of it falls just outside a region that starts at that edge, and it would
     // be left there, drawn by the rest of the frame, when a panel opens out of that edge.
@@ -71,12 +82,19 @@ Item {
         const w = wallMaxW + 120, h = wallMaxH + 60
         return grown([Math.round(width / 2 - w / 2), inB - h, Math.round(w), h])
     }
+    readonly property var topRect: {
+        const w = topMaxW + 120, h = topMaxH + 60
+        return grown([Math.round(width / 2 - w / 2), inT, Math.round(w), h])
+    }
     readonly property var overlap: intersect(leftRect, wallRect)
-    // which of the two draws the shadow where they overlap: the picker while it is out
-    readonly property var leftKeep: bottomOpen && overlap ? subtract([leftRect], [overlap]) : [leftRect]
+    // which one draws the frame and its shadow where they overlap: the picker or the overview while
+    // it is out, else the left column and the stats corner
+    readonly property var leftKeep: subtract([leftRect], [bottomOpen ? overlap : null, topOpen ? topRect : null].filter(r => r))
     readonly property var wallKeep: !bottomOpen && overlap ? subtract([wallRect], [overlap]) : [wallRect]
+    readonly property var statsKeep: topOpen ? subtract([statsRect], [topRect]) : [statsRect]
+    readonly property var topKeep: topOpen ? [topRect] : subtract([topRect], [leftRect, statsRect])
     // everything else is drawn here
-    readonly property var baseKeep: subtract([[0, 0, width, height]], [statsRect, leftRect, wallRect])
+    readonly property var baseKeep: subtract([[0, 0, width, height]], [statsRect, leftRect, wallRect, topRect])
 
     function intersect(a, b) {
         const x0 = Math.max(a[0], b[0]), y0 = Math.max(a[1], b[1])
@@ -103,12 +121,18 @@ Item {
     // ---- outlines of the free area inside the frame ----
     // Clockwise from the top-left corner: a rounded rectangle, with the notches of the panels asked
     // for. The frame is everything outside it.
-    function holePath(stats, left, bottom, clip, mid) {
+    function holePath(stats, left, bottom, clip, mid, top) {
         const L = inL, T = inT, R = inR, B = inB, c = corner
         const lOpen = left && leftOpen, sOpen = stats && panelOpen, bOpen = bottom && bottomOpen, cOpen = clip && clipOpen
-        const mOpen = mid && midOpen
+        const mOpen = mid && midOpen, tOpen = top && topOpen
         // start on the top edge, just right of the left panel (or at the top-left corner)
         let d = `M ${lOpen ? lx + lf : L + c} ${T} `
+        // round the workspace overview in the middle of the top edge
+        if (tOpen)
+            d += `L ${tl - tf} ${T} A ${tf} ${tf} 0 0 1 ${tl} ${T + tf} `
+               + `L ${tl} ${T + topH - tr} A ${tr} ${tr} 0 0 0 ${tl + tr} ${T + topH} `
+               + `L ${trt - tr} ${T + topH} A ${tr} ${tr} 0 0 0 ${trt} ${T + topH - tr} `
+               + `L ${trt} ${T + tf} A ${tf} ${tf} 0 0 1 ${trt + tf} ${T} `
         // along the top edge, then down round the stats panel, or round the top-right corner
         if (sOpen)
             d += `L ${px - f} ${T} A ${f} ${f} 0 0 1 ${px} ${T + f} `
@@ -152,6 +176,7 @@ Item {
     readonly property string statsHole: holePath(true, false, false, false)
     readonly property string leftHole: holePath(false, true, false, true, true)
     readonly property string wallHole: holePath(false, false, true, false)
+    readonly property string topHole: holePath(false, false, false, false, false, true)
 
     // ---- the frame outside the regions (it never changes shape) ----
     // (its inner shadow is drawn by FrameShadow.qml, on its own surface below this one)

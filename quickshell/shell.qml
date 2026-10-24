@@ -69,7 +69,8 @@ ShellRoot {
         property bool clipOpen: false      // clipboard history (bottom left)
         property bool liveOpen: false      // live wallpaper links (bottom left)
         property bool mediaOpen: false     // media player (middle left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen
+        property bool overviewOpen: false  // workspace overview (top middle)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -80,6 +81,7 @@ ShellRoot {
             if (except !== "clip") clipOpen = false
             if (except !== "live") liveOpen = false
             if (except !== "media") mediaOpen = false
+            if (except !== "overview") overviewOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -88,6 +90,7 @@ ShellRoot {
         onClipOpenChanged: if (clipOpen) closeOthers("clip")
         onLiveOpenChanged: if (liveOpen) closeOthers("live")
         onMediaOpenChanged: if (mediaOpen) closeOthers("media")
+        onOverviewOpenChanged: if (overviewOpen) closeOthers("overview")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -183,6 +186,13 @@ ShellRoot {
             function close(): void { win.mediaOpen = false }
         }
 
+        IpcHandler {   // qs ipc call overview toggle|open|close
+            target: "overview"
+            function toggle(): void { win.overviewOpen = !win.overviewOpen }
+            function open(): void { win.overviewOpen = true }
+            function close(): void { win.overviewOpen = false }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -210,6 +220,10 @@ ShellRoot {
             midH: mediaPanel.height
             wallMaxW: wallpaper.openW
             wallMaxH: wallpaper.openH
+            topW: overview.panelW
+            topH: overview.panelH
+            topMaxW: overview.maxW
+            topMaxH: overview.maxH
         }
 
         ThemeButton {
@@ -254,7 +268,7 @@ ShellRoot {
         name: "stats"
         rect: frame.statsRect
         hole: frame.statsHole
-        keepRects: [frame.statsRect]
+        keepRects: frame.statsKeep
         active: win.open
         shown: !fullscreen
         onDismiss: win.closeOthers("")
@@ -313,6 +327,25 @@ ShellRoot {
             media: media
             open: win.mediaOpen
             onToggle: win.mediaOpen = !win.mediaOpen
+        }
+    }
+
+    FrameRegion {   // top middle: the workspace overview
+        frame: frame
+        theme: theme
+        name: "top"
+        rect: frame.topRect
+        hole: frame.topHole
+        keepRects: frame.topKeep
+        active: win.overviewOpen
+        shown: !fullscreen
+        onDismiss: win.closeOthers("")
+
+        WorkspacePanel {
+            id: overview
+            theme: theme
+            open: win.overviewOpen
+            onToggle: win.overviewOpen = !win.overviewOpen
         }
     }
 
@@ -396,6 +429,7 @@ ShellRoot {
         CenterSection {
             id: centerSection
             theme: theme
+            onOverviewToggle: win.overviewOpen = !win.overviewOpen
         }
 
         StatsNumbers {

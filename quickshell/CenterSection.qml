@@ -6,14 +6,21 @@ import Quickshell.Hyprland
 
 // Top-center section, replicating waybar's workspace dots: workspaces 1-10 always shown; the
 // focused one is a wide pill, ones with windows and empty ones are different colors, hovering
-// recolors, clicking switches.
+// recolors, clicking switches. Clicking beside them (not on a dot) opens the workspace overview.
 Item {
     id: section
     required property var theme
+    signal overviewToggle()
 
     anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 4 }   // inside the frame's top band
     height: 39
-    width: row.implicitWidth
+    width: row.implicitWidth + 240   // 120px beside the dots on each side
+
+    MouseArea {   // beside the dots (they are above it and take their own clicks)
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: section.overviewToggle()
+    }
 
     Process { id: switcher }   // hyprctl: Hyprland's Lua config rejects the legacy `dispatch workspace N`
     function focusWorkspace(n) {
