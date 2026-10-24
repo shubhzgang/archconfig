@@ -2,17 +2,18 @@ import QtQuick
 import QtQuick.Shapes
 import Quickshell.Widgets
 
-// A small rounded color square for the wallpaper picker: one color, or two split diagonally (the
-// second in the bottom-right half), or a tiny image. The selected one has a ring around it.
+// A small rounded color square for the wallpaper picker: one color, or several in diagonal bands from
+// the top-left corner (two split it on the diagonal), or a tiny image. The selected one has a ring
+// around it.
 Item {
     id: root
     required property var theme
-    property var colors: []          // one or two colors
+    property var colors: []          // one color or more
     property string image: ""        // instead of the colors
     property bool selected: false
     signal clicked()
 
-    width: 26; height: 26
+    width: 32; height: 32
     readonly property real radius: Math.min(width, height) * 0.27
 
     Rectangle {   // the ring, just outside the square
@@ -30,15 +31,26 @@ Item {
         color: root.colors.length ? root.colors[0] : root.theme.card
         border.width: 1
         border.color: Qt.rgba(1, 1, 1, 0.12)   // so black and white squares still show their edge
-        Shape {
-            anchors.fill: parent
-            visible: root.colors.length > 1
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeWidth: 0
-                strokeColor: "transparent"
-                fillColor: root.colors.length > 1 ? root.colors[1] : "transparent"
-                PathSvg { path: `M ${root.width} 0 L ${root.width} ${root.height} L 0 ${root.height} Z` }
+        Repeater {   // each color after the first covers the square from its band onwards
+            model: root.colors.slice(1)
+            delegate: Shape {
+                required property string modelData
+                required property int index
+                // the band starts where x / width + y / height reaches k (0 at the top-left, 2 at the bottom-right)
+                readonly property real k: 2 * (index + 1) / root.colors.length
+                readonly property real w: root.width
+                readonly property real h: root.height
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeWidth: 0
+                    strokeColor: "transparent"
+                    fillColor: modelData
+                    PathSvg {
+                        path: k <= 1 ? `M ${k * w} 0 L ${w} 0 L ${w} ${h} L 0 ${h} L 0 ${k * h} Z`
+                                     : `M ${w} ${(k - 1) * h} L ${w} ${h} L ${(k - 1) * w} ${h} Z`
+                    }
+                }
             }
         }
         Image {

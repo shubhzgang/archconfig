@@ -12,7 +12,8 @@ import Quickshell.Widgets
 // (hypr/wallpaper.sh), leaving the picker open; Enter applies the selected one and closes it, Escape closes.
 // Below the carousel: plain-color wallpapers, and color swatches (one color, or two) that theme
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
-// for how a single color is grown into a palette (the harmony) and for the shell's style.
+// for how a single color is grown into a palette (each harmony shown as the three main colors it gives)
+// and for the shell's style.
 Item {
     id: panel
     required property var theme
@@ -43,7 +44,7 @@ Item {
 
     readonly property int pad: 40   // room around the thumbnails for their shadows (the panel clips)
     readonly property real openW: centers[3] * 2 + thumbW * scales[3] + 2 * pad
-    readonly property real controlsH: 100   // the rows below the carousel
+    readonly property real controlsH: 112   // the rows below the carousel
     readonly property real openH: thumbH + controlsH + 2 * pad
     readonly property real panelW: openW   // full width from the start: the panel rises, it doesn't expand
     property real panelH: 0
@@ -96,7 +97,7 @@ Item {
             onStreamFinished: panel.files = text.split("\n").filter(f => f !== "")
         }
     }
-    Component.onCompleted: lister.running = true
+    Component.onCompleted: { lister.running = true; previewHarmonies() }
 
     // the wallpaper wpaperd is showing now ("MONITOR: /path")
     Process {
@@ -128,11 +129,30 @@ Item {
         ["#1E2433", "#E8E1D3"], ["#3A7BFF", "#3CC4E0"], ["#FF5FA2", "#FF6A2B"], ["#9B5CF6", "#FF5FA2"],
         ["#3FBF6B", "#B6E35A"], ["#5856D6", "#7FD6B7"], ["#E0413A", "#F7C948"], ["#1F3A5F", "#F2B8A6"]
     ]
-    readonly property var harmonies: [["monochrome", "Mono"], ["complementary", "Compl."], ["split", "Split"],
-                                      ["analogous", "Analog."], ["triadic", "Triad"]]
+    readonly property var harmonies: ["monochrome", "complementary", "split", "analogous", "triadic"]
     // the harmony only matters for a single color: a one-color swatch, or a plain wallpaper with none
-    readonly property bool singleColor: theme.swatch.length === 1
-                                        || (theme.swatch.length === 0 && theme.wallpaper.startsWith(plainDir + "/"))
+    readonly property string baseColor: {
+        if (theme.swatch.length === 1) return theme.swatch[0]
+        const m = theme.swatch.length === 0 && /\/wallpapers\/plain\/([0-9A-F]{6})\.png$/.exec(theme.wallpaper)
+        return m ? "#" + m[1] : ""
+    }
+    readonly property bool singleColor: baseColor !== ""
+    // color1..color3 that each harmony gives the base color (the same code that applies it, wal/swatch_scheme.py)
+    property var harmonyColors: ({})
+    // (the command is set here rather than bound: a change handler runs before the bindings that
+    // depend on the same property have caught up, so a bound command still had the old color)
+    function previewHarmonies() {
+        if (!baseColor) return
+        harmonyPreview.command = ["python3", Quickshell.env("HOME") + "/.config/wal/swatch_scheme.py", "--preview", baseColor]
+        harmonyPreview.running = true
+    }
+    onBaseColorChanged: previewHarmonies()
+    Process {
+        id: harmonyPreview
+        stdout: StdioCollector {
+            onStreamFinished: { try { panel.harmonyColors = JSON.parse(text) } catch (e) {} }
+        }
+    }
     function run(args) {   // the colors change once the wal files are written: drop any preview first
         theme.endPreview()
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh"].concat(args))
@@ -290,7 +310,7 @@ Item {
                 delegate: Swatch {
                     required property string modelData
                     theme: panel.theme
-                    width: 48; height: 27
+                    width: 56; height: 32
                     colors: [modelData]
                     selected: panel.theme.wallpaper === panel.plainDir + "/" + modelData.slice(1) + ".png"
                     onClicked: panel.run(["--plain", modelData])
@@ -323,16 +343,16 @@ Item {
             }
             Row {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
+                spacing: 10
                 opacity: panel.singleColor ? 1 : 0.4
                 Repeater {
                     model: panel.harmonies
-                    delegate: Chip {
-                        required property var modelData
+                    delegate: Swatch {
+                        required property string modelData
                         theme: panel.theme
-                        label: modelData[1]
-                        selected: panel.theme.harmony === modelData[0]
-                        onClicked: panel.run(["--harmony", modelData[0]])
+                        colors: panel.singleColor ? panel.harmonyColors[modelData] ?? [] : []
+                        selected: panel.theme.harmony === modelData
+                        onClicked: panel.run(["--harmony", modelData])
                     }
                 }
             }

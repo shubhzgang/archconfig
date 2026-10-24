@@ -2,6 +2,7 @@
 """Write a pywal scheme (JSON) made from one or two picked colors instead of a wallpaper.
 
 Usage: swatch_scheme.py <out.json> <wallpaper> <harmony> <#color> [#color2]
+       swatch_scheme.py --preview <#color>     color1..color3 of each harmony, as JSON (the picker shows them)
 
 One color is grown into color1..color6 by a color harmony (monochrome, complementary, split,
 analogous, triadic) on the OKLCH hue wheel; two colors are kept as color1 and color2 and the rest is
@@ -46,6 +47,11 @@ def six_colors(colors, harmony):
 
 
 def main():
+    if sys.argv[1] == "--preview":
+        color = sys.argv[2].upper()
+        print(json.dumps({h: [full_colors({"colors": six_colors([color], h), "bg": color})[f"color{i}"] for i in (1, 2, 3)]
+                          for h in HARMONIES}))
+        return
     out, wallpaper, harmony, *colors = sys.argv[1:]
     colors = [c.upper() for c in colors]
     # the second color tints the background (as `bg` does in palettes.json); a single color tints it itself
