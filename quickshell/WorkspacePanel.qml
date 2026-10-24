@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
@@ -7,7 +8,8 @@ import Quickshell.Widgets
 // Workspace overview, like Mission Control's spaces: grows out of the top band under the workspace
 // dots, drawn by the frame like the other panels. The top row is the special workspaces (Super+S,
 // Alt+1-4), the bottom row workspaces 1-10, empty or not. Each is a small picture of the screen: the
-// wallpaper with its windows, captured when the overview opens, where they are. Click one to go there
+// wallpaper with its windows, captured when the overview opens, where they are, with a shadow under
+// it (the focused one lifted off it, as in the wallpaper picker). Click one to go there
 // (a special one is shown or hidden, as its key does). Escape closes.
 Item {
     id: panel
@@ -34,7 +36,7 @@ Item {
     readonly property real openH: 2 * pad + 2 * (thumbH + labelH) + gap
     readonly property real maxW: openW   // (its region's size, Frame.qml)
     readonly property real maxH: openH
-    property real panelW: 0
+    readonly property real panelW: openW   // full width from the start: the panel slides down, it doesn't expand
     property real panelH: 0
 
     anchors { top: parent.top; horizontalCenter: parent.horizontalCenter }
@@ -45,22 +47,24 @@ Item {
     // the windows' positions are only sent on request
     onOpenChanged: if (open) Hyprland.refreshToplevels()
 
-    // Same shape of animation as the stats panel: eases out when opening, eases in when closing.
+    // Slides down with an ease-out when opening and back up with an ease-in when closing, like the
+    // wallpaper picker rises.
     states: State {
         name: "open"
         when: panel.open
-        PropertyChanges { target: panel; panelW: panel.openW; panelH: panel.openH }
+        PropertyChanges { target: panel; panelH: panel.openH }
     }
     transitions: [
         Transition {
             from: ""; to: "open"
-            NumberAnimation { property: "panelW"; duration: 520; easing.type: Easing.OutQuint }
             NumberAnimation { property: "panelH"; duration: 620; easing.type: Easing.OutQuint }
         },
         Transition {
             from: "open"; to: ""
-            NumberAnimation { property: "panelW"; duration: 430; easing.type: Easing.InQuint }
-            NumberAnimation { property: "panelH"; duration: 500; easing.type: Easing.InQuint }
+            SequentialAnimation {   // the workspaces go first, then the shape slides back up
+                PauseAnimation { duration: 140 }
+                NumberAnimation { property: "panelH"; duration: 500; easing.type: Easing.InQuint }
+            }
         }
     ]
 
@@ -82,18 +86,36 @@ Item {
         width: panel.thumbW
         height: panel.thumbH + panel.labelH
 
-        Rectangle {   // the ring round the focused one (and the hovered one, fainter)
-            x: -4; y: -4
-            width: panel.thumbW + 8; height: panel.thumbH + 8
-            radius: 12
-            color: "transparent"
-            border.width: 2
-            border.color: panel.theme.ink
-            opacity: space.focused ? 1 : area.containsMouse ? 0.35 : 0
-            Behavior on opacity { NumberAnimation { duration: 120 } }
+        // the focused one (and the one under the mouse) is picked up, as in the wallpaper picker: the
+        // picture rises 6px and shifts 4px right off its shadow
+        property real lift: focused || area.containsMouse ? 1 : 0
+        Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+        // Soft shadow, as under the wallpaper picker's thumbnails: 35% black, 3px past the picture,
+        // blurred (in a larger item, so the blur isn't cut off at its edge)
+        Item {
+            id: shadow
+            readonly property real grow: 3
+            readonly property real room: 32
+            x: -room
+            y: -room + 5
+            width: panel.thumbW + 2 * room
+            height: panel.thumbH + 2 * room
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax: 24
+                blur: 1.0
+            }
+            Rectangle {
+                anchors { fill: parent; margins: shadow.room - shadow.grow }
+                radius: 8 + shadow.grow
+                color: "#59000000"
+            }
         }
         ClippingRectangle {
             width: panel.thumbW; height: panel.thumbH
+            transform: Translate { x: 4 * space.lift; y: -6 * space.lift }
             radius: 8
             color: Qt.rgba(0, 0, 0, 0.35)
             Image {   // the wallpaper
@@ -141,14 +163,33 @@ Item {
         x: panel.pad; y: panel.band + panel.pad
         width: panel.openW - 2 * panel.pad
         spacing: panel.gap
-        opacity: panel.open ? 1 : 0
+        transformOrigin: Item.Top
+        opacity: 0
+        scale: 0.94
         visible: opacity > 0
-        Behavior on opacity {   // content fades in once the shape has (nearly) finished growing
-            SequentialAnimation {
-                PauseAnimation { duration: panel.open ? 300 : 0 }
-                NumberAnimation { duration: panel.open ? 150 : 100 }
-            }
+        // The workspaces pop in (fade and a small grow, as in the wallpaper picker) once the shape has
+        // finished sliding down, and are the first thing to go when closing.
+        states: State {
+            name: "shown"
+            when: panel.open
+            PropertyChanges { target: content; opacity: 1; scale: 1 }
         }
+        transitions: [
+            Transition {
+                from: ""; to: "shown"
+                SequentialAnimation {
+                    PauseAnimation { duration: 620 }
+                    ParallelAnimation {
+                        NumberAnimation { property: "opacity"; duration: 200 }
+                        NumberAnimation { property: "scale"; duration: 260; easing.type: Easing.OutCubic }
+                    }
+                }
+            },
+            Transition {
+                from: "shown"; to: ""
+                NumberAnimation { properties: "opacity,scale"; duration: 90 }
+            }
+        ]
         // made when it opens (so the windows are captured then), gone once it has faded out
         readonly property bool made: panel.open || opacity > 0
 
