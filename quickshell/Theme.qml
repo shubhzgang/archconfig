@@ -115,6 +115,10 @@ Item {
     function syncWindows() {   // paper: every window opaque; glass: focused 90%, the others 75%
         Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { "
             + (glass ? "active_opacity = 0.9, inactive_opacity = 0.75" : "active_opacity = 1.0, inactive_opacity = 1.0") + " } })"])
+        // and the windows set the other way with Super+Shift+P (tagged for this style, see hyprland.lua)
+        Quickshell.execDetached(["hyprctl", "eval", "hl.window_rule({ name = \"style-exception\", "
+            + (glass ? "match = { tag = \"opaque\" }, opacity = \"1.0 override 1.0 override\""
+                     : "match = { tag = \"translucent\" }, opacity = \"0.9 override 0.75 override\"") + " })"])
     }
     FileView {
         id: savedStyle

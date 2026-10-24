@@ -411,6 +411,12 @@ hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("pavucontrol"))
 
 -- Switch the style between paper (everything opaque) and glass (see-through), as in the wallpaper picker.
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("qs ipc call theme toggleStyle"))
+-- The focused window goes the other way from the style (or back): see-through on paper, opaque on
+-- glass. It is tagged ("translucent" on paper, "opaque" on glass) and keeps the tag through style
+-- switches (see the "style-exception" window rule).
+hl.bind(mainMod .. " + SHIFT + P", function()
+    hl.dispatch(hl.dsp.window.tag({ tag = quickshell_style() == "paper" and "translucent" or "opaque" }))
+end)
 
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
@@ -544,6 +550,15 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 hl.window_rule({
     match = { class = "firefox" },
     opacity = "1.0",
+})
+
+-- Windows tagged with Super+Shift+P for the style in use: on paper the "translucent" ones are
+-- see-through as on glass (focused 90%, the others 75%), on glass the "opaque" ones are opaque.
+-- Theme.qml replaces this rule (by name) when the style changes.
+hl.window_rule({
+    name = "style-exception",
+    match = { tag = paper and "translucent" or "opaque" },
+    opacity = paper and "0.9 override 0.75 override" or "1.0 override 1.0 override",
 })
 
 hl.window_rule({
