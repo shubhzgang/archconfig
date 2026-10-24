@@ -519,19 +519,39 @@ end
 
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-(shell|region-stats|region-wall)$" },
+    match = { namespace = "^qs-(shell|region-stats)$" },
     blur = true,
     xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
--- the left column (launcher, calendar, clipboard, live wallpaper, opacity) shows the windows behind it
+-- the left column (launcher, calendar, clipboard, live wallpaper, opacity) and the wallpaper picker show
+-- the windows behind them
 hl.layer_rule({
     name = "quickshell-blur-left",
-    match = { namespace = "^qs-region-left$" },
+    match = { namespace = "^qs-region-(left|wall)$" },
     blur = true,
     xray = false,
     ignore_alpha = quickshell_opacity() * 0.9,
+})
+
+-- kitty follows the shell's style (the wallpaper picker's Paper/Glass switch, saved by Theme.qml,
+-- which sets the same rule live): opaque on paper, the usual see-through opacity on glass (and
+-- before a style has been picked)
+local function quickshell_style()
+    local file = io.open(HOME .. "/.cache/quickshell-style", "r")
+    if not file then
+        return nil
+    end
+    local value = file:read("*l")
+    file:close()
+    return value
+end
+
+hl.window_rule({
+    name = "kitty-style",
+    match = { class = "^kitty$" },
+    opacity = quickshell_style() == "paper" and "1.0 override 1.0 override" or "1.0",
 })
 
 -- windows on special workspaces (Super+S, Alt+1-4) show the workspace behind them instead of just

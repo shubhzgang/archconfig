@@ -10,6 +10,8 @@ Rectangle {
 
     color: theme.card
     radius: 10
+    border.width: theme.glass ? 1 : 0   // glass: a thin light edge
+    border.color: Qt.rgba(1, 1, 1, 0.18)
     implicitHeight: column.implicitHeight + 28
 
     layer.enabled: true

@@ -8,8 +8,11 @@ import Quickshell.Widgets
 // A carousel of five equal thumbnails with a smaller one peeking in at each end. Left/Right (or the
 // wheel) move the selection across the five; the carousel only slides, by one, when the selection
 // steps onto a peeking one. It wraps around at both ends (after the last wallpaper comes the first).
-// It opens on the current wallpaper. Enter or a click on the selected
-// one applies it (hypr/wallpaper.sh), a click on another one selects it, Escape closes.
+// It opens on the current wallpaper. Selecting a wallpaper (a click, the arrows or the wheel) applies it
+// (hypr/wallpaper.sh), leaving the picker open; Enter applies the selected one and closes it, Escape closes.
+// Below the carousel: plain-color wallpapers, and color swatches (one color, or two) that theme
+// everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
+// for how a single color is grown into a palette (the harmony) and for the shell's style.
 Item {
     id: panel
     required property var theme
@@ -40,7 +43,8 @@ Item {
 
     readonly property int pad: 40   // room around the thumbnails for their shadows (the panel clips)
     readonly property real openW: centers[3] * 2 + thumbW * scales[3] + 2 * pad
-    readonly property real openH: thumbH + 2 * pad
+    readonly property real controlsH: 100   // the rows below the carousel
+    readonly property real openH: thumbH + controlsH + 2 * pad
     readonly property real panelW: openW   // full width from the start: the panel rises, it doesn't expand
     property real panelH: 0
 
@@ -68,6 +72,14 @@ Item {
         if (cursor < first) first = cursor
         else if (cursor > first + 4) first = cursor - 4
         theme.preview(files[current])
+        settle.restart()
+    }
+    // the arrows and the wheel apply the wallpaper they stop on: each apply re-themes everything, so
+    // stepping through several in a row only previews them
+    Timer {
+        id: settle
+        interval: 400
+        onTriggered: panel.apply(panel.files[panel.current], false)
     }
     function show(i) {   // select wallpaper i and put it in the middle of the five, without sliding
         snap = true
@@ -99,15 +111,39 @@ Item {
     }
 
     function move(by) { if (files.length) select(cursor + by) }
-    function apply(path) {
+    function apply(path, close) {
         if (!path) return
+        settle.stop()
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", path])
         theme.commitPreview(path)
-        panel.toggle()
+        if (close) panel.toggle()
     }
+    // ---- plain wallpapers and color swatches (hypr/wallpaper.sh --plain / --swatch / --harmony) ----
+    readonly property string plainDir: Quickshell.env("HOME") + "/wallpapers/plain"
+    readonly property var plains: ["#1C1C1E", "#3A3A3C", "#8E8E93", "#C7C7CC", "#8E8A84", "#1F3A5F", "#3A6EA5",
+                                   "#2F7F86", "#4FB3C8", "#4F8A5B", "#E4B94A", "#D9783B", "#B83A3A", "#D4708F", "#6E4E9E"]
+    readonly property var swatches: [
+        ["#1E2433"], ["#E8E1D3"], ["#E0413A"], ["#FF6A2B"], ["#F7C948"], ["#B6E35A"], ["#3FBF6B"], ["#7FD6B7"],
+        ["#3CC4E0"], ["#3A7BFF"], ["#5856D6"], ["#9B5CF6"], ["#FF5FA2"], ["#F2B8A6"],
+        ["#1E2433", "#E8E1D3"], ["#3A7BFF", "#3CC4E0"], ["#FF5FA2", "#FF6A2B"], ["#9B5CF6", "#FF5FA2"],
+        ["#3FBF6B", "#B6E35A"], ["#5856D6", "#7FD6B7"], ["#E0413A", "#F7C948"], ["#1F3A5F", "#F2B8A6"]
+    ]
+    readonly property var harmonies: [["monochrome", "Mono"], ["complementary", "Compl."], ["split", "Split"],
+                                      ["analogous", "Analog."], ["triadic", "Triad"]]
+    // the harmony only matters for a single color: a one-color swatch, or a plain wallpaper with none
+    readonly property bool singleColor: theme.swatch.length === 1
+                                        || (theme.swatch.length === 0 && theme.wallpaper.startsWith(plainDir + "/"))
+    function run(args) {   // the colors change once the wal files are written: drop any preview first
+        theme.endPreview()
+        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh"].concat(args))
+    }
+
     onOpenChanged: {
         if (open) { keys.forceActiveFocus(); now.running = true }
-        else theme.endPreview()   // closed without applying: back to the real colors
+        else {
+            if (settle.running) apply(files[current], false)   // closed right after an arrow: apply that one now
+            theme.endPreview()   // (does nothing while a wallpaper is being applied) back to the real colors
+        }
     }
 
     // Rises with an ease-out when opening and sinks with an ease-in when closing, like the other panels.
@@ -170,8 +206,8 @@ Item {
             Keys.onEscapePressed: panel.toggle()
             Keys.onLeftPressed: panel.move(-1)
             Keys.onRightPressed: panel.move(1)
-            Keys.onReturnPressed: panel.apply(panel.files[panel.current])
-            Keys.onEnterPressed: panel.apply(panel.files[panel.current])
+            Keys.onReturnPressed: panel.apply(panel.files[panel.current], true)
+            Keys.onEnterPressed: panel.apply(panel.files[panel.current], true)
 
             WheelHandler {
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -236,10 +272,75 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: index === panel.current ? panel.apply(thumb.modelData)
-                                                           : panel.select(panel.cursor + panel.offset(index - panel.current))
+                        onClicked: {
+                            if (index !== panel.current) panel.select(panel.cursor + panel.offset(index - panel.current))
+                            panel.apply(thumb.modelData, false)
+                        }
                     }
                 }
+            }
+        }
+
+        Row {   // plain-color wallpapers
+            id: plainRow
+            anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; topMargin: panel.thumbH + 34 }
+            spacing: 12
+            Repeater {
+                model: panel.plains
+                delegate: Swatch {
+                    required property string modelData
+                    theme: panel.theme
+                    width: 48; height: 27
+                    colors: [modelData]
+                    selected: panel.theme.wallpaper === panel.plainDir + "/" + modelData.slice(1) + ".png"
+                    onClicked: panel.run(["--plain", modelData])
+                }
+            }
+        }
+
+        Row {   // color swatches, then the harmony and style switches
+            anchors { horizontalCenter: parent.horizontalCenter; top: plainRow.bottom; topMargin: 18 }
+            spacing: 36
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 10
+                Swatch {   // auto: the wallpaper's own colors
+                    theme: panel.theme
+                    image: panel.theme.wallpaper
+                    selected: panel.theme.swatch.length === 0
+                    onClicked: panel.run(["--swatch", "auto"])
+                }
+                Repeater {
+                    model: panel.swatches
+                    delegate: Swatch {
+                        required property var modelData
+                        theme: panel.theme
+                        colors: modelData
+                        selected: panel.theme.swatch.join() === modelData.join()
+                        onClicked: panel.run(["--swatch", modelData.join()])
+                    }
+                }
+            }
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
+                opacity: panel.singleColor ? 1 : 0.4
+                Repeater {
+                    model: panel.harmonies
+                    delegate: Chip {
+                        required property var modelData
+                        theme: panel.theme
+                        label: modelData[1]
+                        selected: panel.theme.harmony === modelData[0]
+                        onClicked: panel.run(["--harmony", modelData[0]])
+                    }
+                }
+            }
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
+                Chip { theme: panel.theme; label: "Paper"; selected: !panel.theme.glass; onClicked: panel.theme.setStyle("paper") }
+                Chip { theme: panel.theme; label: "Glass"; selected: panel.theme.glass; onClicked: panel.theme.setStyle("glass") }
             }
         }
     }

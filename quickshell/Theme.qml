@@ -35,6 +35,7 @@ Item {
     // same as the dark, saturated bar ends in scripts/bar-colors.py
     function vividDark(hex) {
         const c = Qt.color(hex)
+        if (c.hslSaturation < 0.1) return Qt.hsla(0, c.hslSaturation, 0.24, 1)   // a grey stays grey
         return Qt.hsla(c.hslHue, Math.min(0.9, Math.max(c.hslSaturation * 1.3, 0.55)), 0.24, 1)
     }
 
@@ -51,16 +52,16 @@ Item {
     // Hyprland blurs behind the shell only where it is at least this opaque: just under the frame's
     // own opacity, so the frame's fainter anti-aliased edge pixels aren't blurred (the blur pulled
     // light from under the frame into a thin line along its curves). Same rules as in hyprland.lua,
-    // which reads the saved level when the config is reloaded: the left column's panels show the
-    // windows behind them, the rest only the (cached) wallpaper.
+    // which reads the saved level when the config is reloaded: the left column's panels and the
+    // wallpaper picker show the windows behind them, the rest only the (cached) wallpaper.
     property bool blurSynced: false
     function syncBlur(level) {
         blurSynced = true
         const alpha = (level * 0.9).toFixed(3)
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
-            + "match = { namespace = \"^qs-(shell|region-stats|region-wall)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-(shell|region-stats)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur-left\", "
-            + "match = { namespace = \"^qs-region-left$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-region-(left|wall)$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
     }
     FileView {
         id: savedOpacity
@@ -95,6 +96,53 @@ Item {
         if (mode === "dark") return Qt.hsla(h, c.hslSaturation, c.hslLightness * 0.5, 1)
         if (mode === "light") return Qt.hsla(h, Math.min(c.hslSaturation, 0.75), 0.74, 1)
         return c
+    }
+
+    // ---- style: paper (opaque, like the cards on a desk) or glass (see-through and blurred, with a
+    // thin light edge). Also sets how opaque kitty is, through a Hyprland window rule that hyprland.lua
+    // makes from the same saved file when its config is reloaded.
+    property string style: "paper"      // paper | glass
+    readonly property bool glass: style === "glass"
+    readonly property string styleFile: Quickshell.env("HOME") + "/.cache/quickshell-style"
+    function setStyle(s) {
+        if (s !== "paper" && s !== "glass") return
+        style = s
+        savedStyle.setText(s)
+        syncKitty()
+        // paper is opaque; glass starts see-through, the slider still sets how much
+        if (s === "paper") setOpacity(1, true)
+        else if (opacityLevel > 0.9) setOpacity(0.6, true)
+    }
+    function syncKitty() {
+        Quickshell.execDetached(["hyprctl", "eval", "hl.window_rule({ name = \"kitty-style\", match = { class = \"^kitty$\" }, "
+            + "opacity = \"" + (glass ? "1.0" : "1.0 override 1.0 override") + "\" })"])
+    }
+    FileView {
+        id: savedStyle
+        path: root.styleFile
+        printErrors: false
+        onLoaded: root.style = text().trim() === "glass" ? "glass" : "paper"
+    }
+
+    // ---- color swatch: while one is picked (hypr/wallpaper.sh --swatch), the palette comes from its
+    // color(s) whatever the wallpaper is, so previewing a wallpaper shows nothing new ----
+    JsonFile {
+        id: swatchState
+        path: Quickshell.env("HOME") + "/.cache/wal-swatch.json"
+        watch: true
+    }
+    readonly property var swatch: swatchState.value.swatch ?? []
+    readonly property string harmony: swatchState.value.harmony ?? "analogous"
+    readonly property string wallpaper: realColors?.wallpaper ?? ""   // the applied wallpaper
+
+    // A black, grey or white plain wallpaper (hypr/wallpaper.sh --plain, without a swatch) themes the
+    // shell in the neutral palette (see `live` below) closest to its lightness, whatever the mode.
+    readonly property string plainNeutral: {
+        const m = /\/wallpapers\/plain\/([0-9A-F]{6})\.png$/.exec(wallpaper)
+        if (!m || swatch.length) return ""
+        const c = Qt.color("#" + m[1])
+        if (c.hslSaturation > 0.12) return ""
+        return c.hslLightness < 0.3 ? "dark" : c.hslLightness > 0.7 ? "light" : "normal"
     }
 
     // ---- live wallpaper: blue-tinted white, grey and black instead of the wallpaper's colors ----
@@ -136,8 +184,8 @@ Item {
         applyTheme()
     }
     function applyTheme() {
-        if (live) {
-            const n = neutral[mode]
+        if (live || plainNeutral) {
+            const n = neutral[live ? mode : plainNeutral]
             accent = n.accent; accent2 = n.accent2; accent3 = n.accent3
             ink = n.ink; textOnInk = n.textOnInk; hover = n.hover; dark = n.dark; card = alpha(n.card)
             series = n.series
@@ -175,6 +223,7 @@ Item {
     function barOf(value) { return [vividDark(value.colors.color1), vividDark(value.colors.color2)] }
     function applyReal() { if (realColors && realColors.colors) setColors(realColors, barOf(realColors)) }
     function preview(wallpaper) {
+        if (swatch.length) return
         const path = Quickshell.env("HOME") + "/.config/wal/wallpaper-schemes/" + wallpaper.split("/").pop() + ".json"
         previewing = true
         wanted = path

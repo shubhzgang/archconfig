@@ -15,7 +15,8 @@ CACHE = os.path.expanduser("~/.cache/wal")
 def vivid_dark(hex_color):
     r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
     h, l, s = colorsys.rgb_to_hls(r, g, b)
-    rgb = colorsys.hls_to_rgb(h, 0.24, min(0.9, max(s * 1.3, 0.55)))
+    # a grey stays grey (forcing saturation onto it made it red)
+    rgb = colorsys.hls_to_rgb(h, 0.24, s if s < 0.1 else min(0.9, max(s * 1.3, 0.55)))
     return "#{:02X}{:02X}{:02X}".format(*[round(c * 255) for c in rgb])
 
 

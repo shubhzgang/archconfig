@@ -21,8 +21,9 @@ Item {
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillRule: ShapePath.OddEvenFill
-            strokeColor: "transparent"
-            strokeWidth: 0
+            // glass: a thin light edge along the frame's inside (and round its panels)
+            strokeColor: root.theme.glass ? Qt.rgba(1, 1, 1, 0.22) : "transparent"
+            strokeWidth: root.theme.glass ? 1 : 0
             fillGradient: LinearGradient {
                 x1: 0; y1: 0; x2: root.screenW; y2: 0
                 GradientStop { position: 0.0; color: root.theme.barEnd }
