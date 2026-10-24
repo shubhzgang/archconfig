@@ -18,6 +18,7 @@ Scope {
     required property string hole       // the outline with this region's panels' notches
     required property var keepRects     // where this region draws the shadow
     property bool active: false         // one of its panels is open: take the keyboard and the mouse
+    property bool shown: true           // false while a fullscreen window covers the screen: draw nothing
     signal dismiss()                    // a click outside its panels, or Escape
     default property alias content: screenSpace.data
 
@@ -38,6 +39,7 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow-" + region.name
+        contentItem.visible: region.shown
         mask: Region {}
         FrameShadow {
             anchors.fill: parent
@@ -60,6 +62,7 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qs-region-" + region.name
+        contentItem.visible: region.shown
         // The keyboard: taken exclusively for a moment when a panel opens (so typing goes to it at once),
         // then on demand. Hyprland sends every click to a surface that holds the keyboard
         // exclusively, so keeping it would stop the bar and the dock buttons from taking their clicks.

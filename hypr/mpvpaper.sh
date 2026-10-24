@@ -1,6 +1,7 @@
 #!/bin/bash
 # Plays the given link as the live wallpaper (the Quickshell live-wallpaper panel runs this; its
-# links are in mpvpaper-links.json). Playlists are shuffled. Videos are decoded on the GPU.
+# links are in mpvpaper-links.json). Playlists are shuffled. Videos are decoded on the GPU,
+# and pause while hidden (under a fullscreen window).
 #
 # Quickshell's colors go neutral while a live wallpaper plays: it is told to check when the player
 # starts, and again when it ends (stopped, replaced by another link, or killed by wallpaper.sh).
@@ -12,9 +13,9 @@ OUTPUT=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
 
 pkill -9 -x mpvpaper   # a plain kill leaves players that failed to load a link running
 if [[ "$URL" == *"list="* ]]; then
-    mpvpaper "$OUTPUT" -o "shuffle hwdec=auto-safe" "$URL" &
+    mpvpaper -p "$OUTPUT" -o "shuffle hwdec=auto-safe" "$URL" &
 else
-    mpvpaper "$OUTPUT" -o "hwdec=auto-safe" "$URL" &
+    mpvpaper -p "$OUTPUT" -o "hwdec=auto-safe" "$URL" &
 fi
 qs ipc call theme checkLive
 wait

@@ -1,11 +1,18 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 
 ShellRoot {
     Theme { id: theme }
+
+    // A fullscreen window (a video, a game) hides the shell: the surfaces stay where they are, empty
+    // and taking no input. (Hidden or covered surfaces get no frame callbacks, and Qt then leaves
+    // them blank once they are shown again.)
+    readonly property bool fullscreen: Hyprland.focusedWorkspace?.hasFullscreen ?? false
+    onFullscreenChanged: if (fullscreen) win.closeOthers("")
 
     // Reserve the frame's space on every edge (the top band holds the bar), so windows tile inside
     // it. These panels draw nothing and take no input; the frame itself is drawn below.
@@ -40,6 +47,7 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow"
+        contentItem.visible: !fullscreen
         mask: Region {}
         FrameShadow {
             anchors.fill: parent
@@ -82,6 +90,7 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qs-shell"
+        contentItem.visible: !fullscreen
         // (the panels, and the keyboard while one is open, are on their regions' surfaces: see the
         // FrameRegions below)
 
@@ -94,7 +103,8 @@ ShellRoot {
                 Region { item: wallpaperButton },
                 Region { item: clipboardButton },
                 Region { item: liveButton },
-                Region { item: opacityButton }
+                Region { item: opacityButton },
+                Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
 
@@ -236,6 +246,7 @@ ShellRoot {
         hole: frame.statsHole
         keepRects: [frame.statsRect]
         active: win.open
+        shown: !fullscreen
         onDismiss: win.closeOthers("")
 
         StatsCorner {
@@ -255,6 +266,7 @@ ShellRoot {
         hole: frame.leftHole
         keepRects: frame.leftKeep
         active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.opacityOpen
+        shown: !fullscreen
         onDismiss: win.closeOthers("")
 
         CalendarPanel {
@@ -301,6 +313,7 @@ ShellRoot {
         hole: frame.wallHole
         keepRects: frame.wallKeep
         active: win.wallOpen
+        shown: !fullscreen
         onDismiss: win.closeOthers("")
 
         WallpaperPanel {
@@ -323,14 +336,18 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qs-bar"
+        contentItem.visible: !fullscreen
         mask: Region {
             regions: [
                 Region { item: leftSection },
                 Region { item: leftSection.tipRect },
                 Region { item: centerSection },
-                Region { item: statsNumbers }
+                Region { item: statsNumbers },
+                Region { item: fullscreen ? null : barAll; intersection: Intersection.Intersect }
             ]
         }
+
+        Item { id: barAll; anchors.fill: parent }
 
         LeftSection {
             id: leftSection
