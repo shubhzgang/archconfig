@@ -39,7 +39,7 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow-" + region.name
-        contentItem.visible: region.shown
+        contentItem.visible: region.shown && !region.theme.flat   // (none in the one-tone black themes)
         mask: Region {}
         FrameShadow {
             anchors.fill: parent

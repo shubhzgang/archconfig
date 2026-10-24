@@ -50,7 +50,7 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow"
-        contentItem.visible: !fullscreen
+        contentItem.visible: !fullscreen && !theme.flat
         mask: Region {}
         FrameShadow {
             anchors.fill: parent

@@ -121,7 +121,7 @@ Item {
     }
     // ---- plain wallpapers and color swatches (hypr/wallpaper.sh --plain / --swatch / --harmony) ----
     readonly property string plainDir: Quickshell.env("HOME") + "/wallpapers/plain"
-    readonly property var plains: ["#1C1C1E", "#3A3A3C", "#8E8E93", "#C7C7CC", "#8E8A84", "#1F3A5F", "#3A6EA5",
+    readonly property var plains: ["#000000", "#1C1C1E", "#3A3A3C", "#8E8E93", "#C7C7CC", "#8E8A84", "#1F3A5F", "#3A6EA5",
                                    "#2F7F86", "#4FB3C8", "#4F8A5B", "#E4B94A", "#D9783B", "#B83A3A", "#D4708F", "#6E4E9E"]
     readonly property var swatches: [
         ["#1E2433"], ["#E8E1D3"], ["#E0413A"], ["#FF6A2B"], ["#F7C948"], ["#B6E35A"], ["#3FBF6B"], ["#7FD6B7"],

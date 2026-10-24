@@ -4,7 +4,9 @@
 Reads bar_start/bar_end (written by quickshell/scripts/bar-colors.py) and writes a
 small diagonal-gradient PNG that kitty stretches over the window, plus the conf line pointing at it.
 """
+import colorsys
 import glob
+import json
 import os
 import re
 import time
@@ -15,6 +17,15 @@ from PIL import Image
 CACHE = os.path.expanduser("~/.cache/wal")
 SIZE = 256
 DARKEN = 0.32  # kitty is mostly text: keep the gradient subtle
+
+# a black palette (OLED or matte black, wal/swatch_scheme.py): no gradient, just its own background
+bg = json.load(open(f"{CACHE}/colors.json"))["special"]["background"]
+r, g, b = (int(bg[i:i + 2], 16) / 255 for i in (1, 3, 5))
+_, light, sat = colorsys.rgb_to_hls(r, g, b)
+if light < 0.15 and sat < 0.1:
+    with open(f"{CACHE}/kitty-gradient.conf", "w") as f:
+        f.write("background_image none\n")
+    raise SystemExit
 
 css = open(f"{CACHE}/colors-waybar-bar.css").read()
 start, end = (np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], float)

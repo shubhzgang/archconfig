@@ -135,14 +135,19 @@ Item {
     readonly property string wallpaper: realColors?.wallpaper ?? ""   // the applied wallpaper
 
     // A black, grey or white plain wallpaper (hypr/wallpaper.sh --plain, without a swatch) themes the
-    // shell in the neutral palette (see `live` below) closest to its lightness, whatever the mode.
+    // shell in the neutral palette (see `live` below) closest to its lightness, whatever the mode. The two
+    // blacks get their own flat, one-tone palettes: pure black (OLED) and the matte black wallpaper's.
     readonly property string plainNeutral: {
         const m = /\/wallpapers\/plain\/([0-9A-F]{6})\.png$/.exec(wallpaper)
         if (!m || swatch.length) return ""
         const c = Qt.color("#" + m[1])
         if (c.hslSaturation > 0.12) return ""
+        if (m[1] === "000000") return "oled"
+        if (c.hslLightness < 0.15) return "matte"
         return c.hslLightness < 0.3 ? "dark" : c.hslLightness > 0.7 ? "light" : "normal"
     }
+    // one tone: no inner shadow round the frame either (shell.qml, FrameRegion.qml)
+    readonly property bool flat: plainNeutral === "oled" || plainNeutral === "matte"
 
     // ---- live wallpaper: blue-tinted white, grey and black instead of the wallpaper's colors ----
     // While mpvpaper is running there is no single wallpaper to take colors from, so the theme goes
@@ -168,6 +173,12 @@ Item {
         normal: { bar: ["#34404f", "#566478"], ink: "#eef2f8", textOnInk: "#161c26", hover: "#ffffff", dark: "#131822",
                   card: "#ccd4e0", accent: "#7b8ca5", accent2: "#c6d0df", accent3: "#6c7b92",
                   series: ["#26303f", "#4d5b70", "#71829b", "#39465a", "#5d6d85", "#8496ae"] },
+        oled: { bar: ["#000000", "#000000"], ink: "#e5e5e7", textOnInk: "#000000", hover: "#ffffff", dark: "#e5e5e7",
+                card: "#161617", accent: "#48484a", accent2: "#aeaeb2", accent3: "#2c2c2e",
+                series: ["#f2f2f7", "#aeaeb2", "#8e8e93", "#d1d1d6", "#636366", "#c7c7cc"] },
+        matte: { bar: ["#1c1c1e", "#1c1c1e"], ink: "#e5e5e7", textOnInk: "#1c1c1e", hover: "#ffffff", dark: "#e5e5e7",
+                 card: "#2c2c2e", accent: "#636366", accent2: "#aeaeb2", accent3: "#48484a",
+                 series: ["#f2f2f7", "#aeaeb2", "#8e8e93", "#d1d1d6", "#636366", "#c7c7cc"] },
         light: { bar: ["#eef3fa", "#9fb0c8"], ink: "#18202c", textOnInk: "#f3f6fb", hover: "#0a1a33", dark: "#18202c",
                  card: "#f4f7fc", accent: "#8fa2bd", accent2: "#4f5f78", accent3: "#bac6d8",
                  series: ["#26303f", "#4d5b70", "#71829b", "#39465a", "#5d6d85", "#8496ae"] }
