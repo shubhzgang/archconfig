@@ -371,6 +371,10 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pypr toggle term"))
 
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 
+-- Hide the shell and let the tiled windows take its space.
+hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd("qs ipc call shell toggle"))
+hl.bind(mainMod .. " + SHIFT + Z", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

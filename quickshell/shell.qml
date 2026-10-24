@@ -6,12 +6,15 @@ import Quickshell.Io
 import Quickshell.Wayland
 
 ShellRoot {
+    id: root
     Theme { id: theme }
 
     // A fullscreen window (a video, a game) hides the shell: the surfaces stay where they are, empty
     // and taking no input. (Hidden or covered surfaces get no frame callbacks, and Qt then leaves
-    // them blank once they are shown again.)
-    readonly property bool fullscreen: Hyprland.focusedWorkspace?.hasFullscreen ?? false
+    // them blank once they are shown again.) `hidden` (qs ipc call shell toggle) hides it the same
+    // way and also gives up the frame's space, so the windows tile over the whole screen.
+    property bool hidden: false
+    readonly property bool fullscreen: hidden || (Hyprland.focusedWorkspace?.hasFullscreen ?? false)
     onFullscreenChanged: if (fullscreen) win.closeOthers("")
 
     // Reserve the frame's space on every edge (the top band holds the bar), so windows tile inside
@@ -31,7 +34,7 @@ ShellRoot {
             implicitWidth: modelData.w
             color: "transparent"
             exclusionMode: ExclusionMode.Normal
-            exclusiveZone: modelData.zone
+            exclusiveZone: root.hidden ? 0 : modelData.zone
             WlrLayershell.layer: WlrLayer.Bottom
             WlrLayershell.namespace: "qs-frame-space"
             mask: Region {}
@@ -165,6 +168,13 @@ ShellRoot {
             function toggle(): void { win.opacityOpen = !win.opacityOpen }
             function open(): void { win.opacityOpen = true }
             function close(): void { win.opacityOpen = false }
+        }
+
+        IpcHandler {   // qs ipc call shell toggle|show|hide
+            target: "shell"
+            function toggle(): void { root.hidden = !root.hidden }
+            function show(): void { root.hidden = false }
+            function hide(): void { root.hidden = true }
         }
 
         IpcHandler {   // qs ipc call calendar toggle|open|close
