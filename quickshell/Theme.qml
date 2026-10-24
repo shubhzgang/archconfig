@@ -52,16 +52,16 @@ Item {
     // Hyprland blurs behind the shell only where it is at least this opaque: just under the frame's
     // own opacity, so the frame's fainter anti-aliased edge pixels aren't blurred (the blur pulled
     // light from under the frame into a thin line along its curves). Same rules as in hyprland.lua,
-    // which reads the saved level when the config is reloaded: the left column's panels and the
-    // wallpaper picker show the windows behind them, the rest only the (cached) wallpaper.
+    // which reads the saved level when the config is reloaded: the wallpaper picker shows the windows
+    // behind it, the rest only the (cached) wallpaper.
     property bool blurSynced: false
     function syncBlur(level) {
         blurSynced = true
         const alpha = (level * 0.9).toFixed(3)
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
-            + "match = { namespace = \"^qs-(shell|region-stats)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
-        Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur-left\", "
-            + "match = { namespace = \"^qs-region-(left|wall)$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-(shell|region-stats|region-left)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
+        Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur-wall\", "
+            + "match = { namespace = \"^qs-region-wall$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
     }
     FileView {
         id: savedOpacity

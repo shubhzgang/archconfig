@@ -519,17 +519,18 @@ end
 
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-(shell|region-stats)$" },
+    match = { namespace = "^qs-(shell|region-stats|region-left)$" },
     blur = true,
     xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
--- the left column (launcher, calendar, clipboard, live wallpaper, opacity) and the wallpaper picker show
--- the windows behind them
+-- the wallpaper picker shows the windows behind it. (The left column's panels used to as well, but each
+-- surface is blurred on its own, and that blur took in the frame band next to them: a lighter line along
+-- their edges, and a square round the frame's left corners.)
 hl.layer_rule({
-    name = "quickshell-blur-left",
-    match = { namespace = "^qs-region-(left|wall)$" },
+    name = "quickshell-blur-wall",
+    match = { namespace = "^qs-region-wall$" },
     blur = true,
     xray = false,
     ignore_alpha = quickshell_opacity() * 0.9,
