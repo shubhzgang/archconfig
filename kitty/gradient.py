@@ -24,7 +24,8 @@ r, g, b = (int(bg[i:i + 2], 16) / 255 for i in (1, 3, 5))
 _, light, sat = colorsys.rgb_to_hls(r, g, b)
 if light < 0.15 and sat < 0.1:
     with open(f"{CACHE}/kitty-gradient.conf", "w") as f:
-        f.write("background_image none\n")
+        # (kitty.conf sets a black background for the gradient after the theme; this comes later)
+        f.write(f"background_image none\nbackground {bg}\n")
     raise SystemExit
 
 css = open(f"{CACHE}/colors-waybar-bar.css").read()

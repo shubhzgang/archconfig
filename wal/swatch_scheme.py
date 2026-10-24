@@ -56,12 +56,13 @@ def main():
     colors = [c.upper() for c in colors]
     # the second color tints the background (as `bg` does in palettes.json); a single color tints it itself
     full = full_colors({"colors": six_colors(colors, harmony), "bg": colors[-1]})
-    # a black (OLED black, matte black): the background is that black itself, so the terminal and
-    # everything else on it are the same one black as the wallpaper
+    # a black: OLED black keeps the background that black itself, so the terminal is the same one
+    # black as the wallpaper; a matte black gets a deeper matte (between it and OLED black) for it
     L, C, _ = lch(colors[0])
     if len(colors) == 1 and C < 0.02 and L < 0.3:
+        background = colors[0] if colors[0] == "#000000" else "#111113"
         # (and its text is plain grey: a black has no real hue to tint it with)
-        full.update(color0=colors[0], color7="#E5E5E7", color8="#8E8E93", color15="#F2F2F7")
+        full.update(color0=background, color7="#E5E5E7", color8="#8E8E93", color15="#F2F2F7")
     scheme = {
         "wallpaper": wallpaper,
         "alpha": "100",
