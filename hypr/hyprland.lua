@@ -95,11 +95,47 @@ hl.plugin.load(dynamicCursorsPlugin)
 -- Environment
 -- ---------------------------------------------------------------------------
 
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
+-- The GPUs with a monitor plugged in (looked up at every start; the cards' numbers can change between
+-- boots): Hyprland uses only those, and renders on the first, a non-NVIDIA one (the integrated GPU)
+-- when there is one. The NVIDIA settings are only for when it renders on an NVIDIA card; otherwise
+-- apps render on the integrated GPU too, not through NVIDIA's libraries.
+local function display_gpus()
+    local gpus, seen = {}, {}
+    local list = io.popen("grep -l '^connected$' /sys/class/drm/card*-*/status 2>/dev/null")
+    for path in list:lines() do
+        local card = path:match("/(card%d+)%-")
+        if card and not seen[card] then
+            seen[card] = true
+            local uevent = io.open("/sys/class/drm/" .. card .. "/device/uevent", "r")
+            local driver = uevent and uevent:read("*a"):match("DRIVER=(%S+)")
+            if uevent then uevent:close() end
+            table.insert(gpus, { device = "/dev/dri/" .. card, driver = driver })
+        end
+    end
+    list:close()
+    table.sort(gpus, function(a, b)
+        if (a.driver == "nvidia") ~= (b.driver == "nvidia") then return b.driver == "nvidia" end
+        return a.device < b.device
+    end)
+    return gpus
+end
+local gpus = display_gpus()
+local gpu = gpus[1]   -- the one Hyprland renders on
+if gpu then
+    local devices = {}
+    for _, g in ipairs(gpus) do table.insert(devices, g.device) end
+    hl.env("AQ_DRM_DEVICES", table.concat(devices, ":"))
+end
+
+if not gpu or gpu.driver == "nvidia" then
+    hl.env("LIBVA_DRIVER_NAME", "nvidia")
+    hl.env("GBM_BACKEND", "nvidia-drm")
+    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    hl.env("WLR_DRM_NO_ATOMIC", "1")
+else
+    hl.env("LIBVA_DRIVER_NAME", "radeonsi")   -- (/etc/environment says nvidia)
+end
 hl.env("XDG_SESSION_TYPE", "wayland")
-hl.env("GBM_BACKEND", "nvidia-drm")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-hl.env("WLR_DRM_NO_ATOMIC", "1")
 hl.env("NVD_BACKEND", "direct")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
 hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
