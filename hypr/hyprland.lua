@@ -269,11 +269,21 @@ hl.animation({
     bezier = "snappy",
 })
 
+-- ease-out quint, as in Quickshell's panels: starts fast and slows gently, so the slide doesn't
+-- cover most of the screen in its first few frames
+hl.curve("outQuint", {
+    type = "bezier",
+    points = {
+        { 0.22, 1.0 },
+        { 0.36, 1.0 },
+    },
+})
+
 hl.animation({
     leaf = "workspaces",
     enabled = true,
-    speed = 1.7,
-    bezier = "snappy",
+    speed = 4.5,
+    bezier = "outQuint",
     style = "slide",
 })
 
