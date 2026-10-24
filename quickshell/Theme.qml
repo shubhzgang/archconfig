@@ -99,8 +99,8 @@ Item {
     }
 
     // ---- style: paper (opaque, like the cards on a desk) or glass (see-through and blurred, with a
-    // thin light edge). Also sets how opaque kitty is, through a Hyprland window rule that hyprland.lua
-    // makes from the same saved file when its config is reloaded.
+    // thin light edge). Also sets how opaque every window is (Hyprland's window opacity, which
+    // hyprland.lua reads from the same saved file when its config is reloaded).
     property string style: "paper"      // paper | glass
     readonly property bool glass: style === "glass"
     readonly property string styleFile: Quickshell.env("HOME") + "/.cache/quickshell-style"
@@ -108,13 +108,13 @@ Item {
         if (s !== "paper" && s !== "glass") return
         style = s
         savedStyle.setText(s)
-        syncKitty()
+        syncWindows()
         // paper is opaque, glass see-through
         setOpacity(s === "paper" ? 1 : 0.6, true)
     }
-    function syncKitty() {
-        Quickshell.execDetached(["hyprctl", "eval", "hl.window_rule({ name = \"kitty-style\", match = { class = \"^kitty$\" }, "
-            + "opacity = \"" + (glass ? "1.0" : "1.0 override 1.0 override") + "\" })"])
+    function syncWindows() {   // paper: every window opaque; glass: focused 90%, the others 75%
+        Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { "
+            + (glass ? "active_opacity = 0.9, inactive_opacity = 0.75" : "active_opacity = 1.0, inactive_opacity = 1.0") + " } })"])
     }
     FileView {
         id: savedStyle

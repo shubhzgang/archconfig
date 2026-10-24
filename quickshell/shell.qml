@@ -137,11 +137,12 @@ ShellRoot {
             function close(): void { win.wallOpen = false }
         }
 
-        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>
+        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>|toggleStyle
             target: "theme"
             function cycle(): void { theme.cycleMode() }
             function set(mode: string): void { theme.setMode(mode) }
             function style(s: string): void { theme.setStyle(s) }
+            function toggleStyle(): void { theme.setStyle(theme.glass ? "paper" : "glass") }
             function opacity(level: real): void { theme.setOpacity(level, true) }
             function checkLive(): void { theme.checkLive() }   // hypr/mpvpaper.sh: a live wallpaper started or ended
         }

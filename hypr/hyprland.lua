@@ -48,6 +48,20 @@ local color5 = wal.color5 or "rgba(888888aa)"
 local activeBorder = wal.color1 or color9
 local inactiveBorder = wal.color2 or color5
 
+-- The shell's style (the wallpaper picker's Paper/Glass switch, saved by Theme.qml, which sets the
+-- same window opacity live): every window opaque on paper, see-through on glass (and before a style
+-- has been picked)
+local function quickshell_style()
+    local file = io.open(HOME .. "/.cache/quickshell-style", "r")
+    if not file then
+        return nil
+    end
+    local value = file:read("*l")
+    file:close()
+    return value
+end
+local paper = quickshell_style() == "paper"
+
 -- ---------------------------------------------------------------------------
 -- External configs
 -- ---------------------------------------------------------------------------
@@ -116,8 +130,8 @@ hl.config({
 
     decoration = {
         rounding = 10,
-        active_opacity = 0.9,
-        inactive_opacity = 0.75,
+        active_opacity = paper and 1.0 or 0.9,      -- Paper/Glass (see quickshell_style above)
+        inactive_opacity = paper and 1.0 or 0.75,
         fullscreen_opacity = 1.0,
 
         blur = {
@@ -359,10 +373,8 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("mpv $(wl-paste)"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("pavucontrol"))
 
--- Toggle the active window between fully opaque and its default transparency.
--- Uses hl.dsp.window.set_prop directly (hyprctl dispatch setprop is broken in Lua config mode).
-hl.bind(mainMod .. " + P",
-    hl.dsp.window.set_prop({ window = "active", prop = "opaque", value = "toggle" }))
+-- Switch the style between paper (everything opaque) and glass (see-through), as in the wallpaper picker.
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("qs ipc call theme toggleStyle"))
 
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
@@ -536,25 +548,6 @@ hl.layer_rule({
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
--- kitty follows the shell's style (the wallpaper picker's Paper/Glass switch, saved by Theme.qml,
--- which sets the same rule live): opaque on paper, the usual see-through opacity on glass (and
--- before a style has been picked)
-local function quickshell_style()
-    local file = io.open(HOME .. "/.cache/quickshell-style", "r")
-    if not file then
-        return nil
-    end
-    local value = file:read("*l")
-    file:close()
-    return value
-end
-
-hl.window_rule({
-    name = "kitty-style",
-    match = { class = "^kitty$" },
-    opacity = quickshell_style() == "paper" and "1.0 override 1.0 override" or "1.0",
-})
-
 -- windows on special workspaces (Super+S, Alt+1-4) show the workspace behind them instead of just
 -- the wallpaper
 hl.window_rule({
@@ -582,16 +575,3 @@ hl.window_rule({
     match = { class = "jetbrains-idea" },
     opacity = "1.0",
 })
-
--- ---------------------------------------------------------------------------
--- Opacity controls
--- ---------------------------------------------------------------------------
-
-hl.bind(mainMod .. " + SHIFT + equal",
-    hl.dsp.exec_cmd("~/.config/hypr/scripts/active_opacity.sh up"))
-
-hl.bind(mainMod .. " + SHIFT + minus",
-    hl.dsp.exec_cmd("~/.config/hypr/scripts/active_opacity.sh down"))
-
-hl.bind(mainMod .. " + SHIFT + P",
-    hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_opacity.sh"))
