@@ -247,6 +247,10 @@ Item {
                     opacity: panel.lerp(panel.fade, d)
                     z: -Math.abs(d)
                     visible: opacity > 0
+                    // the selected one (and the one under the mouse) is picked up, as in the launcher: the
+                    // picture rises 6px and shifts 4px right off its shadow
+                    property real lift: index === panel.current || area.containsMouse ? 1 : 0
+                    Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
                     // Soft shadow: 35% black, 3px past the thumbnail, blurred moderately. The blurred item is much
                     // bigger than the shadow shape (`room`), because the blur can't spread past the item
@@ -273,6 +277,7 @@ Item {
                     }
                     ClippingRectangle {
                         anchors.fill: parent
+                        transform: Translate { x: 4 * thumb.lift; y: -6 * thumb.lift }
                         radius: 14
                         color: panel.theme.card
                         border.width: index === panel.current ? 4 : 0
@@ -288,7 +293,9 @@ Item {
                         }
                     }
                     MouseArea {
+                        id: area
                         anchors.fill: parent
+                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (index !== panel.current) panel.select(panel.cursor + panel.offset(index - panel.current))

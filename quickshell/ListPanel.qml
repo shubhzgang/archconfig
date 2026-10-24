@@ -174,18 +174,23 @@ Item {
                 width: list.width
                 height: panel.rowH
                 readonly property bool current: ListView.isCurrentItem
+                // the selected entry is picked up, as in the launcher: it rises 6px and shifts 4px right,
+                // with a deeper shadow
+                property real lift: current ? 1 : 0
+                Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
                 Rectangle {
                     anchors { fill: parent; margins: 6 }
+                    transform: Translate { x: 4 * row.lift; y: -6 * row.lift }
                     radius: 10
                     color: row.current ? panel.theme.accent : panel.theme.card
                     Behavior on color { ColorAnimation { duration: 150 } }
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         shadowEnabled: true
-                        shadowColor: "#55000000"
-                        shadowBlur: 0.45
-                        shadowVerticalOffset: 3
+                        shadowColor: Qt.rgba(0, 0, 0, 0.33 + 0.27 * row.lift)
+                        shadowBlur: 0.45 + 0.15 * row.lift
+                        shadowVerticalOffset: 3 + row.lift
                     }
                     ClippingRectangle {   // the entry's thumbnail, if it has one
                         id: thumb
@@ -227,6 +232,7 @@ Item {
                     id: trash
                     visible: row.current && panel.removable && !!row.modelData.removable
                     anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
+                    transform: Translate { x: 4 * row.lift; y: -6 * row.lift }   // (on the picked-up entry)
                     width: 40; height: 40
                     Text {
                         anchors.centerIn: parent
