@@ -483,7 +483,7 @@ hl.bind("ALT + SHIFT + 4",
 hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m window -o ~/Screenshots/"))
 hl.bind("ALT + Print",
     hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Screenshots/"))
-hl.bind("ALT + F4", hl.dsp.exec_cmd("wlogout -b 5"))
+hl.bind("ALT + F4", hl.dsp.exec_cmd("qs ipc call power toggle"))
 hl.bind("ALT + down", hl.dsp.window.move({ direction = "down" }))
 hl.bind("ALT + left", hl.dsp.window.move({ direction = "left" }))
 hl.bind("ALT + r", hl.dsp.exec_cmd("~/.config/swaync/refresh.sh"))

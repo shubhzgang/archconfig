@@ -70,7 +70,8 @@ ShellRoot {
         property bool liveOpen: false      // live wallpaper links (bottom left)
         property bool mediaOpen: false     // media player (middle left)
         property bool overviewOpen: false  // workspace overview (top middle)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen
+        property bool powerOpen: false     // power menu (bottom left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -82,6 +83,7 @@ ShellRoot {
             if (except !== "live") liveOpen = false
             if (except !== "media") mediaOpen = false
             if (except !== "overview") overviewOpen = false
+            if (except !== "power") powerOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -91,6 +93,7 @@ ShellRoot {
         onLiveOpenChanged: if (liveOpen) closeOthers("live")
         onMediaOpenChanged: if (mediaOpen) closeOthers("media")
         onOverviewOpenChanged: if (overviewOpen) closeOthers("overview")
+        onPowerOpenChanged: if (powerOpen) closeOthers("power")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -114,6 +117,7 @@ ShellRoot {
                 Region { item: wallpaperButton },
                 Region { item: clipboardButton },
                 Region { item: liveButton },
+                Region { item: powerButton },
                 Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
@@ -194,6 +198,13 @@ ShellRoot {
             function close(): void { win.overviewOpen = false }
         }
 
+        IpcHandler {   // qs ipc call power toggle|open|close
+            target: "power"
+            function toggle(): void { win.powerOpen = !win.powerOpen }
+            function open(): void { win.powerOpen = true }
+            function close(): void { win.powerOpen = false }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -211,8 +222,8 @@ ShellRoot {
             leftH: Math.max(calendar.panelH, launcher.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
-            // the bottom-left panel: whichever of the three is furthest out
-            readonly property var leftPanel: [clipboard, live].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            // the bottom-left panel: whichever of them is furthest out
+            readonly property var leftPanel: [clipboard, live, power].reduce((a, b) => b.panelW > a.panelW ? b : a)
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
@@ -225,6 +236,23 @@ ShellRoot {
             topH: overview.panelH
             topMaxW: overview.maxW
             topMaxH: overview.maxH
+        }
+
+        DockButton {   // power menu, at the bottom
+            id: powerButton
+            theme: theme
+            glyph: 0xF0425
+            slot: -1
+            active: win.powerOpen
+            onClicked: win.powerOpen = !win.powerOpen
+        }
+
+        Rectangle {   // a faint line between the power button and the theme button, in the gap between them
+            x: (48 - width) / 2
+            anchors { bottom: parent.bottom; bottomMargin: 18 + 44 + 8 }
+            width: 22
+            height: 1
+            color: Qt.rgba(theme.ink.r, theme.ink.g, theme.ink.b, 0.25)
         }
 
         ThemeButton {
@@ -283,14 +311,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard and live wallpaper (bottom)
+    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper and power (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         hole: frame.leftHole
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -320,6 +348,13 @@ ShellRoot {
             theme: theme
             open: win.liveOpen
             onToggle: win.liveOpen = !win.liveOpen
+        }
+
+        PowerPanel {
+            id: power
+            theme: theme
+            open: win.powerOpen
+            onToggle: win.powerOpen = !win.powerOpen
         }
 
         MediaPanel {
