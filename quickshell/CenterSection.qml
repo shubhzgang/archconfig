@@ -57,7 +57,7 @@ Item {
                          : dot.empty ? section.theme.accent3 : section.theme.accent2
                     Behavior on color { ColorAnimation { duration: 300 } }
 
-                    layer.enabled: !dot.empty || dot.active   // empty dots are sunken: no drop shadow
+                    layer.enabled: !dot.empty || dot.active   // empty dots are flat: no drop shadow
                     layer.effect: MultiEffect {
                         shadowEnabled: true
                         shadowColor: "black"
@@ -66,16 +66,6 @@ Item {
                         shadowVerticalOffset: dot.active ? 2 : 3
                     }
 
-                    Rectangle {   // inset edge shading: lit top edge, or a sunken look when empty
-                        anchors.fill: parent
-                        radius: parent.radius
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: dot.empty && !dot.active ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, 0.30) }
-                            GradientStop { position: 0.3; color: "transparent" }
-                            GradientStop { position: 0.8; color: "transparent" }
-                            GradientStop { position: 1.0; color: dot.empty && !dot.active ? Qt.rgba(1, 1, 1, 0.07) : "transparent" }
-                        }
-                    }
                 }
 
                 MouseArea {
