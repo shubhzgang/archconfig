@@ -26,7 +26,10 @@ Item {
     clip: true
 
     // ---- apps ----
-    readonly property var allApps: {
+    // The desktop entries arrive one by one at startup: the list is made once they have all come in
+    // (Qt.callLater runs it once for them all), not again for each one.
+    property var allApps: []
+    function loadApps() {
         const out = []
         const seen = new Set()   // ~/.local/share/applications/snap links to snapd's dir, so snap apps are listed twice
         for (const e of DesktopEntries.applications.values) {
@@ -36,7 +39,12 @@ Item {
             out.push(e)
         }
         out.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-        return out
+        allApps = out
+    }
+    Component.onCompleted: loadApps()
+    Connections {
+        target: DesktopEntries.applications
+        function onValuesChanged() { Qt.callLater(panel.loadApps) }
     }
     readonly property string query: search.text.trim().toLowerCase()
     readonly property var shown: {
