@@ -8,6 +8,20 @@
 2. **Audio mixer (pulsemixer on Super+G, pavucontrol on Super+O).** One audio panel that reuses the
    media panel's per-app volume and output pieces. It shows output and input devices with their
    volumes, and each app's volume and output. Clicking the volume in the bar opens it.
+   It can cover everything pavucontrol does:
+
+   | pavucontrol tab | What it has | How the panel would do it |
+   |---|---|---|
+   | Playback | Each app's volume, mute and output device | `Quickshell.Services.Pipewire` (the media panel already does this) |
+   | Recording | Each app's microphone input and which device it uses | Pipewire, as for playback |
+   | Output devices | Volume, mute, per-channel balance, default device | Pipewire (`preferredDefaultAudioSink`, `volumes`) |
+   | | Port (headphones vs. speakers on one card) | `pactl set-sink-port` |
+   | Input devices | Volume, mute, default device, live level meter | Pipewire (`preferredDefaultAudioSource`, the peak monitor) |
+   | Configuration | Each card's profile (stereo, 5.1, digital out, off) | `pactl set-card-profile` |
+
+   There are three cards here: one on digital stereo (`output:iec958-stereo`) and two set to off,
+   so the profile switching matters. Rarely used options (latency offsets) stay in pavucontrol,
+   behind a small "Open pavucontrol" link in the panel's corner.
 3. **Network and Bluetooth (`kitty nmtui`, `blueman-manager`).** Clicking the bar icons opens
    separate windows today. `Quickshell.Networking` and `Quickshell.Bluetooth` are already imported,
    so a small panel under the bar could list Wi-Fi networks and paired devices with connect buttons.
