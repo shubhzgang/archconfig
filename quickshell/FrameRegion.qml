@@ -16,7 +16,7 @@ Scope {
     required property string name       // the surfaces' namespaces: qs-region-<name>, qs-shadow-<name>
     required property var rect          // [x, y, w, h] on the screen
     required property string hole       // the outline with this region's panels' notches
-    required property var keepRects     // where this region draws the shadow
+    required property var keepRects     // where this region draws the frame and its shadow
     property bool active: false         // one of its panels is open: take the keyboard and the mouse
     property bool shown: true           // false while a fullscreen window covers the screen: draw nothing
     signal dismiss()                    // a click outside its panels, or Escape
@@ -86,10 +86,14 @@ Scope {
             x: -region.rect[0]; y: -region.rect[1]
             width: region.frame.width; height: region.frame.height
 
-            FrameFill {
-                theme: region.theme
-                rect: region.rect
-                hole: region.hole
+            Repeater {   // only where it keeps the shadow too, so the two never both draw the overlap
+                model: region.keepRects
+                delegate: FrameFill {
+                    required property var modelData
+                    theme: region.theme
+                    rect: modelData
+                    hole: region.hole
+                }
             }
             Item {   // a click outside the panels, or Escape when no panel has the keyboard
                 anchors.fill: parent

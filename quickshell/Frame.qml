@@ -54,12 +54,16 @@ Item {
 
     // ---- regions, [x, y, w, h] on the screen ----
     // each is its panels' largest size plus 20px for the concave joins and 40px for the shadows to
-    // meet seamlessly at the edges; they only overlap where the left column meets the bottom strip
-    readonly property var statsRect: [inR - 1060, inT, 1060, inB - 360 - inT]
-    readonly property var leftRect: [inL, inT, 1300 + 60, inB - inT]
+    // meet seamlessly at the edges; they only overlap where the left column meets the bottom strip.
+    // Each is 1px larger all round: the glass edge (FrameFill.qml) is a 1px line centred on the
+    // inside edge, so half of it falls just outside a region that starts at that edge, and it would
+    // be left there, drawn by the rest of the frame, when a panel opens out of that edge.
+    function grown(r) { return [r[0] - 1, r[1] - 1, r[2] + 2, r[3] + 2] }
+    readonly property var statsRect: grown([inR - 1060, inT, 1060, inB - 360 - inT])
+    readonly property var leftRect: grown([inL, inT, 1300 + 60, inB - inT])
     readonly property var wallRect: {
         const w = wallMaxW + 120, h = wallMaxH + 60
-        return [Math.round(width / 2 - w / 2), inB - h, Math.round(w), h]
+        return grown([Math.round(width / 2 - w / 2), inB - h, Math.round(w), h])
     }
     readonly property var overlap: intersect(leftRect, wallRect)
     // which of the two draws the shadow where they overlap: the picker while it is out
