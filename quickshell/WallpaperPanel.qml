@@ -321,6 +321,20 @@ Item {
         Row {   // color swatches, then the harmony and style switches
             anchors { horizontalCenter: parent.horizontalCenter; top: plainRow.bottom; topMargin: 18 }
             spacing: 36
+            Row {   // the shell alone in OLED or matte black (picking the selected one again goes back)
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 10
+                Repeater {
+                    model: [["oled", "#000000"], ["matte", "#1c1c1e"]]
+                    delegate: Swatch {
+                        required property var modelData
+                        theme: panel.theme
+                        colors: [modelData[1]]
+                        selected: panel.theme.shellColors === modelData[0]
+                        onClicked: panel.theme.setShellColors(selected ? "" : modelData[0])
+                    }
+                }
+            }
             Row {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 10

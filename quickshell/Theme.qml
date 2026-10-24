@@ -149,6 +149,23 @@ Item {
     // one tone: no inner shadow round the frame either (shell.qml, FrameRegion.qml)
     readonly property bool flat: plainNeutral === "oled" || plainNeutral === "matte"
 
+    // ---- shell colors: the OLED or matte black palette for the shell alone, whatever the wallpaper
+    // (the terminal and the rest keep the wallpaper's colors; the shadows stay) ----
+    property string shellColors: ""     // "" (the wallpaper's) | oled | matte
+    readonly property string shellColorsFile: Quickshell.env("HOME") + "/.cache/quickshell-shell-colors"
+    function setShellColors(c) {
+        if (c !== "" && c !== "oled" && c !== "matte") return
+        shellColors = c
+        savedShellColors.setText(c)
+        applyTheme()
+    }
+    FileView {
+        id: savedShellColors
+        path: root.shellColorsFile
+        printErrors: false
+        onLoaded: { const c = text().trim(); root.shellColors = c === "oled" || c === "matte" ? c : ""; root.applyTheme() }
+    }
+
     // ---- live wallpaper: blue-tinted white, grey and black instead of the wallpaper's colors ----
     // While mpvpaper is running there is no single wallpaper to take colors from, so the theme goes
     // neutral (still darker or lighter by mode). Checked once at startup, and again whenever
@@ -194,8 +211,8 @@ Item {
         applyTheme()
     }
     function applyTheme() {
-        if (live || plainNeutral) {
-            const n = neutral[live ? mode : plainNeutral]
+        if (shellColors || live || plainNeutral) {
+            const n = neutral[shellColors || (live ? mode : plainNeutral)]
             accent = n.accent; accent2 = n.accent2; accent3 = n.accent3
             ink = n.ink; textOnInk = n.textOnInk; hover = n.hover; dark = n.dark; card = alpha(n.card)
             series = n.series
