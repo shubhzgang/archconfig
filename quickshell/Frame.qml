@@ -6,7 +6,7 @@ import QtQuick
 //
 // To keep animations cheap (the display runs on the integrated GPU), the screen is split into
 // regions that are drawn on their own surfaces (FrameRegion.qml): the stats corner (top right), the
-// left column (calendar, launcher, clipboard, live wallpaper) and the bottom strip
+// left column (calendar, launcher, clipboard, live wallpaper, media) and the bottom strip
 // (wallpaper picker). A panel's animation then only redraws its own region. This item draws the
 // rest of the frame, which never changes shape. Each region draws the frame inside its rectangle
 // from an outline with only its own panels' notches (statsHole, leftHole, wallHole).
@@ -25,6 +25,9 @@ Item {
     property real clipW: 0                // clipboard (etc.) panel out of the left band, bottom-left; clipY: its top
     property real clipY: 0
     property real clipH: 0
+    property real midW: 0                 // media panel out of the left band, in the middle; midY: its top
+    property real midY: 0
+    property real midH: 0
     property real wallMaxW: 0             // the wallpaper picker's full size (its region's size)
     property real wallMaxH: 0
 
@@ -46,6 +49,9 @@ Item {
     readonly property bool clipOpen: clipW >= 1
     readonly property real kf: Math.min(20, clipW / 2, clipH / 2)        // clipboard panel's concave joins
     readonly property real kr: Math.min(20, clipW / 2, clipH / 2)        // its rounded top-right corner
+    readonly property bool midOpen: midW >= 1
+    readonly property real mf: Math.min(20, midW / 2, midH / 2)          // media panel's concave joins
+    readonly property real mr: Math.min(20, midW / 2, midH / 2)          // its rounded right corners
     readonly property bool bottomOpen: bottomH >= 1
     readonly property real bf: Math.min(20, bottomH / 2, bottomW / 2)    // bottom panel's concave joins
     readonly property real br: Math.min(20, bottomH, bottomW / 2)        // its rounded top corners
@@ -97,9 +103,10 @@ Item {
     // ---- outlines of the free area inside the frame ----
     // Clockwise from the top-left corner: a rounded rectangle, with the notches of the panels asked
     // for. The frame is everything outside it.
-    function holePath(stats, left, bottom, clip) {
+    function holePath(stats, left, bottom, clip, mid) {
         const L = inL, T = inT, R = inR, B = inB, c = corner
         const lOpen = left && leftOpen, sOpen = stats && panelOpen, bOpen = bottom && bottomOpen, cOpen = clip && clipOpen
+        const mOpen = mid && midOpen
         // start on the top edge, just right of the left panel (or at the top-left corner)
         let d = `M ${lOpen ? lx + lf : L + c} ${T} `
         // along the top edge, then down round the stats panel, or round the top-right corner
@@ -124,6 +131,14 @@ Item {
                + `L ${L + kf} ${y0} A ${kf} ${kf} 0 0 1 ${L} ${y0 - kf} `
         } else
             d += `L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
+        // up the left edge, round the media panel in the middle if it is out
+        if (mOpen) {
+            const y0 = midY, y1 = midY + midH, x1 = L + midW
+            d += `L ${L} ${y1 + mf} A ${mf} ${mf} 0 0 1 ${L + mf} ${y1} `
+               + `L ${x1 - mr} ${y1} A ${mr} ${mr} 0 0 0 ${x1} ${y1 - mr} `
+               + `L ${x1} ${y0 + mr} A ${mr} ${mr} 0 0 0 ${x1 - mr} ${y0} `
+               + `L ${L + mf} ${y0} A ${mf} ${mf} 0 0 1 ${L} ${y0 - mf} `
+        }
         // up to the top-left corner, or round the calendar panel back up to the top edge
         if (lOpen)
             d += `L ${L} ${T + leftH + lf} A ${lf} ${lf} 0 0 1 ${L + lf} ${T + leftH} `
@@ -135,7 +150,7 @@ Item {
     }
     readonly property string plainHole: holePath(false, false, false, false)
     readonly property string statsHole: holePath(true, false, false, false)
-    readonly property string leftHole: holePath(false, true, false, true)
+    readonly property string leftHole: holePath(false, true, false, true, true)
     readonly property string wallHole: holePath(false, false, true, false)
 
     // ---- the frame outside the regions (it never changes shape) ----

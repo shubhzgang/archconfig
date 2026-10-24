@@ -8,6 +8,7 @@ import Quickshell.Wayland
 ShellRoot {
     id: root
     Theme { id: theme }
+    Media { id: media }
 
     // A fullscreen window (a video, a game) hides the shell: the surfaces stay where they are, empty
     // and taking no input. (Hidden or covered surfaces get no frame callbacks, and Qt then leaves
@@ -67,7 +68,8 @@ ShellRoot {
         property bool wallOpen: false      // wallpaper picker (bottom)
         property bool clipOpen: false      // clipboard history (bottom left)
         property bool liveOpen: false      // live wallpaper links (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen
+        property bool mediaOpen: false     // media player (middle left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -77,6 +79,7 @@ ShellRoot {
             if (except !== "wall") wallOpen = false
             if (except !== "clip") clipOpen = false
             if (except !== "live") liveOpen = false
+            if (except !== "media") mediaOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -84,6 +87,11 @@ ShellRoot {
         onWallOpenChanged: if (wallOpen) closeOthers("wall")
         onClipOpenChanged: if (clipOpen) closeOthers("clip")
         onLiveOpenChanged: if (liveOpen) closeOthers("live")
+        onMediaOpenChanged: if (mediaOpen) closeOthers("media")
+        Connections {   // the player went away
+            target: media
+            function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
+        }
 
         anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
@@ -168,6 +176,13 @@ ShellRoot {
             function hide(): void { root.hidden = true }
         }
 
+        IpcHandler {   // qs ipc call media toggle|open|close
+            target: "media"
+            function toggle(): void { win.mediaOpen = !win.mediaOpen && !!media.player }
+            function open(): void { win.mediaOpen = !!media.player }
+            function close(): void { win.mediaOpen = false }
+        }
+
         IpcHandler {   // qs ipc call calendar toggle|open|close
             target: "calendar"
             function toggle(): void { win.calOpen = !win.calOpen }
@@ -190,6 +205,9 @@ ShellRoot {
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
+            midW: mediaPanel.panelW
+            midY: mediaPanel.y
+            midH: mediaPanel.height
             wallMaxW: wallpaper.openW
             wallMaxH: wallpaper.openH
         }
@@ -250,14 +268,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), clipboard and live wallpaper (bottom)
+    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard and live wallpaper (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         hole: frame.leftHole
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -288,6 +306,14 @@ ShellRoot {
             open: win.liveOpen
             onToggle: win.liveOpen = !win.liveOpen
         }
+
+        MediaPanel {
+            id: mediaPanel
+            theme: theme
+            media: media
+            open: win.mediaOpen
+            onToggle: win.mediaOpen = !win.mediaOpen
+        }
     }
 
     FrameRegion {   // bottom middle: the wallpaper picker
@@ -306,6 +332,31 @@ ShellRoot {
             theme: theme
             open: win.wallOpen
             onToggle: win.wallOpen = !win.wallOpen
+        }
+    }
+
+    // The track playing, in the middle of the left band, on its own thin surface: its scrolling line
+    // then only redraws this strip, not the screen-sized shell surface. Hidden with no player.
+    PanelWindow {
+        id: mediaWin
+        anchors { top: true; bottom: true; left: true }
+        implicitWidth: 48
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.namespace: "qs-media"
+        readonly property bool shown: !fullscreen && !!media.player
+        contentItem.visible: shown
+        mask: Region { item: mediaWin.shown ? mediaStrip : null }
+
+        MediaStrip {
+            id: mediaStrip
+            anchors.verticalCenter: parent.verticalCenter
+            theme: theme
+            media: media
+            animate: mediaWin.shown
+            active: win.mediaOpen
+            onClicked: win.mediaOpen = !win.mediaOpen
         }
     }
 
