@@ -10,10 +10,11 @@ import Quickshell.Widgets
 // steps onto a peeking one. It wraps around at both ends (after the last wallpaper comes the first).
 // It opens on the current wallpaper. Selecting a wallpaper (a click, the arrows or the wheel) applies it
 // (hypr/wallpaper.sh), leaving the picker open; Enter applies the selected one and closes it, Escape closes.
-// Below the carousel: plain-color wallpapers, and color swatches (one color, or two) that theme
+// Below the carousel: plain-color wallpapers (themed in shades of their own color; the black ones
+// also pick the shell's OLED or matte black), and color swatches (one color, or two) that theme
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
-// for how a single color is grown into a palette (each harmony shown as the three main colors it gives)
-// and for the shell's style.
+// for how a one-color swatch is grown into a palette (each harmony shown as the three main colors it
+// gives) and for the shell's style. Picking any other wallpaper sets the shell back to its colors.
 Item {
     id: panel
     required property var theme
@@ -116,6 +117,7 @@ Item {
         if (!path) return
         settle.stop()
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", path])
+        theme.setShellColors("")
         theme.commitPreview(path)
         if (close) panel.toggle()
     }
@@ -130,12 +132,8 @@ Item {
         ["#3FBF6B", "#B6E35A"], ["#5856D6", "#7FD6B7"], ["#E0413A", "#F7C948"], ["#1F3A5F", "#F2B8A6"]
     ]
     readonly property var harmonies: ["monochrome", "complementary", "split", "analogous", "triadic"]
-    // the harmony only matters for a single color: a one-color swatch, or a plain wallpaper with none
-    readonly property string baseColor: {
-        if (theme.swatch.length === 1) return theme.swatch[0]
-        const m = theme.swatch.length === 0 && /\/wallpapers\/plain\/([0-9A-F]{6})\.png$/.exec(theme.wallpaper)
-        return m ? "#" + m[1] : ""
-    }
+    // the harmony only matters for a one-color swatch
+    readonly property string baseColor: theme.swatch.length === 1 ? theme.swatch[0] : ""
     readonly property bool singleColor: baseColor !== ""
     // color1..color3 that each harmony gives the base color (the same code that applies it, wal/swatch_scheme.py)
     property var harmonyColors: ({})
@@ -313,7 +311,11 @@ Item {
                     width: 56; height: 32
                     colors: [modelData]
                     selected: panel.theme.wallpaper === panel.plainDir + "/" + modelData.slice(1) + ".png"
-                    onClicked: panel.run(["--plain", modelData])
+                    onClicked: {
+                        panel.run(["--plain", modelData])
+                        // the black ones are the shell's OLED and matte black too
+                        panel.theme.setShellColors({ "#000000": "oled", "#1C1C1E": "matte" }[modelData] ?? "")
+                    }
                 }
             }
         }
@@ -365,7 +367,7 @@ Item {
                         required property string modelData
                         theme: panel.theme
                         colors: panel.singleColor ? panel.harmonyColors[modelData] ?? [] : []
-                        selected: panel.theme.harmony === modelData
+                        selected: panel.singleColor && panel.theme.harmony === modelData
                         onClicked: panel.run(["--harmony", modelData])
                     }
                 }

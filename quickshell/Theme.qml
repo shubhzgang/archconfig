@@ -137,27 +137,35 @@ Item {
     // A black, grey or white plain wallpaper (hypr/wallpaper.sh --plain, without a swatch) themes the
     // shell in the neutral palette (see `live` below) closest to its lightness, whatever the mode. The two
     // blacks get their own flat, one-tone palettes: pure black (OLED) and the matte black wallpaper's.
-    readonly property string plainNeutral: {
+    readonly property string plainColor: {   // a plain wallpaper's color (without a swatch), else ""
         const m = /\/wallpapers\/plain\/([0-9A-F]{6})\.png$/.exec(wallpaper)
-        if (!m || swatch.length) return ""
-        const c = Qt.color("#" + m[1])
+        return m && !swatch.length ? "#" + m[1] : ""
+    }
+    readonly property string plainNeutral: {
+        if (!plainColor) return ""
+        const c = Qt.color(plainColor)
         if (c.hslSaturation > 0.12) return ""
-        if (m[1] === "000000") return "oled"
+        if (plainColor === "#000000") return "oled"
         if (c.hslLightness < 0.15) return "matte"
         return c.hslLightness < 0.3 ? "dark" : c.hslLightness > 0.7 ? "light" : "normal"
     }
     // one tone: no inner shadow round the frame either (shell.qml, FrameRegion.qml)
     readonly property bool flat: plainNeutral === "oled" || plainNeutral === "matte"
 
-    // ---- shell colors: the OLED or matte black palette for the shell alone, whatever the wallpaper
-    // (the terminal and the rest keep the wallpaper's colors; the shadows stay) ----
+    // ---- shell colors: the OLED or matte black palette for the shell, whatever the wallpaper; the
+    // terminal's background goes the same black (kitty/gradient.py reads the saved choice), the rest
+    // keeps the wallpaper's colors, and the shadows stay ----
     property string shellColors: ""     // "" (the wallpaper's) | oled | matte
     readonly property string shellColorsFile: Quickshell.env("HOME") + "/.cache/quickshell-shell-colors"
     function setShellColors(c) {
         if (c !== "" && c !== "oled" && c !== "matte") return
+        const changed = c !== shellColors
         shellColors = c
         savedShellColors.setText(c)
         applyTheme()
+        // (written here too, so the terminal's script reads the new choice, whenever the file view writes)
+        if (changed) Quickshell.execDetached(["sh", "-c", 'printf %s "$1" > "$2"; ~/.config/kitty/gradient.py; pkill -USR1 kitty',
+                                              "sh", c, shellColorsFile])
     }
     FileView {
         id: savedShellColors
@@ -216,7 +224,9 @@ Item {
             accent = n.accent; accent2 = n.accent2; accent3 = n.accent3
             ink = n.ink; textOnInk = n.textOnInk; hover = n.hover; dark = n.dark; card = alpha(n.card)
             series = n.series
-            barStart = alpha(n.bar[0]); barEnd = alpha(n.bar[1])
+            // a grey or white plain wallpaper: the shell is that one grey, with the palette's text
+            const flatBar = !shellColors && !live ? plainColor : ""
+            barStart = alpha(flatBar || n.bar[0]); barEnd = alpha(flatBar || n.bar[1])
             return
         }
         const c = baseValue && baseValue.colors
@@ -247,7 +257,11 @@ Item {
     property string wanted            // the scheme path of the latest preview request
     // the bar's gradient ends: the same dark, saturated colour1/colour2 that scripts/bar-colors.py
     // writes for kitty, computed here so they arrive together with the palette
-    function barOf(value) { return [vividDark(value.colors.color1), vividDark(value.colors.color2)] }
+    // (a plain wallpaper's is one flat shade of its color, no gradient)
+    function barOf(value) {
+        const plain = !swatch.length && /\/wallpapers\/plain\//.test(value.wallpaper ?? "")
+        return [vividDark(value.colors.color1), vividDark(plain ? value.colors.color1 : value.colors.color2)]
+    }
     function applyReal() { if (realColors && realColors.colors) setColors(realColors, barOf(realColors)) }
     function preview(wallpaper) {
         if (swatch.length) return

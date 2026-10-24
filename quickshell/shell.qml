@@ -148,9 +148,10 @@ ShellRoot {
             function close(): void { win.wallOpen = false }
         }
 
-        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>|toggleStyle
+        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>|toggleStyle|shellColors <oled|matte|"">
             target: "theme"
             function cycle(): void { theme.cycleMode() }
+            function shellColors(c: string): void { theme.setShellColors(c) }
             function set(mode: string): void { theme.setMode(mode) }
             function style(s: string): void { theme.setStyle(s) }
             function toggleStyle(): void { theme.setStyle(theme.glass ? "paper" : "glass") }

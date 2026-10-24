@@ -4,12 +4,13 @@
 # parallel. Quickshell picks the new colors up by itself (it watches the wal files).
 #
 #   wallpaper.sh <image>                 set the wallpaper and theme everything from it
-#   wallpaper.sh --plain '#RRGGBB'       set a plain-color wallpaper (made once in ~/wallpapers/plain)
+#   wallpaper.sh --plain '#RRGGBB'       set a plain-color wallpaper (made once in ~/wallpapers/plain);
+#                                        the two blacks (000000, 1C1C1E) also set the swatch back to auto
 #   wallpaper.sh --swatch auto|'#A'|'#A,#B'   theme from one or two colors instead of the wallpaper
 #                                        (kept across wallpaper changes until set back to auto)
 #   wallpaper.sh --harmony monochrome|complementary|split|analogous|triadic
-#                                        how a single color (a swatch or a plain wallpaper) is grown
-#                                        into a palette
+#                                        how a one-color swatch is grown into a palette (a plain
+#                                        wallpaper is always shades of its own color)
 # The swatch and harmony are kept in ~/.cache/wal-swatch.json (the picker shows them from there).
 STATE="$HOME/.cache/wal-swatch.json"
 PLAIN_DIR="$HOME/wallpapers/plain"
@@ -31,6 +32,7 @@ apply_palette() {
     h=$(harmony)
     if [ -z "$colors" ] && [[ "$wallpaper" == "$PLAIN_DIR"/* ]]; then
         colors="#$(basename "$wallpaper" .png)"
+        h=monochrome
     fi
     if [ -n "$colors" ]; then
         scheme="$HOME/.cache/wal/swatch-scheme.json"
@@ -98,6 +100,8 @@ case "$1" in
         [ -f "$PLAIN_DIR/$hex.png" ] ||
             python3 -c "import sys; from PIL import Image; Image.new('RGB', (3840, 2160), '#' + sys.argv[1]).save(sys.argv[2])" \
                 "$hex" "$PLAIN_DIR/$hex.png"
+        # the OLED and matte black wallpapers theme everything black: a swatch would color it instead
+        [[ "$hex" == 000000 || "$hex" == 1C1C1E ]] && save_state "" "$(harmony)"
         set_wallpaper "$PLAIN_DIR/$hex.png"
         ;;
     --swatch)
