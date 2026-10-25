@@ -369,6 +369,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ 0")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    hl.exec_cmd("LLConnect3")   -- LL-Connect 3: the Lian Li fan controller (lands on Alt+2, see its window rule)
 end)
 
 -- ---------------------------------------------------------------------------
@@ -626,4 +627,10 @@ hl.window_rule({
 hl.window_rule({
     match = { class = "jetbrains-idea" },
     opacity = "1.0",
+})
+
+-- LL-Connect 3 (started at login) lives on the Alt+2 special workspace, without showing it
+hl.window_rule({
+    match = { class = "^LLConnect3$" },
+    workspace = "special:two silent",
 })
