@@ -379,11 +379,54 @@ Item {
                     }
                 }
             }
-            Row {
+            Item {   // the style: a switch between paper (knob left) and glass (knob right); a click flips it
+                id: styleSwitch
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
-                Chip { theme: panel.theme; label: "Paper"; selected: !panel.theme.glass; onClicked: panel.theme.setStyle("paper") }
-                Chip { theme: panel.theme; label: "Glass"; selected: panel.theme.glass; onClicked: panel.theme.setStyle("glass") }
+                width: styleRow.implicitWidth
+                height: styleRow.implicitHeight
+                readonly property bool glass: panel.theme.glass
+                Row {
+                    id: styleRow
+                    spacing: 10
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Paper"
+                        color: panel.theme.ink
+                        opacity: styleSwitch.glass ? 0.5 : 1
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 15
+                    }
+                    Rectangle {   // the track, filled while on glass
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 46; height: 26
+                        radius: height / 2
+                        color: styleSwitch.glass ? panel.theme.ink : "transparent"
+                        border.width: 1
+                        border.color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, styleSwitch.glass ? 0 : 0.45)
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Rectangle {   // the knob
+                            width: 18; height: 18
+                            radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: styleSwitch.glass ? parent.width - width - 4 : 4
+                            color: styleSwitch.glass ? panel.theme.textOnInk : panel.theme.ink
+                            Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        }
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Glass"
+                        color: panel.theme.ink
+                        opacity: styleSwitch.glass ? 1 : 0.5
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 15
+                    }
+                }
+                MouseArea {   // over the whole switch, labels included
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: panel.theme.setStyle(panel.theme.glass ? "paper" : "glass")
+                }
             }
         }
     }
