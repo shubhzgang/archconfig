@@ -147,7 +147,7 @@ Item {
         // ---- the apps ----
         GridView {
             id: grid
-            anchors { top: searchBox.bottom; topMargin: 18; left: parent.left; right: parent.right; bottom: parent.bottom }
+            anchors { top: searchBox.bottom; topMargin: 18; left: parent.left; right: parent.right; rightMargin: 31; bottom: parent.bottom }   // (room for the scroll bar: 16px from the cards)
             clip: true
             cellWidth: width / panel.columns
             cellHeight: 88
@@ -257,6 +257,13 @@ Item {
                     onClicked: panel.launch(cell.modelData)
                 }
             }
+        }
+        VScrollBar {   // right of the grid
+            theme: panel.theme
+            view: grid
+            x: grid.x + grid.width + 10
+            y: grid.y + 6
+            height: grid.height - 12
         }
     }
 }

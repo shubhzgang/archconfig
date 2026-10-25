@@ -149,7 +149,7 @@ Item {
 
         ListView {
             id: list
-            anchors { top: searchBox.bottom; topMargin: 14; left: parent.left; right: parent.right; bottom: parent.bottom }
+            anchors { top: searchBox.bottom; topMargin: 14; left: parent.left; right: parent.right; rightMargin: 27; bottom: parent.bottom }
             clip: true
             model: panel.shown
             boundsBehavior: Flickable.StopAtBounds
@@ -262,6 +262,13 @@ Item {
                     }
                 }
             }
+        }
+        VScrollBar {   // in the room right of the rows (the list stops 27px short of the panel's padding for it): 16px from the rows, 14px from the edge
+            theme: panel.theme
+            view: list
+            x: list.x + list.width + 10
+            y: list.y + 6
+            height: list.height - 12
         }
     }
 }

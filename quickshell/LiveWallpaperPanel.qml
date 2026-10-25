@@ -84,7 +84,7 @@ ListPanel {
     Item {
         id: stopButton
         readonly property bool shown: panel.theme.live
-        x: panel.openW - 22 - width   // right-aligned with the rows (16 in from the panel, 6 in from the list)
+        x: panel.openW - 49 - width   // right-aligned with the rows (16 in from the panel, 27 for the scroll bar, 6 in from the list)
         y: panel.openH - 22 - height
         width: stopRow.implicitWidth + 40
         height: 52
