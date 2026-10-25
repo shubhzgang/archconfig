@@ -409,6 +409,8 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("mpv $(wl-paste)"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("pavucontrol"))
+-- Switch audio between the 5.1 speakers and the headphones.
+hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_audio_output.sh"))
 
 -- Switch the style between paper (everything opaque) and glass (see-through), as in the wallpaper picker.
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("qs ipc call theme toggleStyle"))

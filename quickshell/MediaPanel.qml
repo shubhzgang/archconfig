@@ -10,7 +10,8 @@ import Quickshell.Widgets
 // frame like the other panels. The album art, the track, how far it has played (click or drag to
 // seek) and the usual controls. With more than one player, dots on the right switch between them (it
 // opens on the one in the strip; scrolling switches too). Below, the player's own volume and which
-// output it plays on (only its audio: the device volume and the other apps stay as they are). Space plays or pauses, Left / Right skip, Up / Down switch players,
+// output it plays on (only its audio: the device volume and the other apps stay as they are), and the
+// sound card's output for all audio (speakers or headphones). Space plays or pauses, Left / Right skip, Up / Down switch players,
 // Escape closes.
 Item {
     id: panel
@@ -453,6 +454,37 @@ Item {
                     selected: modelData === panel.output
                     onClicked: panel.route(modelData)
                 }
+            }
+        }
+        Item { width: 1; height: 10 }
+        Row {   // the sound card's output, for all audio: the speakers (TOSLINK) or the headphones (line out)
+            spacing: 8
+            // which one is on, from its sink (hypr/scripts/toggle_audio_output.sh switches the card's profile)
+            readonly property bool headphones: Pipewire.nodes.values.some(n => n.name === "alsa_output.pci-0000_17_00.6.analog-stereo")
+            readonly property bool speakers: Pipewire.nodes.values.some(n => n.name === "alsa_output.pci-0000_17_00.6.iec958-ac3-surround-51")
+            function pick(which) {
+                Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/toggle_audio_output.sh", which])
+                recheck.restart()   // the player's stream moves with it
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "All audio"
+                color: panel.theme.ink
+                opacity: 0.7
+                font.family: "CodeNewRoman Nerd Font Mono"
+                font.pixelSize: 14
+            }
+            Chip {
+                theme: panel.theme
+                label: "5.1 Speakers"
+                selected: parent.speakers
+                onClicked: parent.pick("speakers")
+            }
+            Chip {
+                theme: panel.theme
+                label: "Headphones"
+                selected: parent.headphones
+                onClicked: parent.pick("headphones")
             }
         }
     }
