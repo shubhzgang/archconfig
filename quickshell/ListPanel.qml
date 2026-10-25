@@ -28,6 +28,8 @@ Item {
     signal removeRequested(var entry)
     function clearSearch() { search.text = "" }
     property int fitRows: 0              // > 0: just tall enough for this many rows (else as tall as the screen allows)
+    property real listBottomPad: 0       // room left below the last row, for something floating over the list's bottom
+    readonly property real contentOpacity: content.opacity   // (for that, so it fades in and out with the rest)
     readonly property real openH: Math.min(maxH, parent.height - band - side - 160,
                                            fitRows > 0 ? 32 + 58 + 14 + fitRows * rowH + 6 : maxH)
     property real panelW: 0
@@ -151,7 +153,17 @@ Item {
             clip: true
             model: panel.shown
             boundsBehavior: Flickable.StopAtBounds
-            interactive: false   // the WheelHandler below does all scrolling (the default wheel step is tiny)
+            bottomMargin: panel.listBottomPad
+            interactive: false
+            // the view keeps the selected row inside its own height, which takes no account of
+            // listBottomPad: scroll a row selected down there up out of it
+            onCurrentIndexChanged: Qt.callLater(keepClear)
+            function keepClear() {
+                const row = currentItem
+                if (!row || bottomMargin <= 0) return
+                const over = row.y + row.height - (contentY + height - bottomMargin)
+                if (over > 0) contentY += over
+            }   // the WheelHandler below does all scrolling (the default wheel step is tiny)
 
             // Mouse wheel: each notch scrolls ~2.5 rows, eased over 160ms.
             NumberAnimation { id: scrollAnim; target: list; property: "contentY"; duration: 160; easing.type: Easing.OutCubic }
@@ -159,7 +171,7 @@ Item {
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                 onWheel: event => {
                     const step = event.pixelDelta.y !== 0 ? event.pixelDelta.y * 1.3 : event.angleDelta.y * 1.7
-                    const max = Math.max(0, list.contentHeight - list.height)
+                    const max = Math.max(0, list.contentHeight + list.bottomMargin - list.height)
                     const from = scrollAnim.running ? scrollAnim.to : list.contentY
                     scrollAnim.stop()
                     scrollAnim.to = Math.max(0, Math.min(max, from - step))
