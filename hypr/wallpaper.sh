@@ -4,8 +4,10 @@
 # parallel. Quickshell picks the new colors up by itself (it watches the wal files).
 #
 #   wallpaper.sh <image>                 set the wallpaper and theme everything from it
-#   wallpaper.sh --plain '#RRGGBB'       set a plain-color wallpaper (made once in ~/wallpapers/plain);
-#                                        the two blacks (000000, 1C1C1E) also set the swatch back to auto
+#   wallpaper.sh --plain '#RRGGBB' [keep]   set a plain-color wallpaper (made once in ~/wallpapers/plain);
+#                                        the two blacks (000000, 1C1C1E) also set the swatch back to auto,
+#                                        unless `keep` (the picker's black wallpapers whose colors follow
+#                                        the swatch)
 #   wallpaper.sh --swatch auto|'#A'|'#A,#B'   theme from one or two colors instead of the wallpaper
 #                                        (kept across wallpaper changes until set back to auto)
 #   wallpaper.sh --harmony monochrome|complementary|split|analogous|triadic
@@ -101,7 +103,7 @@ case "$1" in
             python3 -c "import sys; from PIL import Image; Image.new('RGB', (3840, 2160), '#' + sys.argv[1]).save(sys.argv[2])" \
                 "$hex" "$PLAIN_DIR/$hex.png"
         # the OLED and matte black wallpapers theme everything black: a swatch would color it instead
-        [[ "$hex" == 000000 || "$hex" == 1C1C1E ]] && save_state "" "$(harmony)"
+        [[ "$3" != keep && ( "$hex" == 000000 || "$hex" == 1C1C1E ) ]] && save_state "" "$(harmony)"
         set_wallpaper "$PLAIN_DIR/$hex.png"
         ;;
     --swatch)

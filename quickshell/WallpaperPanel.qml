@@ -10,8 +10,9 @@ import Quickshell.Widgets
 // steps onto a peeking one. It wraps around at both ends (after the last wallpaper comes the first).
 // It opens on the current wallpaper. Selecting a wallpaper (a click, the arrows or the wheel) applies it
 // (hypr/wallpaper.sh), leaving the picker open; Enter applies the selected one and closes it, Escape closes.
-// Below the carousel: plain-color wallpapers (themed in shades of their own color; the black ones
-// also pick the shell's OLED or matte black), and color swatches (one color, or two) that theme
+// Below the carousel: plain-color wallpapers (themed in shades of their own color; the first two
+// blacks also pick the shell's OLED or matte black, the next two leave the shell and the terminal to the
+// swatch's colors), and color swatches (one color, or two) that theme
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
 // for how a one-color swatch is grown into a palette (each harmony shown as the three main colors it
 // gives) and for the shell's style. Picking any other wallpaper sets the shell back to its colors.
@@ -123,7 +124,11 @@ Item {
     }
     // ---- plain wallpapers and color swatches (hypr/wallpaper.sh --plain / --swatch / --harmony) ----
     readonly property string plainDir: Quickshell.env("HOME") + "/wallpapers/plain"
-    readonly property var plains: ["#000000", "#1C1C1E", "#3A3A3C", "#8E8E93", "#C7C7CC", "#8E8A84", "#1F3A5F", "#3A6EA5",
+    // the OLED and matte black wallpapers twice: first with the shell and the terminal in that black (a
+    // swatch colors only their accents), then with everything in the swatch's colors (`free`)
+    readonly property var plainBlacks: [{ color: "#000000", shell: "oled" }, { color: "#1C1C1E", shell: "matte" },
+                                        { color: "#000000", shell: "", free: true }, { color: "#1C1C1E", shell: "", free: true }]
+    readonly property var plains: ["#3A3A3C", "#8E8E93", "#C7C7CC", "#8E8A84", "#1F3A5F", "#3A6EA5",
                                    "#2F7F86", "#4FB3C8", "#4F8A5B", "#E4B94A", "#D9783B", "#B83A3A", "#D4708F", "#6E4E9E"]
     readonly property var swatches: [
         ["#1E2433"], ["#E8E1D3"], ["#E0413A"], ["#FF6A2B"], ["#F7C948"], ["#B6E35A"], ["#3FBF6B"], ["#7FD6B7"],
@@ -295,17 +300,19 @@ Item {
             anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; topMargin: panel.thumbH + 34 }
             spacing: 12
             Repeater {
-                model: panel.plains
+                model: panel.plainBlacks.concat(panel.plains.map(c => ({ color: c, shell: "" })))
                 delegate: Swatch {
-                    required property string modelData
+                    required property var modelData
+                    readonly property bool isBlack: !!modelData.free || modelData.shell !== ""
                     theme: panel.theme
                     width: 56; height: 32
-                    colors: [modelData]
-                    selected: panel.theme.wallpaper === panel.plainDir + "/" + modelData.slice(1) + ".png"
+                    // the free blacks: a corner in the swatch's color (grey without one)
+                    colors: modelData.free ? [modelData.color, modelData.color, panel.theme.swatch[0] ?? "#8E8E93"] : [modelData.color]
+                    selected: panel.theme.wallpaper === panel.plainDir + "/" + modelData.color.slice(1) + ".png"
+                              && (!isBlack || panel.theme.shellColors === modelData.shell)
                     onClicked: {
-                        panel.run(["--plain", modelData])
-                        // the black ones are the shell's OLED and matte black too
-                        panel.theme.setShellColors({ "#000000": "oled", "#1C1C1E": "matte" }[modelData] ?? "")
+                        panel.run(["--plain", modelData.color].concat(modelData.free ? ["keep"] : []))
+                        panel.theme.setShellColors(modelData.shell)
                     }
                 }
             }
