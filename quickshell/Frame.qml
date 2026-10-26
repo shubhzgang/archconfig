@@ -9,8 +9,8 @@ import QtQuick
 // left column (calendar, launcher, clipboard, live wallpaper, media), the workspace overview (top
 // middle) and the bottom strip (wallpaper picker). A panel's animation then only redraws its own
 // region. This item draws the rest of the frame, which never changes shape. Each region draws the
-// frame inside its rectangle from an outline with only its own panels' notches (statsHole, leftHole,
-// wallHole, topHole).
+// frame inside its rectangle with only its own panels' notches (statsNotches, leftNotches,
+// wallNotches, topNotches), drawn by a shader (FrameShader.qml).
 Item {
     id: frame
     required property var theme
@@ -72,7 +72,7 @@ Item {
     // each is its panels' largest size plus 20px for the concave joins and 40px for the shadows to
     // meet seamlessly at the edges. They overlap where the left column meets the bottom strip, and
     // where the workspace overview's (wide, along the top) meets the left column's and the stats corner's.
-    // Each is 1px larger all round: the glass edge (FrameFill.qml) is a 1px line centred on the
+    // Each is 1px larger all round: the glass edge (shaders/frame.frag) is a 1px line centred on the
     // inside edge, so half of it falls just outside a region that starts at that edge, and it would
     // be left there, drawn by the rest of the frame, when a panel opens out of that edge.
     function grown(r) { return [r[0] - 1, r[1] - 1, r[2] + 2, r[3] + 2] }
@@ -93,8 +93,13 @@ Item {
     readonly property var wallKeep: !bottomOpen && overlap ? subtract([wallRect], [overlap]) : [wallRect]
     readonly property var statsKeep: topOpen ? subtract([statsRect], [topRect]) : [statsRect]
     readonly property var topKeep: topOpen ? [topRect] : subtract([topRect], [leftRect, statsRect])
-    // everything else is drawn here
-    readonly property var baseKeep: subtract([[0, 0, width, height]], [statsRect, leftRect, wallRect, topRect])
+    // everything else is drawn here, near the edges only: strips 80px past the inside edge (the corners
+    // and the shadow's faint tail reach about that far), not overlapping each other
+    readonly property var edgeStrips: [
+        [0, 0, width, inT + 80], [0, inB - 80, width, height - inB + 80],
+        [0, inT + 80, inL + 80, inB - inT - 160], [inR - 80, inT + 80, width - inR + 80, inB - inT - 160]
+    ]
+    readonly property var baseKeep: subtract(edgeStrips, [statsRect, leftRect, wallRect, topRect])
 
     function intersect(a, b) {
         const x0 = Math.max(a[0], b[0]), y0 = Math.max(a[1], b[1])
@@ -118,75 +123,34 @@ Item {
         return rects
     }
 
-    // ---- outlines of the free area inside the frame ----
-    // Clockwise from the top-left corner: a rounded rectangle, with the notches of the panels asked
-    // for. The frame is everything outside it.
-    function holePath(stats, left, bottom, clip, mid, top) {
-        const L = inL, T = inT, R = inR, B = inB, c = corner
-        const lOpen = left && leftOpen, sOpen = stats && panelOpen, bOpen = bottom && bottomOpen, cOpen = clip && clipOpen
-        const mOpen = mid && midOpen, tOpen = top && topOpen
-        // start on the top edge, just right of the left panel (or at the top-left corner)
-        let d = `M ${lOpen ? lx + lf : L + c} ${T} `
-        // round the workspace overview in the middle of the top edge
-        if (tOpen)
-            d += `L ${tl - tf} ${T} A ${tf} ${tf} 0 0 1 ${tl} ${T + tf} `
-               + `L ${tl} ${T + topH - tr} A ${tr} ${tr} 0 0 0 ${tl + tr} ${T + topH} `
-               + `L ${trt - tr} ${T + topH} A ${tr} ${tr} 0 0 0 ${trt} ${T + topH - tr} `
-               + `L ${trt} ${T + tf} A ${tf} ${tf} 0 0 1 ${trt + tf} ${T} `
-        // along the top edge, then down round the stats panel, or round the top-right corner
-        if (sOpen)
-            d += `L ${px - f} ${T} A ${f} ${f} 0 0 1 ${px} ${T + f} `
-               + `L ${px} ${T + panelH - r} A ${r} ${r} 0 0 0 ${px + r} ${T + panelH} `
-               + `L ${R - f} ${T + panelH} A ${f} ${f} 0 0 1 ${R} ${T + panelH + f} `
-        else
-            d += `L ${R - c} ${T} A ${c} ${c} 0 0 1 ${R} ${T + c} `
-        // down the right edge, along the bottom (round the wallpaper picker)
-        d += `L ${R} ${B - c} A ${c} ${c} 0 0 1 ${R - c} ${B} `
-        if (bOpen)
-            d += `L ${brt + bf} ${B} A ${bf} ${bf} 0 0 1 ${brt} ${B - bf} `
-               + `L ${brt} ${B - bottomH + br} A ${br} ${br} 0 0 0 ${brt - br} ${B - bottomH} `
-               + `L ${bl + br} ${B - bottomH} A ${br} ${br} 0 0 0 ${bl} ${B - bottomH + br} `
-               + `L ${bl} ${B - bf} A ${bf} ${bf} 0 0 1 ${bl - bf} ${B} `
-        // to the left edge, round the clipboard panel in the bottom-left corner if it is out
-        if (cOpen) {
-            const y0 = clipY, x1 = L + clipW
-            d += `L ${x1 + kf} ${B} A ${kf} ${kf} 0 0 1 ${x1} ${B - kf} `
-               + `L ${x1} ${y0 + kr} A ${kr} ${kr} 0 0 0 ${x1 - kr} ${y0} `
-               + `L ${L + kf} ${y0} A ${kf} ${kf} 0 0 1 ${L} ${y0 - kf} `
-        } else
-            d += `L ${L + c} ${B} A ${c} ${c} 0 0 1 ${L} ${B - c} `
-        // up the left edge, round the media panel in the middle if it is out
-        if (mOpen) {
-            const y0 = midY, y1 = midY + midH, x1 = L + midW
-            d += `L ${L} ${y1 + mf} A ${mf} ${mf} 0 0 1 ${L + mf} ${y1} `
-               + `L ${x1 - mr} ${y1} A ${mr} ${mr} 0 0 0 ${x1} ${y1 - mr} `
-               + `L ${x1} ${y0 + mr} A ${mr} ${mr} 0 0 0 ${x1 - mr} ${y0} `
-               + `L ${L + mf} ${y0} A ${mf} ${mf} 0 0 1 ${L} ${y0 - mf} `
-        }
-        // up to the top-left corner, or round the calendar panel back up to the top edge
-        if (lOpen)
-            d += `L ${L} ${T + leftH + lf} A ${lf} ${lf} 0 0 1 ${L + lf} ${T + leftH} `
-               + `L ${lx - lr} ${T + leftH} A ${lr} ${lr} 0 0 0 ${lx} ${T + leftH - lr} `
-               + `L ${lx} ${T + lf} A ${lf} ${lf} 0 0 1 ${lx + lf} ${T} Z`
-        else
-            d += `L ${L} ${T + c} A ${c} ${c} 0 0 1 ${L + c} ${T} Z`
-        return d
+    // ---- the open panels' notches in the free area inside the frame, for its shader ----
+    // [x0, y0, x1, y1, corner radius, join radius]: each reaches 100px into its band (past the screen's
+    // edge), so only its corners on the free side show. The free area is the rounded rectangle inside
+    // the frame minus these; the frame is everything outside it.
+    function notches(stats, left, bottom, clip, mid, top) {
+        const L = inL, T = inT, R = inR, B = inB, e = 100, n = []
+        if (top && topOpen) n.push([tl, T - e, trt, T + topH, tr, tf])
+        if (stats && panelOpen) n.push([px, T - e, R + e, T + panelH, r, f])
+        if (bottom && bottomOpen) n.push([bl, B - bottomH, brt, B + e, br, bf])
+        if (left && leftOpen) n.push([L - e, T - e, lx, T + leftH, lr, lf])
+        if (clip && clipOpen) n.push([L - e, clipY, L + clipW, B + e, kr, kf])
+        if (mid && midOpen) n.push([L - e, midY, L + midW, midY + midH, mr, mf])
+        return n
     }
-    readonly property string plainHole: holePath(false, false, false, false)
-    readonly property string statsHole: holePath(true, false, false, false)
-    readonly property string leftHole: holePath(false, true, false, true, true)
-    readonly property string wallHole: holePath(false, false, true, false)
-    readonly property string topHole: holePath(false, false, false, false, false, true)
+    readonly property var statsNotches: notches(true, false, false, false, false, false)
+    readonly property var leftNotches: notches(false, true, false, true, true, false)
+    readonly property var wallNotches: notches(false, false, true, false, false, false)
+    readonly property var topNotches: notches(false, false, false, false, false, true)
 
     // ---- the frame outside the regions (it never changes shape) ----
-    // (its inner shadow is drawn by FrameShadow.qml, on its own surface below this one)
+    // (its inner shadow is drawn on its own surface below this one, see shell.qml)
     Repeater {
         model: frame.baseKeep
-        delegate: FrameFill {
+        delegate: FrameShader {
             required property var modelData
+            outline: frame
             theme: frame.theme
             rect: modelData
-            hole: frame.plainHole
         }
     }
 }

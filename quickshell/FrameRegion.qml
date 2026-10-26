@@ -15,40 +15,36 @@ Scope {
     required property var theme
     required property string name       // the surfaces' namespaces: qs-region-<name>, qs-shadow-<name>
     required property var rect          // [x, y, w, h] on the screen
-    required property string hole       // the outline with this region's panels' notches
+    required property var panels        // this region's open panels' notches (Frame.notches())
     required property var keepRects     // where this region draws the frame and its shadow
     property bool active: false         // one of its panels is open: take the keyboard and the mouse
     property bool shown: true           // false while a fullscreen window covers the screen: draw nothing
     signal dismiss()                    // a click outside its panels, or Escape
     default property alias content: screenSpace.data
 
-    // the shadow's surface: 40px larger than the region where the screen allows, so the blur has the
-    // frame's outline beyond the region to work from and meets the neighbours' shadow without a seam
-    readonly property var shadowRect: {
-        const x0 = Math.max(0, rect[0] - 40), y0 = Math.max(0, rect[1] - 40)
-        const x1 = Math.min(frame.width, rect[0] + rect[2] + 40), y1 = Math.min(frame.height, rect[1] + rect[3] + 40)
-        return [x0, y0, x1 - x0, y1 - y0]
-    }
-
-    PanelWindow {
+    PanelWindow {   // the shadow's surface
         anchors { top: true; left: true }
-        margins { left: region.shadowRect[0]; top: region.shadowRect[1] }
-        implicitWidth: region.shadowRect[2]
-        implicitHeight: region.shadowRect[3]
+        margins { left: region.rect[0]; top: region.rect[1] }
+        implicitWidth: region.rect[2]
+        implicitHeight: region.rect[3]
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow-" + region.name
         contentItem.visible: region.shown && !region.theme.flat   // (none in the one-tone black themes)
         mask: Region {}
-        FrameShadow {
-            anchors.fill: parent
-            hole: region.hole
-            originX: region.shadowRect[0]
-            originY: region.shadowRect[1]
-            screenW: region.frame.width
-            screenH: region.frame.height
-            keepRects: region.keepRects
+        Repeater {
+            model: region.keepRects
+            delegate: FrameShader {
+                required property var modelData
+                outline: region.frame
+                theme: region.theme
+                rect: modelData
+                panels: region.panels
+                isShadow: true
+                originX: region.rect[0]
+                originY: region.rect[1]
+            }
         }
     }
 
@@ -88,11 +84,12 @@ Scope {
 
             Repeater {   // only where it keeps the shadow too, so the two never both draw the overlap
                 model: region.keepRects
-                delegate: FrameFill {
+                delegate: FrameShader {
                     required property var modelData
+                    outline: region.frame
                     theme: region.theme
                     rect: modelData
-                    hole: region.hole
+                    panels: region.panels
                 }
             }
             Item {   // a click outside the panels, or Escape when no panel has the keyboard

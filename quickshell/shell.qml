@@ -54,10 +54,15 @@ ShellRoot {
         WlrLayershell.namespace: "qs-shadow"
         contentItem.visible: !fullscreen && !theme.flat
         mask: Region {}
-        FrameShadow {
-            anchors.fill: parent
-            hole: frame.plainHole
-            keepRects: frame.baseKeep
+        Repeater {
+            model: frame.baseKeep
+            delegate: FrameShader {
+                required property var modelData
+                outline: frame
+                theme: frame.theme
+                rect: modelData
+                isShadow: true
+            }
         }
     }
 
@@ -322,7 +327,7 @@ ShellRoot {
         theme: theme
         name: "stats"
         rect: frame.statsRect
-        hole: frame.statsHole
+        panels: frame.statsNotches
         keepRects: frame.statsKeep
         active: win.open
         shown: !fullscreen
@@ -342,7 +347,7 @@ ShellRoot {
         theme: theme
         name: "left"
         rect: frame.leftRect
-        hole: frame.leftHole
+        panels: frame.leftNotches
         keepRects: frame.leftKeep
         active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen
         shown: !fullscreen
@@ -405,7 +410,7 @@ ShellRoot {
         theme: theme
         name: "top"
         rect: frame.topRect
-        hole: frame.topHole
+        panels: frame.topNotches
         keepRects: frame.topKeep
         active: win.overviewOpen
         shown: !fullscreen
@@ -424,7 +429,7 @@ ShellRoot {
         theme: theme
         name: "wall"
         rect: frame.wallRect
-        hole: frame.wallHole
+        panels: frame.wallNotches
         keepRects: frame.wallKeep
         active: win.wallOpen
         shown: !fullscreen
