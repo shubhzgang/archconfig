@@ -161,7 +161,10 @@ hl.config({
 
     cursor = {
         inactive_timeout = 5,
-        no_hardware_cursors = true,
+        -- the hardware cursor plane: moving the mouse doesn't recomposite the screen (the software
+        -- cursor this replaced, left from NVIDIA, cost the iGPU about two thirds of its time while
+        -- the mouse moved)
+        no_hardware_cursors = false,
     },
 
     decoration = {
