@@ -7,7 +7,7 @@ import Quickshell.Io
 Item {
     id: root
 
-    property color accent: "#4a8fb5"       // color1: active window border
+    property color accent: "#4a8fb5"       // color1
     property color ink: "#d8dce4"          // color7: light text
     property color hover: "#ffb59a"        // color9: text on hover
     property color accent2: "#5d629b"      // color2: workspace dot with windows
@@ -113,9 +113,10 @@ Item {
         // paper is opaque, glass see-through
         setOpacity(s === "paper" ? 1 : 0.6, true)
     }
-    function syncWindows() {   // paper: every window opaque; glass: focused 90%, the others 75%
+    function syncWindows() {   // paper: every window opaque, no border; glass: focused 90%, the others 75%, a light edge
         Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { "
             + (glass ? "active_opacity = 0.9, inactive_opacity = 0.75" : "active_opacity = 1.0, inactive_opacity = 1.0") + " } })"])
+        Quickshell.execDetached(["hyprctl", "eval", "hl.config({ general = { border_size = " + (glass ? 1 : 0) + " } })"])
         // and the windows set the other way with Super+Shift+P (tagged for this style, see hyprland.lua)
         Quickshell.execDetached(["hyprctl", "eval", "hl.window_rule({ name = \"style-exception\", "
             + (glass ? "match = { tag = \"opaque\" }, opacity = \"1.0 override 1.0 override\""

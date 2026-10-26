@@ -62,15 +62,6 @@ apply_palette() {
         pkill -USR1 kitty
     } &
 
-    {   # Hyprland's border colors (and the scratchpads' border rule, by name), without reloading its
-        # whole config: a reload stutters and resets changes made at runtime
-        local active inactive
-        active=$(sed -n 's/^\s*\$color1 = //p' ~/.cache/wal/colors-hyprland)
-        inactive=$(sed -n 's/^\s*\$color2 = //p' ~/.cache/wal/colors-hyprland)
-        hyprctl eval "hl.config({ general = { col = { active_border = \"$active\", inactive_border = \"$inactive\" } } })"
-        hyprctl eval "hl.window_rule({ name = \"scratchpad-border\", match = { class = \"^kitty-.*\$\" }, border_color = \"$active $inactive\" })"
-    } >/dev/null &
-
     swaync-client --reload-css &
     pywalfox update &
 

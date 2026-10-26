@@ -13,41 +13,6 @@ require("monitors")
 
 local HOME = os.getenv("HOME")
 
--- ---------------------------------------------------------------------------
--- Compatibility helper for the existing pywal colors file.
--- The original config sourced a hyprlang file containing variables such as
--- $color5 and $color9. Lua cannot source that file as Lua, so we parse those
--- simple $name = value assignments here.
--- ---------------------------------------------------------------------------
-
-local function read_hyprlang_vars(path)
-    local vars = {}
-    local file = io.open(path, "r")
-    if not file then
-        return vars
-    end
-
-    for line in file:lines() do
-        local name, value = line:match("^%s*%$([%w_]+)%s*=%s*(.-)%s*$")
-        if name and value then
-            vars[name] = value
-        end
-    end
-
-    file:close()
-    return vars
-end
-
-local wal = read_hyprlang_vars(HOME .. "/.cache/wal/colors-hyprland")
-
--- Keep the old $color9 / $color5 references.
-local color9 = wal.color9 or "rgba(ffffffaa)"
-local color5 = wal.color5 or "rgba(888888aa)"
-
--- Match the workspace dots: color1 = active, color2 = inactive non-empty.
-local activeBorder = wal.color1 or color9
-local inactiveBorder = wal.color2 or color5
-
 -- The shell's style (the wallpaper picker's Paper/Glass switch, saved by Theme.qml, which sets the
 -- same window opacity live): every window opaque on paper, see-through on glass (and before a style
 -- has been picked)
@@ -61,6 +26,12 @@ local function quickshell_style()
     return value
 end
 local paper = quickshell_style() == "paper"
+
+-- Window borders follow the style too: none on paper (the focused window's shadow sets it apart), and on
+-- glass a thin light edge like the shell's own (its frame's: white at 22%), a bit brighter on the focused
+-- window. Theme.qml switches the size live with the style.
+local glassBorder = "rgba(ffffff38)"          -- 22%
+local glassBorderFocused = "rgba(ffffff59)"   -- 35%
 
 -- ---------------------------------------------------------------------------
 -- External configs
@@ -137,10 +108,10 @@ hl.config({
     general = {
         gaps_in = 8,
         gaps_out = 20,
-        border_size = 2,
+        border_size = paper and 0 or 1,
         col = {
-            active_border   = activeBorder,
-            inactive_border = inactiveBorder,
+            active_border   = glassBorderFocused,
+            inactive_border = glassBorder,
         },
         resize_on_border = true,
         allow_tearing = false,
@@ -574,9 +545,9 @@ hl.window_rule({
 -- pyprland scratchpads (drop terminal, ...) come up with a magenta
 -- border unless it is set explicitly.
 hl.window_rule({
-    name = "scratchpad-border",   -- wallpaper.sh replaces it by name with the new palette's colors
+    name = "scratchpad-border",
     match = { class = "^kitty-.*$" },
-    border_color = activeBorder .. " " .. inactiveBorder,
+    border_color = glassBorderFocused .. " " .. glassBorder,
 })
 
 hl.window_rule({
