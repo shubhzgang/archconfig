@@ -2,7 +2,8 @@ import QtQuick
 import Quickshell.Widgets
 
 // The track playing, in the frame's left band: a small album art with the title and artist above it,
-// written bottom to top. A line longer than its space scrolls (pausing at its start each time round).
+// written bottom to top. A line longer than its space scrolls while the track plays (pausing at its
+// start each time round).
 // Click to open the media panel.
 Item {
     id: strip
@@ -79,7 +80,7 @@ Item {
         }
         SequentialAnimation {
             id: scroll
-            running: window.scrolls && strip.animate
+            running: window.scrolls && strip.animate && strip.media.playing   // (it redraws the shell every frame)
             loops: Animation.Infinite
             PauseAnimation { duration: 1500 }
             NumberAnimation {
