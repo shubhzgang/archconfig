@@ -32,6 +32,10 @@ Item {
     Behavior on barEnd { ColorAnimation { duration: 250 } }
 
     function darken(c, t) { return Qt.rgba(c.r * (1 - t), c.g * (1 - t), c.b * (1 - t), 1) }
+    function luminance(hex) {   // relative luminance (WCAG): dark text reads better above 0.179
+        const c = Qt.color(hex), lin = v => v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+        return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b)
+    }
     // same as the dark, saturated bar ends in scripts/bar-colors.py
     function vividDark(hex) {
         const c = Qt.color(hex)
@@ -263,17 +267,22 @@ Item {
         const c = baseValue && baseValue.colors
         if (!c) return
         const bg = baseValue.special.background
+        // a plain wallpaper in the normal mode: the shell is its very color, so it merges with the
+        // wallpaper (seamlessly with the shadows off); on a light one its text goes dark, as in the light mode
+        const merge = plainColor !== "" && mode === "normal"
+        const darkText = mode === "light" || (merge && luminance(plainColor) > 0.179)
         accent = c.color1
         accent2 = c.color2
         accent3 = c.color3
-        ink = mode === "light" ? bg : c.color7
-        textOnInk = mode === "light" ? "#f1f3f8" : bg
-        hover = mode === "light" ? darken(Qt.color(c.color9), 0.45) : c.color9
+        ink = darkText ? bg : c.color7
+        textOnInk = darkText ? "#f1f3f8" : bg
+        hover = darkText ? darken(Qt.color(c.color9), 0.45) : c.color9
         dark = mode === "dark" ? "#e8ebf2" : bg
         card = alpha(mode === "dark" ? "#2b303b" : mode === "light" ? "#f1f3f8" : "#c3cadb")
         // darkened accents read well on the pale cards; on the dark ones the plain colors do
         series = [1, 2, 3, 4, 5, 6].map(i => mode === "dark" ? Qt.color(c["color" + i]) : darken(Qt.color(c["color" + i]), 0.4))
-        if (baseBar) { barStart = alpha(tone(baseBar[0])); barEnd = alpha(tone(baseBar[1])) }
+        if (merge) { barStart = alpha(plainColor); barEnd = alpha(plainColor) }
+        else if (baseBar) { barStart = alpha(tone(baseBar[0])); barEnd = alpha(tone(baseBar[1])) }
     }
 
     // ---- wallpaper preview: show another wallpaper's palette without applying it ----
