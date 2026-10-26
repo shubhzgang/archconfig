@@ -115,6 +115,9 @@ above is recomposited and the xray blur cache rebuilt every video frame. In `hyp
 stream (`ytdl-format=bestvideo[height<=?1440][fps<=?30]`) and add `no-audio` unless its audio is wanted
 (mpvpaper plays audio by default).
 
+Decided (2026-10-26): the audio is wanted, so no `no-audio` (and the format must keep an audio
+stream, e.g. `bestvideo[height<=?1440][fps<=?30]+bestaudio`). Cap at 1440p.
+
 ## 2. Low-level (QML)
 
 **2.1 `RectangularShadow` instead of `layer` + `MultiEffect`.** One SDF draw, no offscreen buffer, and
