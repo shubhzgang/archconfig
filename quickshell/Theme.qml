@@ -136,6 +136,7 @@ Item {
         watch: true
     }
     readonly property var swatch: swatchState.value.swatch ?? []
+    onSwatchChanged: applyTheme()   // (the shell's OLED or matte black takes a swatch's accents)
     readonly property string harmony: swatchState.value.harmony ?? "analogous"
     readonly property string wallpaper: realColors?.wallpaper ?? ""   // the applied wallpaper
 
@@ -232,6 +233,13 @@ Item {
             // a grey or white plain wallpaper: the shell is that one grey, with the palette's text
             const flatBar = !shellColors && !live ? plainColor : ""
             barStart = alpha(flatBar || n.bar[0]); barEnd = alpha(flatBar || n.bar[1])
+            // the shell's OLED or matte black with a color swatch picked: the swatch colors the accents,
+            // as on the dark mode's cards (the black stays)
+            const sc = baseValue && baseValue.colors
+            if (shellColors && swatch.length && sc) {
+                accent = sc.color1; accent2 = sc.color2; accent3 = sc.color3; hover = sc.color9
+                series = [1, 2, 3, 4, 5, 6].map(i => Qt.color(sc["color" + i]))
+            }
             return
         }
         const c = baseValue && baseValue.colors
