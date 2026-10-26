@@ -149,9 +149,7 @@ hl.config({
 
     cursor = {
         inactive_timeout = 5,
-        -- the hardware cursor plane: moving the mouse doesn't recomposite the screen (the software
-        -- cursor this replaced, left from NVIDIA, cost the iGPU about two thirds of its time while
-        -- the mouse moved)
+        -- the hardware cursor plane, except in HDR (see sync_cursor below)
         no_hardware_cursors = false,
     },
 
@@ -210,6 +208,21 @@ hl.config({
     },
 
 })
+
+-- The hardware cursor plane spares the iGPU a recomposite on every mouse move (the software cursor
+-- cost it about two thirds of its time while the mouse moved), but it isn't color-managed: in HDR
+-- its white shows far brighter than SDR white (sdr_max_luminance). So in HDR (cm "hdr", "hdredid")
+-- the cursor is drawn with the rest of the screen, checked again whenever the monitors change.
+local function sync_cursor()
+    local hdr = false
+    for _, monitor in ipairs(hl.get_monitors()) do
+        if tostring(monitor.cm):sub(1, 3) == "hdr" then hdr = true end
+    end
+    hl.config({ cursor = { no_hardware_cursors = hdr } })
+end
+sync_cursor()
+hl.on("monitor.added", sync_cursor)
+hl.on("monitor.layout_changed", sync_cursor)
 
 hl.device({
     name = "epic-mouse-v1",
