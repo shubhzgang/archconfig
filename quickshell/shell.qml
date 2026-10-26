@@ -9,6 +9,7 @@ ShellRoot {
     id: root
     Theme { id: theme }
     Media { id: media }
+    Capture { id: capture }   // screenshots and screen recordings (ScreenshotPanel.qml)
 
     // A fullscreen window (a video, a game) hides the shell: the surfaces stay where they are, empty
     // and taking no input. (Hidden or covered surfaces get no frame callbacks, and Qt then leaves
@@ -71,7 +72,8 @@ ShellRoot {
         property bool mediaOpen: false     // media player (middle left)
         property bool overviewOpen: false  // workspace overview (top middle)
         property bool powerOpen: false     // power menu (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen
+        property bool shotOpen: false      // screenshot panel (bottom left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -84,6 +86,7 @@ ShellRoot {
             if (except !== "media") mediaOpen = false
             if (except !== "overview") overviewOpen = false
             if (except !== "power") powerOpen = false
+            if (except !== "shot") shotOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -94,6 +97,7 @@ ShellRoot {
         onMediaOpenChanged: if (mediaOpen) closeOthers("media")
         onOverviewOpenChanged: if (overviewOpen) closeOthers("overview")
         onPowerOpenChanged: if (powerOpen) closeOthers("power")
+        onShotOpenChanged: if (shotOpen) closeOthers("shot")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -118,6 +122,7 @@ ShellRoot {
                 Region { item: clipboardButton },
                 Region { item: liveButton },
                 Region { item: powerButton },
+                Region { item: screenshotButton },
                 Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
@@ -212,6 +217,16 @@ ShellRoot {
             function close(): void { win.calOpen = false }
         }
 
+        // qs ipc call screenshot toggle|open|close|stop; while a capture is under way (a countdown,
+        // a recording) toggle stops it instead, as the dock button does
+        IpcHandler {
+            target: "screenshot"
+            function toggle(): void { if (capture.phase !== "idle") capture.stop(); else win.shotOpen = !win.shotOpen }
+            function open(): void { win.shotOpen = true }
+            function close(): void { win.shotOpen = false }
+            function stop(): void { capture.stop() }
+        }
+
         // The frame around the monitor (the panels hang from it, see Frame.qml)
         Frame {
             id: frame
@@ -223,7 +238,7 @@ ShellRoot {
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
             // the bottom-left panel: whichever of them is furthest out
-            readonly property var leftPanel: [clipboard, live, power].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            readonly property var leftPanel: [clipboard, live, power, shot].reduce((a, b) => b.panelW > a.panelW ? b : a)
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
@@ -287,6 +302,17 @@ ShellRoot {
             onClicked: win.liveOpen = !win.liveOpen
         }
 
+        DockButton {   // screenshots: the countdown, then a blinking red dot while recording (a click stops it)
+            id: screenshotButton
+            theme: theme
+            glyph: 0xF0100
+            slot: 3
+            active: win.shotOpen
+            label: capture.phase === "counting" ? String(capture.remaining) : ""
+            recording: capture.recording
+            onClicked: if (capture.phase !== "idle") capture.stop(); else win.shotOpen = !win.shotOpen
+        }
+
     }
 
     // ---- the panels' regions, each on its own surfaces (FrameRegion.qml, Frame.qml) ----
@@ -311,14 +337,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper and power (bottom)
+    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper, power and screenshots (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         hole: frame.leftHole
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -355,6 +381,14 @@ ShellRoot {
             theme: theme
             open: win.powerOpen
             onToggle: win.powerOpen = !win.powerOpen
+        }
+
+        ScreenshotPanel {
+            id: shot
+            theme: theme
+            capture: capture
+            open: win.shotOpen
+            onToggle: win.shotOpen = !win.shotOpen
         }
 
         MediaPanel {

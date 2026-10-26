@@ -8,6 +8,8 @@ Item {
     required property int glyph         // Nerd Font code point
     required property int slot
     property bool active: false         // the panel it opens is open
+    property string label: ""           // shown instead of the glyph (the screenshot countdown)
+    property bool recording: false      // a blinking red dot instead (a screen recording is running)
     signal clicked()
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int size: 44      // the icon's hit area, centered in the band
@@ -18,10 +20,25 @@ Item {
 
     Text {
         anchors.centerIn: parent
-        text: String.fromCodePoint(root.glyph)
+        visible: !root.recording
+        text: root.label || String.fromCodePoint(root.glyph)
         color: area.containsMouse || root.active ? root.theme.hover : root.theme.ink
         font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 26
+    }
+    Rectangle {   // on and off rather than fading, so the shell redraws twice a second, not every frame
+        id: dot
+        anchors.centerIn: parent
+        visible: root.recording
+        width: 20; height: 20; radius: 10
+        color: "#ff3b30"
+        Timer {
+            interval: 500
+            repeat: true
+            running: root.recording
+            onRunningChanged: dot.opacity = 1
+            onTriggered: dot.opacity = dot.opacity === 1 ? 0.25 : 1
+        }
     }
     MouseArea {
         id: area

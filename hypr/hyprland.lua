@@ -459,11 +459,10 @@ hl.bind(mainMod .. " + CTRL + right",
 
 
 -- Screenshots
--- Capture selected region to clipboard
-hl.bind("SUPER + W", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
-
--- Capture selected region and edit
-hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd('grim -g "$(slurp)" - | satty --filename -'))
+-- Screenshot panel: photos and recordings, with a delay (quickshell/ScreenshotPanel.qml); stops a
+-- recording or a countdown that is under way
+hl.bind("SUPER + W", hl.dsp.exec_cmd("qs ipc call screenshot toggle"))
+hl.bind("Print", hl.dsp.exec_cmd("qs ipc call screenshot toggle"))
 
 -- ---------------------------------------------------------------------------
 -- Special workspaces
@@ -489,9 +488,6 @@ hl.bind("ALT + SHIFT + 4",
 -- Miscellaneous binds
 -- ---------------------------------------------------------------------------
 
-hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m window -o ~/Screenshots/"))
-hl.bind("ALT + Print",
-    hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Screenshots/"))
 hl.bind("ALT + F4", hl.dsp.exec_cmd("qs ipc call power toggle"))
 hl.bind("ALT + down", hl.dsp.window.move({ direction = "down" }))
 hl.bind("ALT + left", hl.dsp.window.move({ direction = "left" }))
@@ -501,8 +497,6 @@ hl.bind("ALT + t",
     hl.dsp.exec_cmd("/home/shubham/Downloads/trilium-linux-x64/trilium"))
 hl.bind("ALT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind("ALT + w", hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
-hl.bind("CTRL + Print",
-    hl.dsp.exec_cmd("hyprshot -m region -o ~/Screenshots/"))
 
 -- Mouse binds.
 hl.bind(mainMod .. " + mouse:272",
