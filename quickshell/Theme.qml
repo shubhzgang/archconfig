@@ -129,6 +129,23 @@ Item {
         onLoaded: root.style = text().trim() === "glass" ? "glass" : "paper"
     }
 
+    // ---- shadows: off takes every shadow away, the shell's (its frame's inner shadow, every card's)
+    // and the windows' (Hyprland's, which hyprland.lua reads from the same saved file when its config is
+    // reloaded) ----
+    property bool shadows: true
+    readonly property string shadowsFile: Quickshell.env("HOME") + "/.cache/quickshell-shadows"
+    function setShadows(on) {
+        shadows = on
+        savedShadows.setText(on ? "on" : "off")
+        Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { shadow = { enabled = " + on + " } } })"])
+    }
+    FileView {
+        id: savedShadows
+        path: root.shadowsFile
+        printErrors: false
+        onLoaded: root.shadows = text().trim() !== "off"
+    }
+
     // ---- color swatch: while one is picked (hypr/wallpaper.sh --swatch), the palette comes from its
     // color(s) whatever the wallpaper is, so previewing a wallpaper shows nothing new ----
     JsonFile {

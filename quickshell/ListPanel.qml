@@ -109,6 +109,7 @@ Item {
             radius: 10
             color: panel.theme.card
             RectangularShadow {
+                visible: panel.theme.shadows
                 anchors.fill: parent; z: -1
                 radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 6.5; spread: 1
                 color: Qt.rgba(0, 0, 0, 0.33 * parent.color.a)
@@ -196,6 +197,7 @@ Item {
                     color: row.current ? panel.theme.accent : panel.theme.card
                     Behavior on color { ColorAnimation { duration: 150 } }
                     RectangularShadow {
+                        visible: panel.theme.shadows
                         anchors.fill: parent; z: -1
                         radius: parent.radius; offset: Qt.vector2d(0, 3 + row.lift); blur: 6.5 + 2.2 * row.lift; spread: 1
                         color: Qt.rgba(0, 0, 0, (0.33 + 0.27 * row.lift) * parent.color.a)

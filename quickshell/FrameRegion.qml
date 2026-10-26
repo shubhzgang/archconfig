@@ -31,7 +31,7 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow-" + region.name
-        contentItem.visible: region.shown && !region.theme.flat   // (none in the one-tone black themes)
+        contentItem.visible: region.shown && !region.theme.flat && region.theme.shadows   // (none in the one-tone black themes)
         mask: Region {}
         Repeater {
             model: region.keepRects

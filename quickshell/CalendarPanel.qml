@@ -73,6 +73,7 @@ Item {
 
         // Shadow: 20% black, grown 8px past the card so it stays dark for 8px, then blurred so it fades.
         RectangularShadow {
+            visible: panel.theme.shadows
             x: card.x - 8; y: card.y - 8 + 3
             width: card.width + 16; height: card.height + 16
             radius: card.radius + 8; blur: 7.2; spread: 1

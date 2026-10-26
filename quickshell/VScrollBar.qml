@@ -37,7 +37,7 @@ Item {
         Behavior on color { ColorAnimation { duration: 300 } }
         RectangularShadow {
             anchors.fill: parent; z: -1
-            visible: bar.needed
+            visible: bar.needed && bar.theme.shadows
             radius: parent.radius; offset: Qt.vector2d(0, 2); blur: 1.4; spread: 1
             color: Qt.rgba(0, 0, 0, 0.75)
         }

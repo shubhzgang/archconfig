@@ -194,6 +194,7 @@ Item {
                 radius: 14
                 color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.12)
                 RectangularShadow {
+                    visible: panel.theme.shadows
                     anchors.fill: parent; z: -1
                     radius: parent.radius; offset: Qt.vector2d(0, 4); blur: 8.6; spread: 1
                     color: Qt.rgba(0, 0, 0, 0.4 * parent.color.a)
@@ -516,7 +517,7 @@ Item {
                     Behavior on color { ColorAnimation { duration: 300 } }
                     RectangularShadow {
                         anchors.fill: parent; z: -1
-                        visible: dot.shown || dot.modelData.isPlaying
+                        visible: (dot.shown || dot.modelData.isPlaying) && panel.theme.shadows
                         radius: parent.radius; offset: Qt.vector2d(0, 2); blur: 2.9; spread: 1
                         color: Qt.rgba(0, 0, 0, 0.65)
                     }

@@ -27,6 +27,18 @@ local function quickshell_style()
 end
 local paper = quickshell_style() == "paper"
 
+-- The wallpaper picker's Shadows switch (saved by Theme.qml, which sets it live): off takes the windows'
+-- shadows away too
+local function quickshell_shadows()
+    local file = io.open(HOME .. "/.cache/quickshell-shadows", "r")
+    if not file then
+        return true
+    end
+    local value = file:read("*l")
+    file:close()
+    return value ~= "off"
+end
+
 -- Window borders follow the style too: none on paper (the focused window's shadow sets it apart), and on
 -- glass a thin light edge like the shell's own (its frame's: white at 22%), a bit brighter on the focused
 -- window. Theme.qml switches the size live with the style.
@@ -144,7 +156,7 @@ hl.config({
         },
 
         shadow = {
-            enabled = true,
+            enabled = quickshell_shadows(),
             range = 24,
             render_power = 2,
             offset = "0 6",

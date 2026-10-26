@@ -111,6 +111,7 @@ Item {
             radius: 10
             color: panel.theme.card
             RectangularShadow {
+                visible: panel.theme.shadows
                 anchors.fill: parent; z: -1
                 radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 6.5; spread: 1
                 color: Qt.rgba(0, 0, 0, 0.33 * parent.color.a)
@@ -198,6 +199,7 @@ Item {
                         visible: opacity > 0
                         Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                         RectangularShadow {
+                            visible: panel.theme.shadows
                             anchors.fill: parent; z: -1
                             radius: parent.radius; offset: Qt.vector2d(0, 4); blur: 8.6; spread: 1
                             color: Qt.rgba(0, 0, 0, 0.6 * parent.color.a)

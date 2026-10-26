@@ -21,7 +21,7 @@ Rectangle {
     RectangularShadow {
         anchors.fill: parent
         z: -1
-        visible: root.shadowColor.a > 0
+        visible: (root.shadowColor.a > 0) && root.theme.shadows
         radius: root.radius
         offset: Qt.vector2d(0, 3)
         blur: 6.5

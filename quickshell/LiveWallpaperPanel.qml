@@ -100,6 +100,7 @@ ListPanel {
             color: stopArea.containsMouse ? panel.theme.accent : panel.theme.card
             Behavior on color { ColorAnimation { duration: 150 } }
             RectangularShadow {
+                visible: panel.theme.shadows
                 anchors.fill: parent; z: -1
                 radius: parent.radius; offset: Qt.vector2d(0, 3 + stopButton.lift); blur: 7.2 + 1.4 * stopButton.lift; spread: 1
                 color: Qt.rgba(0, 0, 0, (0.45 + 0.15 * stopButton.lift) * parent.color.a)

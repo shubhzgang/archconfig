@@ -52,7 +52,7 @@ ShellRoot {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qs-shadow"
-        contentItem.visible: !fullscreen && !theme.flat
+        contentItem.visible: !fullscreen && !theme.flat && theme.shadows
         mask: Region {}
         Repeater {
             model: frame.baseKeep
@@ -162,13 +162,14 @@ ShellRoot {
             function close(): void { win.wallOpen = false }
         }
 
-        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>|toggleStyle|shellColors <oled|matte|"">
+        IpcHandler {   // qs ipc call theme cycle|set <dark|normal|light>|style <paper|glass>|toggleStyle|toggleShadows|shellColors <oled|matte|"">
             target: "theme"
             function cycle(): void { theme.cycleMode() }
             function shellColors(c: string): void { theme.setShellColors(c) }
             function set(mode: string): void { theme.setMode(mode) }
             function style(s: string): void { theme.setStyle(s) }
             function toggleStyle(): void { theme.setStyle(theme.glass ? "paper" : "glass") }
+            function toggleShadows(): void { theme.setShadows(!theme.shadows) }
             function opacity(level: real): void { theme.setOpacity(level, true) }
             function checkLive(): void { theme.checkLive() }   // hypr/mpvpaper.sh: a live wallpaper started or ended
         }

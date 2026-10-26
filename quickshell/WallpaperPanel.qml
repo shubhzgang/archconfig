@@ -15,7 +15,8 @@ import Quickshell.Widgets
 // swatch's colors), and color swatches (one color, or two) that theme
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
 // for how a one-color swatch is grown into a palette (each harmony shown as the three main colors it
-// gives) and for the shell's style. Picking any other wallpaper sets the shell back to its colors.
+// gives), for the shell's style, and for shadows (all of them, the windows' too). Picking any other
+// wallpaper sets the shell back to its colors.
 Item {
     id: panel
     required property var theme
@@ -259,6 +260,7 @@ Item {
 
                     // Soft shadow: 35% black, 3px past the thumbnail, blurred moderately
                     RectangularShadow {
+                        visible: panel.theme.shadows
                         x: -3; y: -3 + 5
                         width: parent.width + 6; height: parent.height + 6
                         radius: 14 + 3; blur: 10.8; spread: 1
@@ -417,6 +419,47 @@ Item {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: panel.theme.setStyle(panel.theme.glass ? "paper" : "glass")
+                }
+            }
+            Item {   // shadows on (knob right, the track filled) or off, everywhere: the shell's and the windows'
+                id: shadowSwitch
+                anchors.verticalCenter: parent.verticalCenter
+                width: shadowRow.implicitWidth
+                height: shadowRow.implicitHeight
+                readonly property bool on: panel.theme.shadows
+                Row {
+                    id: shadowRow
+                    spacing: 10
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Shadows"
+                        color: panel.theme.ink
+                        opacity: shadowSwitch.on ? 1 : 0.5
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 15
+                    }
+                    Rectangle {   // the track, as the style switch's
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 46; height: 26
+                        radius: height / 2
+                        color: shadowSwitch.on ? panel.theme.ink : "transparent"
+                        border.width: 1
+                        border.color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, shadowSwitch.on ? 0 : 0.45)
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Rectangle {   // the knob
+                            width: 18; height: 18
+                            radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: shadowSwitch.on ? parent.width - width - 4 : 4
+                            color: shadowSwitch.on ? panel.theme.textOnInk : panel.theme.ink
+                            Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        }
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: panel.theme.setShadows(!panel.theme.shadows)
                 }
             }
         }

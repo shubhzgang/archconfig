@@ -68,7 +68,7 @@ Item {
 
             RectangularShadow {
                 anchors.fill: parent; z: -1
-                visible: !dot.empty || dot.active   // empty dots are flat: no drop shadow
+                visible: (!dot.empty || dot.active) && section.theme.shadows   // empty dots are flat: no drop shadow
                 radius: parent.radius; offset: Qt.vector2d(0, dot.active ? 2 : 3); blur: dot.active ? 1.4 : 2.9; spread: 1
                 color: Qt.rgba(0, 0, 0, dot.active ? 0.75 : 0.65)
             }

@@ -93,6 +93,7 @@ Item {
 
         // Soft shadow, as under the wallpaper picker's thumbnails: 35% black, 3px past the picture, blurred
         RectangularShadow {
+            visible: panel.theme.shadows
             x: -3; y: -3 + 5
             width: panel.thumbW + 6; height: panel.thumbH + 6
             radius: 8 + 3; blur: 10.8; spread: 1
