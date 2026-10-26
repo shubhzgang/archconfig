@@ -35,13 +35,11 @@ Item {
         y: bar.range > 0 ? (bar.view.contentY - bar.view.originY + bar.view.topMargin) / bar.range * (bar.height - height) : 0
         color: area.containsMouse || area.pressed ? bar.theme.accent2 : bar.theme.accent
         Behavior on color { ColorAnimation { duration: 300 } }
-        layer.enabled: bar.needed
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: "black"
-            shadowOpacity: 0.75
-            shadowBlur: 0.1
-            shadowVerticalOffset: 2
+        RectangularShadow {
+            anchors.fill: parent; z: -1
+            visible: bar.needed
+            radius: parent.radius; offset: Qt.vector2d(0, 2); blur: 1.4; spread: 1
+            color: Qt.rgba(0, 0, 0, 0.75)
         }
     }
     MouseArea {

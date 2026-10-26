@@ -66,13 +66,11 @@ Item {
                  : dot.empty ? section.theme.accent3 : section.theme.accent2
             Behavior on color { ColorAnimation { duration: 300 } }
 
-            layer.enabled: !dot.empty || dot.active   // empty dots are flat: no drop shadow
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: "black"
-                shadowOpacity: dot.active ? 0.75 : 0.65
-                shadowBlur: dot.active ? 0.1 : 0.2
-                shadowVerticalOffset: dot.active ? 2 : 3
+            RectangularShadow {
+                anchors.fill: parent; z: -1
+                visible: !dot.empty || dot.active   // empty dots are flat: no drop shadow
+                radius: parent.radius; offset: Qt.vector2d(0, dot.active ? 2 : 3); blur: dot.active ? 1.4 : 2.9; spread: 1
+                color: Qt.rgba(0, 0, 0, dot.active ? 0.75 : 0.65)
             }
 
         }

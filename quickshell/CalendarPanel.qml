@@ -72,24 +72,11 @@ Item {
         }
 
         // Shadow: 20% black, grown 8px past the card so it stays dark for 8px, then blurred so it fades.
-        Item {
-            id: shadow
-            readonly property real grow: 8
-            x: card.x - grow
-            y: card.y - grow + 3
-            width: card.width + 2 * grow
-            height: card.height + 2 * grow
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blurMax: 16
-                blur: 1.0
-            }
-            Rectangle {
-                anchors.fill: parent
-                radius: card.radius + shadow.grow
-                color: "#33000000"
-            }
+        RectangularShadow {
+            x: card.x - 8; y: card.y - 8 + 3
+            width: card.width + 16; height: card.height + 16
+            radius: card.radius + 8; blur: 7.2; spread: 1
+            color: "#33000000"
         }
 
         Card {

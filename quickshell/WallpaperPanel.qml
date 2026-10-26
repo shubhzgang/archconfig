@@ -252,28 +252,12 @@ Item {
                     property real lift: index === panel.current || area.containsMouse ? 1 : 0
                     Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
-                    // Soft shadow: 35% black, 3px past the thumbnail, blurred moderately. The blurred item is much
-                    // bigger than the shadow shape (`room`), because the blur can't spread past the item
-                    // it is applied to and would otherwise be cut off at its edge.
-                    Item {
-                        id: shadow
-                        readonly property real grow: 3
-                        readonly property real room: 32
-                        x: -room
-                        y: -room + 5
-                        width: parent.width + 2 * room
-                        height: parent.height + 2 * room
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            blurEnabled: true
-                            blurMax: 24
-                            blur: 1.0
-                        }
-                        Rectangle {
-                            anchors { fill: parent; margins: shadow.room - shadow.grow }
-                            radius: 14 + shadow.grow
-                            color: "#59000000"
-                        }
+                    // Soft shadow: 35% black, 3px past the thumbnail, blurred moderately
+                    RectangularShadow {
+                        x: -3; y: -3 + 5
+                        width: parent.width + 6; height: parent.height + 6
+                        radius: 14 + 3; blur: 10.8; spread: 1
+                        color: "#59000000"
                     }
                     ClippingRectangle {
                         anchors.fill: parent

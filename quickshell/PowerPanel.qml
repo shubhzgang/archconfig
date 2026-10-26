@@ -107,12 +107,10 @@ Item {
                     radius: 10
                     color: card.selected ? panel.theme.accent : panel.theme.card
                     Behavior on color { ColorAnimation { duration: 150 } }
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        shadowEnabled: true
-                        shadowColor: Qt.rgba(0, 0, 0, 0.33 + 0.27 * card.lift)
-                        shadowBlur: 0.45 + 0.15 * card.lift
-                        shadowVerticalOffset: 3 + card.lift
+                    RectangularShadow {
+                        anchors.fill: parent; z: -1
+                        radius: parent.radius; offset: Qt.vector2d(0, 3 + card.lift); blur: 6.5 + 2.2 * card.lift; spread: 1
+                        color: Qt.rgba(0, 0, 0, (0.33 + 0.27 * card.lift) * parent.color.a)
                     }
                     Column {
                         anchors.centerIn: parent

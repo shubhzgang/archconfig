@@ -193,12 +193,10 @@ Item {
                 anchors.fill: parent
                 radius: 14
                 color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.12)
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    shadowEnabled: true
-                    shadowColor: "#66000000"
-                    shadowBlur: 0.6
-                    shadowVerticalOffset: 4
+                RectangularShadow {
+                    anchors.fill: parent; z: -1
+                    radius: parent.radius; offset: Qt.vector2d(0, 4); blur: 8.6; spread: 1
+                    color: Qt.rgba(0, 0, 0, 0.4 * parent.color.a)
                 }
             }
             ClippingRectangle {
@@ -516,13 +514,11 @@ Item {
                          : dot.shown ? panel.theme.accent
                          : dot.modelData.isPlaying ? panel.theme.accent2 : panel.theme.accent3
                     Behavior on color { ColorAnimation { duration: 300 } }
-                    layer.enabled: dot.shown || dot.modelData.isPlaying
-                    layer.effect: MultiEffect {
-                        shadowEnabled: true
-                        shadowColor: "black"
-                        shadowOpacity: 0.65
-                        shadowBlur: 0.2
-                        shadowVerticalOffset: 2
+                    RectangularShadow {
+                        anchors.fill: parent; z: -1
+                        visible: dot.shown || dot.modelData.isPlaying
+                        radius: parent.radius; offset: Qt.vector2d(0, 2); blur: 2.9; spread: 1
+                        color: Qt.rgba(0, 0, 0, 0.65)
                     }
                 }
                 MouseArea {

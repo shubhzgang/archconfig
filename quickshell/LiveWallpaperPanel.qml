@@ -99,12 +99,10 @@ ListPanel {
             radius: 10
             color: stopArea.containsMouse ? panel.theme.accent : panel.theme.card
             Behavior on color { ColorAnimation { duration: 150 } }
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: Qt.rgba(0, 0, 0, 0.45 + 0.15 * stopButton.lift)
-                shadowBlur: 0.5 + 0.1 * stopButton.lift
-                shadowVerticalOffset: 3 + stopButton.lift
+            RectangularShadow {
+                anchors.fill: parent; z: -1
+                radius: parent.radius; offset: Qt.vector2d(0, 3 + stopButton.lift); blur: 7.2 + 1.4 * stopButton.lift; spread: 1
+                color: Qt.rgba(0, 0, 0, (0.45 + 0.15 * stopButton.lift) * parent.color.a)
             }
             Row {
                 id: stopRow

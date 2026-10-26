@@ -110,12 +110,10 @@ Item {
             height: 58
             radius: 10
             color: panel.theme.card
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: "#55000000"
-                shadowBlur: 0.45
-                shadowVerticalOffset: 3
+            RectangularShadow {
+                anchors.fill: parent; z: -1
+                radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 6.5; spread: 1
+                color: Qt.rgba(0, 0, 0, 0.33 * parent.color.a)
             }
             TextInput {
                 id: search
@@ -199,12 +197,10 @@ Item {
                         opacity: cell.current ? 1 : 0
                         visible: opacity > 0
                         Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            shadowEnabled: true
-                            shadowColor: "#99000000"
-                            shadowBlur: 0.6
-                            shadowVerticalOffset: 4
+                        RectangularShadow {
+                            anchors.fill: parent; z: -1
+                            radius: parent.radius; offset: Qt.vector2d(0, 4); blur: 8.6; spread: 1
+                            color: Qt.rgba(0, 0, 0, 0.6 * parent.color.a)
                         }
                     }
                     Rectangle {   // icon tile, recessed into the card

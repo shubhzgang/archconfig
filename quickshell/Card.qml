@@ -14,12 +14,19 @@ Rectangle {
     border.color: Qt.rgba(1, 1, 1, 0.18)
     implicitHeight: column.implicitHeight + 28
 
-    layer.enabled: true
-    layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: root.shadowColor
-        shadowBlur: 0.45
-        shadowVerticalOffset: 3
+    // drawn in one pass, not from an offscreen copy of the card (which re-rendered and re-blurred
+    // whenever a graph on it repainted); as faint as the card is see-through, as that copy's was.
+    // (RectangularShadow matches a MultiEffect shadow at 0.45x its blur, shadowBlur x 32, plus a
+    // spread of 1: the shadows elsewhere use the same conversion.)
+    RectangularShadow {
+        anchors.fill: parent
+        z: -1
+        visible: root.shadowColor.a > 0
+        radius: root.radius
+        offset: Qt.vector2d(0, 3)
+        blur: 6.5
+        spread: 1
+        color: Qt.rgba(root.shadowColor.r, root.shadowColor.g, root.shadowColor.b, root.shadowColor.a * root.color.a)
     }
 
     Column {

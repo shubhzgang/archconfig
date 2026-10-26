@@ -91,27 +91,12 @@ Item {
         property real lift: focused || area.containsMouse ? 1 : 0
         Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
-        // Soft shadow, as under the wallpaper picker's thumbnails: 35% black, 3px past the picture,
-        // blurred (in a larger item, so the blur isn't cut off at its edge)
-        Item {
-            id: shadow
-            readonly property real grow: 3
-            readonly property real room: 32
-            x: -room
-            y: -room + 5
-            width: panel.thumbW + 2 * room
-            height: panel.thumbH + 2 * room
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blurMax: 24
-                blur: 1.0
-            }
-            Rectangle {
-                anchors { fill: parent; margins: shadow.room - shadow.grow }
-                radius: 8 + shadow.grow
-                color: "#59000000"
-            }
+        // Soft shadow, as under the wallpaper picker's thumbnails: 35% black, 3px past the picture, blurred
+        RectangularShadow {
+            x: -3; y: -3 + 5
+            width: panel.thumbW + 6; height: panel.thumbH + 6
+            radius: 8 + 3; blur: 10.8; spread: 1
+            color: "#59000000"
         }
         ClippingRectangle {
             width: panel.thumbW; height: panel.thumbH
