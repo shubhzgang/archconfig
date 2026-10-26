@@ -53,15 +53,16 @@ Item {
     // own opacity, so the frame's fainter anti-aliased edge pixels aren't blurred (the blur pulled
     // light from under the frame into a thin line along its curves). Same rules as in hyprland.lua,
     // which reads the saved level when the config is reloaded: the wallpaper picker shows the windows
-    // behind it, the rest only the (cached) wallpaper.
+    // behind it, the rest only the (cached) wallpaper. Fully opaque (paper) hides the blur: none then.
     property bool blurSynced: false
     function syncBlur(level) {
         blurSynced = true
         const alpha = (level * 0.9).toFixed(3)
+        const blur = level < 1
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur\", "
-            + "match = { namespace = \"^qs-(shell|region-stats|region-left|region-top)$\" }, blur = true, xray = true, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-(shell|region-stats|region-left|region-top)$\" }, blur = " + blur + ", xray = true, ignore_alpha = " + alpha + " })"])
         Quickshell.execDetached(["hyprctl", "eval", "hl.layer_rule({ name = \"quickshell-blur-wall\", "
-            + "match = { namespace = \"^qs-region-wall$\" }, blur = true, xray = false, ignore_alpha = " + alpha + " })"])
+            + "match = { namespace = \"^qs-region-wall$\" }, blur = " + blur + ", xray = false, ignore_alpha = " + alpha + " })"])
     }
     FileView {
         id: savedOpacity

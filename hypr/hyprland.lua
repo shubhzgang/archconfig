@@ -573,7 +573,8 @@ hl.window_rule({
 -- ignore_alpha sits just under the frame's own opacity (saved by Quickshell), so only the frame is
 -- blurred: not the transparent rest of the screen-sized surface, and not the frame's fainter
 -- anti-aliased edge pixels, where the blur would pull light from under the frame into a thin line
--- along its curves. Quickshell sets the same rule live when the opacity changes (Theme.qml).
+-- along its curves. Fully opaque (the paper style) hides the blur, so there is none then.
+-- Quickshell sets the same rule live when the opacity changes (Theme.qml).
 local function quickshell_opacity()
     local file = io.open(HOME .. "/.cache/quickshell-opacity", "r")
     if not file then
@@ -587,7 +588,7 @@ end
 hl.layer_rule({
     name = "quickshell-blur",
     match = { namespace = "^qs-(shell|region-stats|region-left|region-top)$" },
-    blur = true,
+    blur = quickshell_opacity() < 1,
     xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
     ignore_alpha = quickshell_opacity() * 0.9,
 })
@@ -598,7 +599,7 @@ hl.layer_rule({
 hl.layer_rule({
     name = "quickshell-blur-wall",
     match = { namespace = "^qs-region-wall$" },
-    blur = true,
+    blur = quickshell_opacity() < 1,
     xray = false,
     ignore_alpha = quickshell_opacity() * 0.9,
 })
