@@ -80,18 +80,6 @@ local fileManager = "nautilus"
 local mainMod = "SUPER"
 
 -- ---------------------------------------------------------------------------
--- Plugin loading
--- ---------------------------------------------------------------------------
--- IMPORTANT: plugin configuration must be registered after the plugin exists.
--- The old hyprland.conf loaded this during exec-once, which happens too late
--- for plugin.* keys in a Lua config.
-local dynamicCursorsPlugin =
-    HOME .. "/.local/share/hyprpm/dynamic-cursors/dynamic-cursors.so"
-
-hl.plugin.load(dynamicCursorsPlugin)
-
-
--- ---------------------------------------------------------------------------
 -- Environment
 -- ---------------------------------------------------------------------------
 
@@ -227,52 +215,6 @@ hl.device({
     name = "epic-mouse-v1",
     sensitivity = 0,
 })
-
--- ---------------------------------------------------------------------------
--- Dynamic cursors plugin
--- ---------------------------------------------------------------------------
--- hypr-dynamic-cursors uses the Lua plugin namespace `dynamic_cursors`
--- (underscore, not the legacy hyprlang `dynamic-cursors` spelling).
---
--- Its current Lua API also changed two details from the old .conf syntax:
---   * stretch.function -> stretch.activation
---   * shaperule -> hl.plugin.dynamic_cursors.shape_rule(...)
---
--- The plugin itself recommends guarding configuration with this check so a
--- missing/unloadable plugin does not create config errors.
-
-if hl.plugin.dynamic_cursors then
-    hl.config({
-        plugin = {
-            dynamic_cursors = {
-                mode = "stretch",
-                threshold = 2,
-
-                rotate = {
-                    length = 12,
-                    offset = 30,
-                },
-
-                stretch = {
-                    limit = 1000,
-                    activation = "negative_quadratic",
-                },
-
-                shake = {
-                    enabled = false,
-                },
-            },
-        },
-    })
-
-    hl.plugin.dynamic_cursors.shape_rule({
-        shape = "grab",
-        mode = "stretch",
-        stretch = {
-            limit = 2000,
-        },
-    })
-end
 
 -- ---------------------------------------------------------------------------
 -- Animations
