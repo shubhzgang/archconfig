@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Effects
-import Quickshell.Widgets
+import QtQuick.Shapes
 
-// The track playing, in the frame's left band: a small album art with the title and artist above it,
+// The track playing, in the frame's left band: a disc, turning while it plays, with the title and
+// artist above it,
 // written bottom to top, under a play/pause button. A line longer than its space scrolls while the track plays (pausing at its
 // start each time round). They sit on a pill colored like the workspace dots (CenterSection.qml): the
 // focused dot's color while playing, a dot with windows' while paused, swapped on hover. The button is
-// solid and shadowed like a dot, raised off the fainter pill.
+// raised off the fainter pill (Raised.qml).
 // Click to open the media panel (the button plays or pauses).
 Item {
     id: strip
@@ -40,22 +41,13 @@ Item {
         }
     }
 
-    Rectangle {   // play / pause, as in the media panel
+    Raised {   // play / pause, as in the media panel
         id: play
         anchors { top: parent.top; topMargin: 4; horizontalCenter: parent.horizontalCenter }
         z: 1   // above the strip's mouse area
-        width: 30; height: 30
-        radius: 7
-        color: strip.media.playing !== playArea.containsMouse ? strip.theme.accent : strip.theme.accent2
+        theme: strip.theme
+        lit: strip.media.playing !== playArea.containsMouse
         opacity: strip.media.player?.canTogglePlaying ? 1 : 0.35
-        Behavior on color { ColorAnimation { duration: 300 } }
-
-        RectangularShadow {   // as a workspace dot's
-            anchors.fill: parent; z: -1
-            visible: strip.theme.shadows
-            radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 2.9; spread: 1
-            color: Qt.rgba(0, 0, 0, 0.65)
-        }
         Text {
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: strip.media.playing ? 0 : 1   // the triangle looks centred
@@ -74,28 +66,36 @@ Item {
         }
     }
 
-    ClippingRectangle {
+    Item {   // the disc
         id: art
         anchors { bottom: parent.bottom; bottomMargin: 4; horizontalCenter: parent.horizontalCenter }
         width: 30; height: 30
-        radius: 7
-        color: Qt.rgba(strip.theme.ink.r, strip.theme.ink.g, strip.theme.ink.b, 0.15)
         opacity: strip.media.playing ? 1 : 0.6
-        Text {   // no art: a note
+        Text {
             anchors.centerIn: parent
-            visible: cover.status !== Image.Ready
-            text: String.fromCodePoint(0xF075A)
+            text: String.fromCodePoint(0xF0025)
             color: strip.tint
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 18
+            font.pixelSize: 26
         }
-        Image {
-            id: cover
+        Shape {   // its shine: two short arcs on opposite sides of the hole, to see it turn
             anchors.fill: parent
-            source: strip.media.art
-            sourceSize: Qt.size(60, 60)
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
+            preferredRendererType: Shape.CurveRenderer   // smooth edges
+            ShapePath {
+                strokeColor: strip.theme.textOnInk
+                strokeWidth: 1.5
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc { centerX: 15; centerY: 15; radiusX: 6.5; radiusY: 6.5; startAngle: 200; sweepAngle: 50 }
+                PathAngleArc { centerX: 15; centerY: 15; radiusX: 6.5; radiusY: 6.5; startAngle: 20; sweepAngle: 50; moveToStart: true }
+            }
+        }
+        // a turn every 4s while it plays, in steps 5 times a second (not every frame); paused, it stops where it is
+        Timer {
+            interval: 200
+            repeat: true
+            running: strip.animate && strip.media.playing
+            onTriggered: art.rotation = (art.rotation + 18) % 360
         }
     }
 

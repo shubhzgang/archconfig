@@ -6,17 +6,23 @@ Item {
     id: root
     required property var theme
     readonly property int band: 48      // the frame's left band (Frame.qml)
-    readonly property int size: 44      // the icon's hit area, centered in the band
+    readonly property int size: 38      // the icon's hit area, centered in the band
 
-    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + 44 + 16 }   // the power button, then a 16px gap with the line in it
+    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: 18 + 38 + 12 }   // the power button, then a 12px gap with the line in it
     width: band
     height: size
 
+    Raised {   // as on the dock's buttons (DockButton.qml)
+        anchors.centerIn: parent
+        theme: root.theme
+        width: 34; height: 34; radius: 8
+        lit: area.containsMouse
+    }
     Text {
         anchors.centerIn: parent
         // moon, half-and-half, sun
         text: String.fromCodePoint(root.theme.mode === "dark" ? 0xF0594 : root.theme.mode === "light" ? 0xF0599 : 0xF050E)
-        color: area.containsMouse ? root.theme.hover : root.theme.ink
+        color: root.theme.ink
         font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 26
     }

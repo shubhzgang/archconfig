@@ -1,6 +1,6 @@
 import QtQuick
 
-// Icon button in the frame's left band; slots count up from the bottom (slot 0 is the first one above
+// Icon button in the frame's left band, a raised square (Raised.qml); slots count up from the bottom (slot 0 is the first one above
 // the theme button, which sits above the power button). A negative slot is the power button, at the bottom. It sits in the frame, where no windows are, so it can always take the mouse.
 Item {
     id: root
@@ -12,17 +12,23 @@ Item {
     property bool recording: false      // a blinking red dot instead (a screen recording is running)
     signal clicked()
     readonly property int band: 48      // the frame's left band (Frame.qml)
-    readonly property int size: 44      // the icon's hit area, centered in the band
+    readonly property int size: 38      // the icon's hit area, centered in the band
 
-    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: slot < 0 ? 18 : 18 + size + 16 + (slot + 1) * (size + 4) }
+    anchors { left: parent.left; bottom: parent.bottom; bottomMargin: slot < 0 ? 18 : 18 + size + 12 + (slot + 1) * (size + 2) }
     width: band
     height: size
 
+    Raised {
+        anchors.centerIn: parent
+        theme: root.theme
+        width: 34; height: 34; radius: 8
+        lit: root.active !== area.containsMouse   // as a workspace dot: the focused color while open, swapped on hover
+    }
     Text {
         anchors.centerIn: parent
         visible: !root.recording
         text: root.label || String.fromCodePoint(root.glyph)
-        color: area.containsMouse || root.active ? root.theme.hover : root.theme.ink
+        color: root.theme.ink
         font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 26
     }
@@ -30,7 +36,7 @@ Item {
         id: dot
         anchors.centerIn: parent
         visible: root.recording
-        width: 20; height: 20; radius: 10
+        width: 18; height: 18; radius: 9
         color: "#ff3b30"
         Timer {
             interval: 500

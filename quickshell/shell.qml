@@ -271,7 +271,7 @@ ShellRoot {
 
         Rectangle {   // a faint line between the power button and the theme button, in the gap between them
             x: (48 - width) / 2
-            anchors { bottom: parent.bottom; bottomMargin: 18 + 44 + 8 }
+            anchors { bottom: parent.bottom; bottomMargin: 18 + 38 + 6 }
             width: 22
             height: 1
             color: Qt.rgba(theme.ink.r, theme.ink.g, theme.ink.b, 0.25)
