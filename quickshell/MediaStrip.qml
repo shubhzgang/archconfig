@@ -1,10 +1,13 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell.Widgets
 
 // The track playing, in the frame's left band: a small album art with the title and artist above it,
-// written bottom to top. A line longer than its space scrolls while the track plays (pausing at its
-// start each time round).
-// Click to open the media panel.
+// written bottom to top, under a play/pause button. A line longer than its space scrolls while the track plays (pausing at its
+// start each time round). They sit on a pill colored like the workspace dots (CenterSection.qml): the
+// focused dot's color while playing, a dot with windows' while paused, swapped on hover. The button is
+// solid and shadowed like a dot, raised off the fainter pill.
+// Click to open the media panel (the button plays or pauses).
 Item {
     id: strip
     required property var theme
@@ -16,13 +19,64 @@ Item {
     readonly property int band: 48     // the frame's left band (Frame.qml)
     readonly property real textLen: 200
     width: band
-    height: art.height + 10 + textLen
+    height: play.height + 8 + art.height + 10 + textLen + 8   // 4px above the button and below the art, in the pill
 
-    readonly property color tint: area.containsMouse || active ? theme.hover : theme.ink
+    readonly property color tint: theme.ink
+
+    Rectangle {   // the pill
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 38; height: parent.height
+        radius: 10
+        readonly property bool swapped: area.containsMouse || strip.active
+        readonly property color dot: strip.media.playing !== swapped ? strip.theme.accent : strip.theme.accent2
+        color: Qt.rgba(dot.r, dot.g, dot.b, swapped ? 0.6 : 0.35)   // fainter than a dot: it's much bigger
+        Behavior on color { ColorAnimation { duration: 300 } }
+
+        RectangularShadow {   // as a workspace dot's
+            anchors.fill: parent; z: -1
+            visible: strip.theme.shadows
+            radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 2.9; spread: 1
+            color: Qt.rgba(0, 0, 0, 0.65 * parent.color.a)   // as faint as the pill is see-through (Card.qml)
+        }
+    }
+
+    Rectangle {   // play / pause, as in the media panel
+        id: play
+        anchors { top: parent.top; topMargin: 4; horizontalCenter: parent.horizontalCenter }
+        z: 1   // above the strip's mouse area
+        width: 30; height: 30
+        radius: 7
+        color: strip.media.playing !== playArea.containsMouse ? strip.theme.accent : strip.theme.accent2
+        opacity: strip.media.player?.canTogglePlaying ? 1 : 0.35
+        Behavior on color { ColorAnimation { duration: 300 } }
+
+        RectangularShadow {   // as a workspace dot's
+            anchors.fill: parent; z: -1
+            visible: strip.theme.shadows
+            radius: parent.radius; offset: Qt.vector2d(0, 3); blur: 2.9; spread: 1
+            color: Qt.rgba(0, 0, 0, 0.65)
+        }
+        Text {
+            anchors.centerIn: parent
+            anchors.horizontalCenterOffset: strip.media.playing ? 0 : 1   // the triangle looks centred
+            text: String.fromCodePoint(strip.media.playing ? 0xF03E4 : 0xF040A)
+            color: strip.tint
+            font.family: "JetBrainsMono Nerd Font Propo"
+            font.pixelSize: 18
+        }
+        MouseArea {
+            id: playArea
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: strip.media.player?.canTogglePlaying ?? false
+            cursorShape: Qt.PointingHandCursor
+            onClicked: strip.media.player.togglePlaying()
+        }
+    }
 
     ClippingRectangle {
         id: art
-        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
+        anchors { bottom: parent.bottom; bottomMargin: 4; horizontalCenter: parent.horizontalCenter }
         width: 30; height: 30
         radius: 7
         color: Qt.rgba(strip.theme.ink.r, strip.theme.ink.g, strip.theme.ink.b, 0.15)
@@ -50,7 +104,7 @@ Item {
         width: strip.textLen
         height: strip.band
         x: (strip.width - width) / 2
-        y: (strip.textLen - height) / 2
+        y: play.y + play.height + 8 + (strip.textLen - height) / 2
         rotation: -90
         clip: true
         opacity: strip.media.playing ? 1 : 0.6
