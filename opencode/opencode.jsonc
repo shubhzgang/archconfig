@@ -103,6 +103,14 @@
       "url": "https://mcp.budget.shubhamgangwal.space/mcp",
       "enabled": false
     },
+    "assistant": {
+      "type": "remote",
+      "url": "http://192.168.1.2:8312/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:ASSISTANT_MCP_TOKEN}"
+      }
+    },
     "crawl4ai-mcp": {
       "type": "local",
       "command": [
