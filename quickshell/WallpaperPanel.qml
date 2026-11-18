@@ -102,14 +102,16 @@ Item {
     }
     Component.onCompleted: { lister.running = true; previewHarmonies() }
 
-    // the wallpaper wpaperd is showing now ("MONITOR: /path")
+    // the wallpaper wpaperd is showing now ("MONITOR: /path"); after a boot that is the saved copy
+    // (~/wallpapers/pywallpaper.jpg), so then the applied one from the wal colors
     Process {
         id: now
         command: ["wpaperctl", "get-all"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const m = /: (.+)/.exec(text)
-                panel.show(Math.max(0, panel.files.indexOf(m ? m[1].trim() : "")))
+                const i = panel.files.indexOf(m ? m[1].trim() : "")
+                panel.show(Math.max(0, i >= 0 ? i : panel.files.indexOf(panel.theme.wallpaper)))
             }
         }
     }
