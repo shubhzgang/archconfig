@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
@@ -20,8 +21,8 @@ Item {
     readonly property int band: 48      // the frame's left band (Frame.qml)
     readonly property int side: 10      // its bottom band
     readonly property real openW: 760
-    readonly property real openH: content.implicitHeight + 48
-    readonly property real contentW: openW - 48
+    readonly property real openH: content.implicitHeight + 32
+    readonly property real contentW: openW - 32
     property real panelW: 0
 
     // in the bottom-left corner of the free area; only the width animates
@@ -165,8 +166,28 @@ Item {
         else makeDefault(it.node)
     }
 
-    // ---- pieces ----
-    component Glyph: Item {   // an icon button
+    // ---- pieces, in the other panels' style: cards, picked up when selected, dark text on them ----
+
+    // a card, as in the clipboard list: the selected one is picked up (the accent color, it rises 6px
+    // and shifts 4px right, with a deeper shadow)
+    component PickCard: Rectangle {
+        id: pick
+        property bool selected: false
+        property real lift: selected ? 1 : 0
+        Behavior on lift { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        transform: Translate { x: 4 * pick.lift; y: -6 * pick.lift }
+        radius: 10
+        color: selected ? panel.theme.accent : panel.theme.card
+        Behavior on color { ColorAnimation { duration: 150 } }
+        RectangularShadow {
+            visible: panel.theme.shadows
+            anchors.fill: parent; z: -1
+            radius: parent.radius; offset: Qt.vector2d(0, 3 + pick.lift); blur: 6.5 + 2.2 * pick.lift; spread: 1
+            color: Qt.rgba(0, 0, 0, (0.33 + 0.27 * pick.lift) * parent.color.a)
+        }
+    }
+
+    component Glyph: Item {   // an icon button on a card (white on hover, as the clipboard's trash can)
         id: glyph
         property int code
         property bool on: true            // a toggle that is off is dimmed
@@ -176,7 +197,7 @@ Item {
         Text {
             anchors.centerIn: parent
             text: String.fromCodePoint(glyph.code)
-            color: glyphArea.containsMouse ? panel.theme.hover : panel.theme.ink
+            color: glyphArea.containsMouse ? "white" : panel.theme.dark
             opacity: glyph.on ? 1 : 0.5
             font.family: "JetBrainsMono Nerd Font Propo"
             font.pixelSize: glyph.size
@@ -190,19 +211,50 @@ Item {
         }
     }
 
-    component Header: Text {
+    component GroupTitle: Text {   // as in the screenshot panel
+        height: 34
+        verticalAlignment: Text.AlignVCenter
         color: panel.theme.ink
-        opacity: 0.6
-        topPadding: 10
-        bottomPadding: 2
         font.family: "CodeNewRoman Nerd Font Mono"
-        font.pixelSize: 13
+        font.pixelSize: 15
     }
 
-    component Highlight: Rectangle {   // behind the selected row
-        anchors.fill: parent
-        radius: 10
-        color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.1)
+    component Choice: Rectangle {   // a device an app can move to, on its card: the one it is on is marked
+        id: choice
+        property string label
+        property bool chosen: false
+        signal clicked()
+        width: choiceRow.implicitWidth + 26
+        height: 32
+        radius: height / 2
+        color: Qt.rgba(panel.theme.dark.r, panel.theme.dark.g, panel.theme.dark.b, choiceArea.containsMouse ? 0.2 : 0.08)
+        Behavior on color { ColorAnimation { duration: 150 } }
+        Row {
+            id: choiceRow
+            anchors.centerIn: parent
+            spacing: 6
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: String.fromCodePoint(choice.chosen ? 0xF043E : 0xF043D)
+                color: panel.theme.dark
+                font.family: "JetBrainsMono Nerd Font Propo"
+                font.pixelSize: 16
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: choice.label
+                color: panel.theme.dark
+                font.family: "CodeNewRoman Nerd Font Mono"
+                font.pixelSize: 14
+            }
+        }
+        MouseArea {
+            id: choiceArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: choice.clicked()
+        }
     }
 
     // a device or an app: (the default mark,) its name, mute, its volume, (the devices it can move to)
@@ -211,208 +263,237 @@ Item {
         required property var modelData
         readonly property var node: modelData
         readonly property string key: "n" + node.id
+        readonly property bool selected: panel.sel === key
         readonly property bool stream: node.isStream
         readonly property bool isDefault: node === (node.isSink ? Pipewire.defaultAudioSink : Pipewire.defaultAudioSource)
         readonly property var on: stream ? panel.linkedTo(node) : null
         readonly property real level: node.audio?.volume ?? 0
         readonly property bool muted: node.audio?.muted ?? false
         width: panel.contentW
-        height: rowContent.implicitHeight + 12
+        height: rowContent.implicitHeight + 20
 
-        Highlight { visible: panel.sel === row.key }
         HoverHandler { onHoveredChanged: if (hovered) panel.sel = row.key }   // hovering selects
 
-        Column {
-            id: rowContent
-            x: 8; y: 6
-            width: parent.width - 16
-            spacing: 2
+        PickCard {
+            anchors.fill: parent
+            selected: row.selected
 
-            Row {
-                width: parent.width
-                spacing: 4
-                Glyph {   // the default device: a click makes this one it
-                    visible: !row.stream
-                    anchors.verticalCenter: parent.verticalCenter
-                    code: row.isDefault ? 0xF043E : 0xF043D
-                    size: 20
-                    on: row.isDefault
-                    onClicked: panel.makeDefault(row.node)
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - (row.stream ? 0 : 40)
-                    elide: Text.ElideRight
-                    textFormat: Text.StyledText
-                    readonly property string media: row.node.properties?.["media.name"] ?? ""
-                    text: row.stream
-                        ? (row.node.properties?.["application.name"] || row.node.description || row.node.name)
-                          + (media ? "  <font color=\"" + Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.55) + "\">"
-                                     + media.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>" : "")
-                        : panel.deviceLabel(row.node)
-                    color: panel.theme.ink
-                    font.family: "CodeNewRoman Nerd Font Mono"
-                    font.pixelSize: 15
-                    height: 36
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
+            Column {
+                id: rowContent
+                x: 12; y: 10
+                width: parent.width - 24
+                spacing: 2
 
-            Row {
-                width: parent.width
-                Glyph {   // mute
-                    anchors.verticalCenter: parent.verticalCenter
-                    code: row.node.isSink
-                        ? (row.muted || row.level === 0 ? 0xF0581 : row.level < 0.34 ? 0xF057F : row.level < 0.67 ? 0xF0580 : 0xF057E)
-                        : (row.muted ? 0xF036D : 0xF036C)
-                    on: !row.muted
-                    onClicked: row.node.audio.muted = !row.muted
-                }
-                Item {
-                    id: slider
-                    width: parent.width - 36 - 64
-                    height: 32
-                    anchors.verticalCenter: parent.verticalCenter
-                    Rectangle {
-                        x: 8
+                Row {
+                    width: parent.width
+                    spacing: 4
+                    Glyph {   // the default device: a click makes this one it
+                        visible: !row.stream
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 16
-                        height: 4
-                        radius: 2
-                        color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, 0.25)
-                        Rectangle {
-                            width: parent.width * Math.min(1, row.level)
-                            height: parent.height
-                            radius: 2
-                            color: panel.theme.ink
-                            opacity: row.muted ? 0.4 : 1
-                        }
-                        Rectangle {   // the knob
-                            x: parent.width * Math.min(1, row.level) - width / 2
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 14; height: 14; radius: 7
-                            color: sliderArea.containsMouse || sliderArea.pressed ? panel.theme.hover : panel.theme.ink
-                        }
+                        code: row.isDefault ? 0xF043E : 0xF043D
+                        size: 20
+                        onClicked: panel.makeDefault(row.node)
                     }
-                    MouseArea {
-                        id: sliderArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onPressed: event => panel.setVolume(row.node, (event.x - 8) / (width - 16))
-                        onPositionChanged: event => { if (pressed) panel.setVolume(row.node, (event.x - 8) / (width - 16)) }
-                    }
-                    WheelHandler {   // 5% a notch
-                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                        onWheel: event => panel.setVolume(row.node, row.level + event.angleDelta.y / 120 * 0.05)
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - (row.stream ? 0 : 40)
+                        height: 36
+                        leftPadding: row.stream ? 8 : 0
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                        textFormat: Text.StyledText
+                        readonly property string media: row.node.properties?.["media.name"] ?? ""
+                        text: row.stream
+                            ? (row.node.properties?.["application.name"] || row.node.description || row.node.name)
+                              + (media ? "  <font color=\"" + Qt.rgba(panel.theme.dark.r, panel.theme.dark.g, panel.theme.dark.b, 0.6) + "\">"
+                                         + media.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>" : "")
+                            : panel.deviceLabel(row.node)
+                        color: panel.theme.dark
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 16
+                        font.bold: row.selected
                     }
                 }
-                Text {
-                    width: 64
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: Text.AlignRight
-                    text: Math.round(row.level * 100) + "%"
-                    color: panel.theme.ink
-                    opacity: 0.7
-                    font.family: "CodeNewRoman Nerd Font Mono"
-                    font.pixelSize: 14
-                }
-            }
 
-            Flow {   // an app: the devices it can move to, the one it is on filled
-                visible: row.stream
-                width: parent.width
-                spacing: 8
-                bottomPadding: 4
-                Repeater {
-                    model: row.stream ? panel.devicesFor(row.node) : []
-                    delegate: Chip {
-                        required property var modelData
-                        theme: panel.theme
-                        label: panel.shortLabel(modelData)
-                        selected: modelData === row.on
-                        onClicked: panel.route(row.node, modelData)
+                Row {
+                    width: parent.width
+                    Glyph {   // mute
+                        anchors.verticalCenter: parent.verticalCenter
+                        code: row.node.isSink
+                            ? (row.muted || row.level === 0 ? 0xF0581 : row.level < 0.34 ? 0xF057F : row.level < 0.67 ? 0xF0580 : 0xF057E)
+                            : (row.muted ? 0xF036D : 0xF036C)
+                        on: !row.muted
+                        onClicked: row.node.audio.muted = !row.muted
+                    }
+                    Item {
+                        id: slider
+                        width: parent.width - 36 - 64
+                        height: 32
+                        anchors.verticalCenter: parent.verticalCenter
+                        Rectangle {
+                            x: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 16
+                            height: 4
+                            radius: 2
+                            color: Qt.rgba(panel.theme.dark.r, panel.theme.dark.g, panel.theme.dark.b, 0.25)
+                            Rectangle {
+                                width: parent.width * Math.min(1, row.level)
+                                height: parent.height
+                                radius: 2
+                                color: panel.theme.dark
+                                opacity: row.muted ? 0.4 : 1
+                            }
+                            Rectangle {   // the knob
+                                x: parent.width * Math.min(1, row.level) - width / 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 14; height: 14; radius: 7
+                                color: sliderArea.containsMouse || sliderArea.pressed ? "white" : panel.theme.dark
+                            }
+                        }
+                        MouseArea {
+                            id: sliderArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: event => panel.setVolume(row.node, (event.x - 8) / (width - 16))
+                            onPositionChanged: event => { if (pressed) panel.setVolume(row.node, (event.x - 8) / (width - 16)) }
+                        }
+                        WheelHandler {   // 5% a notch
+                            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                            onWheel: event => panel.setVolume(row.node, row.level + event.angleDelta.y / 120 * 0.05)
+                        }
+                    }
+                    Text {
+                        width: 64
+                        anchors.verticalCenter: parent.verticalCenter
+                        rightPadding: 4
+                        horizontalAlignment: Text.AlignRight
+                        text: Math.round(row.level * 100) + "%"
+                        color: panel.theme.dark
+                        opacity: 0.75
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 14
+                    }
+                }
+
+                Flow {   // an app: the devices it can move to
+                    visible: row.stream
+                    width: parent.width
+                    spacing: 8
+                    topPadding: 4
+                    bottomPadding: 2
+                    Repeater {
+                        model: row.stream ? panel.devicesFor(row.node) : []
+                        delegate: Choice {
+                            required property var modelData
+                            label: panel.shortLabel(modelData)
+                            chosen: modelData === row.on
+                            onClicked: panel.route(row.node, modelData)
+                        }
                     }
                 }
             }
         }
     }
 
-    // a sound card: its name and profile; unfolded, all the profiles it can switch to
+    // a sound card: a card with its name and profile; unfolded, below it the profiles it can switch to,
+    // as the screenshot panel's chips (the one in use marked)
     component CardRow: Column {
         id: cardRow
         required property var modelData
         readonly property var card: modelData
+        readonly property string key: "c" + card.name
         readonly property bool unfolded: panel.unfolded.includes(card.name)
         width: panel.contentW
-        spacing: 4
+        spacing: 10
 
         Item {
             width: parent.width
-            height: 40
-            Highlight { visible: panel.sel === "c" + cardRow.card.name }
-            HoverHandler { onHoveredChanged: if (hovered) panel.sel = "c" + cardRow.card.name }
-            Text {
-                id: chevron
-                x: 8
-                width: 36
-                anchors.verticalCenter: parent.verticalCenter
-                horizontalAlignment: Text.AlignHCenter
-                text: String.fromCodePoint(cardRow.unfolded ? 0xF0140 : 0xF0142)
-                color: panel.theme.ink
-                font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 20
-            }
-            Text {
-                anchors { left: chevron.right; leftMargin: 4; verticalCenter: parent.verticalCenter }
-                text: cardRow.card.label
-                color: panel.theme.ink
-                font.family: "CodeNewRoman Nerd Font Mono"
-                font.pixelSize: 15
-            }
-            Text {
-                anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-                text: cardRow.card.profiles.find(p => p.key === cardRow.card.active)?.label ?? cardRow.card.active
-                color: panel.theme.ink
-                opacity: 0.6
-                font.family: "CodeNewRoman Nerd Font Mono"
-                font.pixelSize: 14
-            }
-            MouseArea {
+            height: 52
+            HoverHandler { onHoveredChanged: if (hovered) panel.sel = cardRow.key }
+            PickCard {
                 anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: panel.fold(cardRow.card, !cardRow.unfolded)
+                selected: panel.sel === cardRow.key
+                Text {
+                    id: chevron
+                    x: 12
+                    width: 36
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: String.fromCodePoint(cardRow.unfolded ? 0xF0140 : 0xF0142)
+                    color: panel.theme.dark
+                    font.family: "JetBrainsMono Nerd Font Propo"
+                    font.pixelSize: 20
+                }
+                Text {
+                    id: cardName
+                    anchors { left: chevron.right; leftMargin: 4; verticalCenter: parent.verticalCenter }
+                    text: cardRow.card.label
+                    color: panel.theme.dark
+                    font.family: "CodeNewRoman Nerd Font Mono"
+                    font.pixelSize: 16
+                    font.bold: panel.sel === cardRow.key
+                }
+                Text {
+                    anchors { left: cardName.right; leftMargin: 16; right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideLeft
+                    text: cardRow.card.profiles.find(p => p.key === cardRow.card.active)?.label ?? cardRow.card.active
+                    color: panel.theme.dark
+                    opacity: 0.7
+                    font.family: "CodeNewRoman Nerd Font Mono"
+                    font.pixelSize: 14
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: panel.fold(cardRow.card, !cardRow.unfolded)
+                }
             }
         }
 
         Flow {
             visible: cardRow.unfolded
-            x: 48
-            width: parent.width - 48
+            x: 12
+            width: parent.width - 12
             spacing: 8
-            bottomPadding: 6
+            bottomPadding: 4
             Repeater {
                 model: cardRow.unfolded ? cardRow.card.profiles : []
-                delegate: Item {
+                delegate: Rectangle {
                     id: profile
                     required property var modelData
                     readonly property string key: "p" + cardRow.card.name + "/" + modelData.key
-                    width: chip.width
-                    height: chip.height
-                    Rectangle {   // the keyboard's selection
-                        anchors { fill: parent; margins: -3 }
-                        radius: 10
-                        color: "transparent"
-                        border.width: 2
-                        border.color: panel.theme.hover
-                        visible: panel.sel === profile.key
+                    readonly property bool chosen: modelData.key === cardRow.card.active
+                    width: profileRow.implicitWidth + 32
+                    height: 36
+                    radius: height / 2
+                    color: panel.sel === key ? panel.theme.accent : panel.theme.card
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    HoverHandler { onHoveredChanged: if (hovered) panel.sel = profile.key }   // hovering selects
+                    Row {
+                        id: profileRow
+                        anchors.centerIn: parent
+                        spacing: 8
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: String.fromCodePoint(profile.chosen ? 0xF043E : 0xF043D)
+                            color: panel.theme.dark
+                            font.family: "JetBrainsMono Nerd Font Propo"
+                            font.pixelSize: 18
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: profile.modelData.label
+                            color: panel.theme.dark
+                            font.family: "CodeNewRoman Nerd Font Mono"
+                            font.pixelSize: 15
+                        }
                     }
-                    HoverHandler { onHoveredChanged: if (hovered) panel.sel = profile.key }
-                    Chip {
-                        id: chip
-                        theme: panel.theme
-                        label: profile.modelData.label
-                        selected: profile.modelData.key === cardRow.card.active
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: panel.setProfile(cardRow.card, profile.modelData)
                     }
                 }
@@ -422,8 +503,9 @@ Item {
 
     Column {
         id: content
-        x: 24; y: 24
+        x: 16; y: 16
         width: panel.contentW
+        spacing: 10
         opacity: 0
         visible: opacity > 0
 
@@ -441,15 +523,15 @@ Item {
             event.accepted = true
         }
 
-        Header { text: "Outputs"; topPadding: 0; visible: panel.outputs.length > 0 }
+        GroupTitle { text: "Outputs"; visible: panel.outputs.length > 0 }
         Repeater { model: panel.outputs; delegate: NodeRow {} }
-        Header { text: "Inputs"; visible: panel.inputs.length > 0 }
+        GroupTitle { text: "Inputs"; visible: panel.inputs.length > 0 }
         Repeater { model: panel.inputs; delegate: NodeRow {} }
-        Header { text: "Playing"; visible: panel.playing.length > 0 }
+        GroupTitle { text: "Playing"; visible: panel.playing.length > 0 }
         Repeater { model: panel.playing; delegate: NodeRow {} }
-        Header { text: "Recording"; visible: panel.recording.length > 0 }
+        GroupTitle { text: "Recording"; visible: panel.recording.length > 0 }
         Repeater { model: panel.recording; delegate: NodeRow {} }
-        Header { text: "Cards"; visible: panel.cards.length > 0 }
+        GroupTitle { text: "Cards"; visible: panel.cards.length > 0 }
         Repeater { model: panel.cards; delegate: CardRow {} }
     }
 }
