@@ -15,8 +15,8 @@ import Quickshell.Widgets
 // swatch's colors), and color swatches (one color, or two) that theme
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
 // for how a one-color swatch is grown into a palette (each harmony shown as the three main colors it
-// gives), for the shell's style, and for shadows (all of them, the windows' too). Picking any other
-// wallpaper sets the shell back to its colors.
+// gives), for the shell's style, for shadows (all of them, the windows' too), and for Hyperion's LEDs
+// taking the colors too (as mood blobs). Picking any other wallpaper sets the shell back to its colors.
 Item {
     id: panel
     required property var theme
@@ -159,6 +159,20 @@ Item {
             onStreamFinished: { try { panel.harmonyColors = JSON.parse(text) } catch (e) {} }
         }
     }
+    // Hyperion's LEDs in the palette's colors (hypr/wallpaper.sh --hyperion), on or off: from its file
+    property bool hyperionOn: false
+    FileView {
+        path: Quickshell.env("HOME") + "/.cache/hyperion-theme"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: panel.hyperionOn = text().trim() === "on"
+    }
+    function setHyperion(on) {
+        hyperionOn = on
+        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", "--hyperion", on ? "on" : "off"])
+    }
+
     function run(args) {   // the colors change once the wal files are written: drop any preview first
         theme.endPreview()
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh"].concat(args))
@@ -462,6 +476,47 @@ Item {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: panel.theme.setShadows(!panel.theme.shadows)
+                }
+            }
+            Item {   // Hyperion's LEDs in the palette's colors (knob right, the track filled) or its own effect
+                id: hyperionSwitch
+                anchors.verticalCenter: parent.verticalCenter
+                width: hyperionRow.implicitWidth
+                height: hyperionRow.implicitHeight
+                readonly property bool on: panel.hyperionOn
+                Row {
+                    id: hyperionRow
+                    spacing: 10
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Hyperion"
+                        color: panel.theme.ink
+                        opacity: hyperionSwitch.on ? 1 : 0.5
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 15
+                    }
+                    Rectangle {   // the track, as the style switch's
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 46; height: 26
+                        radius: height / 2
+                        color: hyperionSwitch.on ? panel.theme.ink : "transparent"
+                        border.width: 1
+                        border.color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, hyperionSwitch.on ? 0 : 0.45)
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Rectangle {   // the knob
+                            width: 18; height: 18
+                            radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: hyperionSwitch.on ? parent.width - width - 4 : 4
+                            color: hyperionSwitch.on ? panel.theme.textOnInk : panel.theme.ink
+                            Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        }
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: panel.setHyperion(!panel.hyperionOn)
                 }
             }
         }
