@@ -344,7 +344,7 @@ hl.bind(mainMod .. " + B", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
-hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("pypr toggle music"))
+hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("qs ipc call audio toggle"))
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call mpvpaper toggle"))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
@@ -550,7 +550,7 @@ hl.window_rule({
 -- so do the pyprland scratchpads, which are moved onto the current workspace while shown
 hl.window_rule({
     name = "scratchpad-see-through",
-    match = { class = "^kitty-(dropterm|pulsemixer)$" },
+    match = { class = "^kitty-dropterm$" },
     xray = false,
 })
 

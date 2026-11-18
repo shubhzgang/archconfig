@@ -79,7 +79,8 @@ ShellRoot {
         property bool overviewOpen: false  // workspace overview (top middle)
         property bool powerOpen: false     // power menu (bottom left)
         property bool shotOpen: false      // screenshot panel (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen
+        property bool audioOpen: false     // audio mixer (bottom left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen || audioOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -93,6 +94,7 @@ ShellRoot {
             if (except !== "overview") overviewOpen = false
             if (except !== "power") powerOpen = false
             if (except !== "shot") shotOpen = false
+            if (except !== "audio") audioOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -104,6 +106,7 @@ ShellRoot {
         onOverviewOpenChanged: if (overviewOpen) closeOthers("overview")
         onPowerOpenChanged: if (powerOpen) closeOthers("power")
         onShotOpenChanged: if (shotOpen) closeOthers("shot")
+        onAudioOpenChanged: if (audioOpen) closeOthers("audio")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -129,6 +132,7 @@ ShellRoot {
                 Region { item: liveButton },
                 Region { item: powerButton },
                 Region { item: screenshotButton },
+                Region { item: audioButton },
                 Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
@@ -224,6 +228,13 @@ ShellRoot {
             function close(): void { win.calOpen = false }
         }
 
+        IpcHandler {   // qs ipc call audio toggle|open|close
+            target: "audio"
+            function toggle(): void { win.audioOpen = !win.audioOpen }
+            function open(): void { win.audioOpen = true }
+            function close(): void { win.audioOpen = false }
+        }
+
         // qs ipc call screenshot toggle|open|close|stop; while a capture is under way (a countdown,
         // a recording) toggle stops it instead, as the dock button does
         IpcHandler {
@@ -245,7 +256,7 @@ ShellRoot {
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
             // the bottom-left panel: whichever of them is furthest out
-            readonly property var leftPanel: [clipboard, live, power, shot].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            readonly property var leftPanel: [clipboard, live, power, shot, audio].reduce((a, b) => b.panelW > a.panelW ? b : a)
             clipW: leftPanel.panelW
             clipY: leftPanel.y
             clipH: leftPanel.height
@@ -320,6 +331,15 @@ ShellRoot {
             onClicked: if (capture.phase !== "idle") capture.stop(); else win.shotOpen = !win.shotOpen
         }
 
+        DockButton {   // audio mixer
+            id: audioButton
+            theme: theme
+            glyph: 0xF057E
+            slot: 4
+            active: win.audioOpen
+            onClicked: win.audioOpen = !win.audioOpen
+        }
+
     }
 
     // ---- the panels' regions, each on its own surfaces (FrameRegion.qml, Frame.qml) ----
@@ -344,14 +364,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper, power and screenshots (bottom)
+    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper, power, screenshots and audio (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         panels: frame.leftNotches
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen || win.audioOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -396,6 +416,13 @@ ShellRoot {
             capture: capture
             open: win.shotOpen
             onToggle: win.shotOpen = !win.shotOpen
+        }
+
+        AudioPanel {
+            id: audio
+            theme: theme
+            open: win.audioOpen
+            onToggle: win.audioOpen = !win.audioOpen
         }
 
         MediaPanel {
