@@ -11,10 +11,10 @@ import Quickshell.Widgets
 Item {
     id: section
     required property var theme
-    required property var win           // the PanelWindow (tray menus anchor to it)
     readonly property alias tipRect: tip
     signal calendarToggle()
     signal launcherToggle()
+    signal menuRequested(var item, real x)   // a tray icon's menu, at its left edge on the screen (TrayMenu.qml)
 
     anchors { top: parent.top; left: parent.left; topMargin: 4; leftMargin: 14 + 8 }   // inside the frame's top band
     height: 39
@@ -123,8 +123,7 @@ Item {
                             if (mouse.button === Qt.MiddleButton) {
                                 trayItem.modelData.secondaryActivate()
                             } else if (mouse.button === Qt.RightButton || trayItem.modelData.onlyMenu) {
-                                const p = trayItem.mapToItem(null, 0, trayItem.height + 4)
-                                if (trayItem.modelData.hasMenu) trayItem.modelData.display(section.win, p.x, p.y)
+                                if (trayItem.modelData.hasMenu) section.menuRequested(trayItem.modelData, trayItem.mapToItem(null, 0, 0).x)
                             } else {
                                 trayItem.modelData.activate()
                             }

@@ -80,7 +80,8 @@ ShellRoot {
         property bool powerOpen: false     // power menu (bottom left)
         property bool shotOpen: false      // screenshot panel (bottom left)
         property bool audioOpen: false     // audio mixer (bottom left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen || audioOpen
+        property bool trayOpen: false      // a tray icon's menu (top left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen || audioOpen || trayOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -95,6 +96,7 @@ ShellRoot {
             if (except !== "power") powerOpen = false
             if (except !== "shot") shotOpen = false
             if (except !== "audio") audioOpen = false
+            if (except !== "tray") trayOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -107,6 +109,7 @@ ShellRoot {
         onPowerOpenChanged: if (powerOpen) closeOthers("power")
         onShotOpenChanged: if (shotOpen) closeOthers("shot")
         onAudioOpenChanged: if (audioOpen) closeOthers("audio")
+        onTrayOpenChanged: if (trayOpen) closeOthers("tray")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -547,9 +550,14 @@ ShellRoot {
         LeftSection {
             id: leftSection
             theme: theme
-            win: barWin
             onCalendarToggle: win.calOpen = !win.calOpen
             onLauncherToggle: win.launcherOpen = !win.launcherOpen
+            onMenuRequested: (item, x) => {   // a second right click on the same icon closes it
+                const same = win.trayOpen && trayMenu.item === item
+                trayMenu.item = item
+                trayMenu.atX = x
+                win.trayOpen = !same
+            }
         }
 
         CenterSection {
@@ -563,5 +571,14 @@ ShellRoot {
             theme: theme
             onToggle: win.open = !win.open
         }
+    }
+
+    // a tray icon's menu, drawn in the theme (TrayMenu.qml); above the bar, and above the shell's
+    // backdrop, which closes it on a click outside
+    TrayMenu {
+        id: trayMenu
+        theme: theme
+        open: win.trayOpen && !fullscreen
+        onClose: win.trayOpen = false
     }
 }

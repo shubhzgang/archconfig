@@ -525,7 +525,7 @@ end
 -- RTX 4090, which redoes that blur every frame without trouble.
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-region-(stats|left|top|wall)$" },
+    match = { namespace = "^qs-(region-(stats|left|top|wall)|traymenu)$" },
     blur = quickshell_opacity() < 1,
     xray = false,
     ignore_alpha = quickshell_opacity() * 0.9,
