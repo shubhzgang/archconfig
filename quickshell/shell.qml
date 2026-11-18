@@ -45,7 +45,7 @@ ShellRoot {
     }
 
     // The frame's inner shadow, on its own surface just below the shell's: Hyprland blurs behind the
-    // shell's surface (for the glass style), and that blur must not reach the windows under the shadow.
+    // frame's surface (for the glass style), and that blur must not reach the windows under the shadow.
     // The panels' regions draw their own (FrameRegion.qml), so this one only covers the rest.
     PanelWindow {
         anchors { top: true; left: true; right: true; bottom: true }
@@ -121,18 +121,11 @@ ShellRoot {
         // (the panels, and the keyboard while one is open, are on their regions' surfaces: see the
         // FrameRegions below)
 
-        // Only the dock buttons take mouse input; while a panel is open the whole screen does, so a
-        // click outside closes it.
+        // It takes the mouse only while a panel is open: the whole screen, so a click outside closes it.
+        // (The frame and the dock buttons are on their own surface, above the panels': see frameWin.)
         mask: Region {
             regions: [
                 Region { item: win.anyOpen ? backdrop : nothing },
-                Region { item: themeButton },
-                Region { item: wallpaperButton },
-                Region { item: clipboardButton },
-                Region { item: liveButton },
-                Region { item: powerButton },
-                Region { item: screenshotButton },
-                Region { item: audioButton },
                 Region { item: fullscreen ? nothing : backdrop; intersection: Intersection.Intersect }
             ]
         }
@@ -243,101 +236,6 @@ ShellRoot {
             function open(): void { win.shotOpen = true }
             function close(): void { win.shotOpen = false }
             function stop(): void { capture.stop() }
-        }
-
-        // The frame around the monitor (the panels hang from it, see Frame.qml)
-        Frame {
-            id: frame
-            theme: theme
-            panelW: stats.panelW
-            panelH: stats.panelH
-            leftW: Math.max(calendar.panelW, launcher.panelW)
-            leftH: Math.max(calendar.panelH, launcher.panelH)
-            bottomW: wallpaper.panelW
-            bottomH: wallpaper.panelH
-            // the bottom-left panel: whichever of them is furthest out
-            readonly property var leftPanel: [clipboard, live, power, shot, audio].reduce((a, b) => b.panelW > a.panelW ? b : a)
-            clipW: leftPanel.panelW
-            clipY: leftPanel.y
-            clipH: leftPanel.height
-            midW: mediaPanel.panelW
-            midY: mediaPanel.y
-            midH: mediaPanel.height
-            wallMaxW: wallpaper.openW
-            wallMaxH: wallpaper.openH
-            topW: overview.panelW
-            topH: overview.panelH
-            topMaxW: overview.maxW
-            topMaxH: overview.maxH
-        }
-
-        DockButton {   // power menu, at the bottom
-            id: powerButton
-            theme: theme
-            glyph: 0xF0425
-            slot: -1
-            active: win.powerOpen
-            onClicked: win.powerOpen = !win.powerOpen
-        }
-
-        Rectangle {   // a faint line between the power button and the theme button, in the gap between them
-            x: (48 - width) / 2
-            anchors { bottom: parent.bottom; bottomMargin: 18 + 38 + 6 }
-            width: 22
-            height: 1
-            color: Qt.rgba(theme.ink.r, theme.ink.g, theme.ink.b, 0.25)
-        }
-
-        ThemeButton {
-            id: themeButton
-            theme: theme
-        }
-
-        DockButton {   // wallpaper picker
-            id: wallpaperButton
-            theme: theme
-            glyph: 0xF0E09
-            slot: 0
-            active: win.wallOpen
-            onClicked: win.wallOpen = !win.wallOpen
-        }
-
-        DockButton {   // clipboard history
-            id: clipboardButton
-            theme: theme
-            glyph: 0xF014C
-            slot: 1
-            active: win.clipOpen
-            onClicked: win.clipOpen = !win.clipOpen
-        }
-
-        DockButton {   // live wallpaper
-            id: liveButton
-            theme: theme
-            glyph: 0xF0FCF
-            slot: 2
-            active: win.liveOpen
-            onClicked: win.liveOpen = !win.liveOpen
-        }
-
-        DockButton {   // screenshots: the countdown, then a blinking red dot while recording (a click stops it)
-            id: screenshotButton
-            theme: theme
-            glyph: 0xF0100
-            slot: 3
-            active: win.shotOpen
-            label: capture.phase === "counting" ? String(capture.remaining) : ""
-            recording: capture.recording
-            onClicked: if (capture.phase !== "idle") capture.stop(); else win.shotOpen = !win.shotOpen
-        }
-
-        DockButton {   // audio mixer
-            id: audioButton
-            theme: theme
-            glyph: 0xF057E
-            slot: 4
-            active: win.audioOpen
-            onClicked: win.audioOpen = !win.audioOpen
         }
 
     }
@@ -469,6 +367,130 @@ ShellRoot {
             theme: theme
             open: win.wallOpen
             onToggle: win.wallOpen = !win.wallOpen
+        }
+    }
+
+    // The frame and the dock buttons, on a surface above the panels' regions. Hyprland blurs behind each
+    // surface what is drawn below it: the panels show the windows behind them, and with the frame
+    // drawn after them their blur doesn't take in the frame's bands next to them (a dark seam along
+    // their edges). The frame itself blurs only the (cached) wallpaper: no windows are behind it.
+    // Only the dock buttons take the mouse.
+    PanelWindow {
+        id: frameWin
+        anchors { top: true; left: true; right: true; bottom: true }
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.namespace: "qs-frame"
+        contentItem.visible: !fullscreen
+        mask: Region {
+            regions: [
+                Region { item: themeButton },
+                Region { item: wallpaperButton },
+                Region { item: clipboardButton },
+                Region { item: liveButton },
+                Region { item: powerButton },
+                Region { item: screenshotButton },
+                Region { item: audioButton },
+                Region { item: fullscreen ? null : frameAll; intersection: Intersection.Intersect }
+            ]
+        }
+
+        Item { id: frameAll; anchors.fill: parent }
+
+        // The frame around the monitor (the panels hang from it, see Frame.qml)
+        Frame {
+            id: frame
+            theme: theme
+            panelW: stats.panelW
+            panelH: stats.panelH
+            leftW: Math.max(calendar.panelW, launcher.panelW)
+            leftH: Math.max(calendar.panelH, launcher.panelH)
+            bottomW: wallpaper.panelW
+            bottomH: wallpaper.panelH
+            // the bottom-left panel: whichever of them is furthest out
+            readonly property var leftPanel: [clipboard, live, power, shot, audio].reduce((a, b) => b.panelW > a.panelW ? b : a)
+            clipW: leftPanel.panelW
+            clipY: leftPanel.y
+            clipH: leftPanel.height
+            midW: mediaPanel.panelW
+            midY: mediaPanel.y
+            midH: mediaPanel.height
+            wallMaxW: wallpaper.openW
+            wallMaxH: wallpaper.openH
+            topW: overview.panelW
+            topH: overview.panelH
+            topMaxW: overview.maxW
+            topMaxH: overview.maxH
+        }
+
+        DockButton {   // power menu, at the bottom
+            id: powerButton
+            theme: theme
+            glyph: 0xF0425
+            slot: -1
+            active: win.powerOpen
+            onClicked: win.powerOpen = !win.powerOpen
+        }
+
+        Rectangle {   // a faint line between the power button and the theme button, in the gap between them
+            x: (48 - width) / 2
+            anchors { bottom: parent.bottom; bottomMargin: 18 + 38 + 6 }
+            width: 22
+            height: 1
+            color: Qt.rgba(theme.ink.r, theme.ink.g, theme.ink.b, 0.25)
+        }
+
+        ThemeButton {
+            id: themeButton
+            theme: theme
+        }
+
+        DockButton {   // wallpaper picker
+            id: wallpaperButton
+            theme: theme
+            glyph: 0xF0E09
+            slot: 0
+            active: win.wallOpen
+            onClicked: win.wallOpen = !win.wallOpen
+        }
+
+        DockButton {   // clipboard history
+            id: clipboardButton
+            theme: theme
+            glyph: 0xF014C
+            slot: 1
+            active: win.clipOpen
+            onClicked: win.clipOpen = !win.clipOpen
+        }
+
+        DockButton {   // live wallpaper
+            id: liveButton
+            theme: theme
+            glyph: 0xF0FCF
+            slot: 2
+            active: win.liveOpen
+            onClicked: win.liveOpen = !win.liveOpen
+        }
+
+        DockButton {   // screenshots: the countdown, then a blinking red dot while recording (a click stops it)
+            id: screenshotButton
+            theme: theme
+            glyph: 0xF0100
+            slot: 3
+            active: win.shotOpen
+            label: capture.phase === "counting" ? String(capture.remaining) : ""
+            recording: capture.recording
+            onClicked: if (capture.phase !== "idle") capture.stop(); else win.shotOpen = !win.shotOpen
+        }
+
+        DockButton {   // audio mixer
+            id: audioButton
+            theme: theme
+            glyph: 0xF057E
+            slot: 4
+            active: win.audioOpen
+            onClicked: win.audioOpen = !win.audioOpen
         }
     }
 

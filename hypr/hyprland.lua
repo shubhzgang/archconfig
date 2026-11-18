@@ -520,22 +520,23 @@ local function quickshell_opacity()
     return value or 1
 end
 
+-- The panels show the windows behind them, not just the (cached) wallpaper: the display runs on the
+-- RTX 4090, which redoes that blur every frame without trouble.
 hl.layer_rule({
     name = "quickshell-blur",
-    match = { namespace = "^qs-(shell|region-stats|region-left|region-top)$" },
+    match = { namespace = "^qs-region-(stats|left|top|wall)$" },
     blur = quickshell_opacity() < 1,
-    xray = true,   -- blur the cached wallpaper only (see decoration.blur.xray)
+    xray = false,
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
--- the wallpaper picker shows the windows behind it. (The left column's panels used to as well, but each
--- surface is blurred on its own, and that blur took in the frame band next to them: a lighter line along
--- their edges, and a square round the frame's left corners.)
+-- The frame's bands blur only the (cached) wallpaper: no windows are behind them, and their surface is
+-- drawn above the panels', whose glass would show through it (shell.qml)
 hl.layer_rule({
-    name = "quickshell-blur-wall",
-    match = { namespace = "^qs-region-wall$" },
+    name = "quickshell-blur-frame",
+    match = { namespace = "^qs-frame$" },
     blur = quickshell_opacity() < 1,
-    xray = false,
+    xray = true,
     ignore_alpha = quickshell_opacity() * 0.9,
 })
 
