@@ -14,8 +14,8 @@ Item {
     readonly property int collapsedW: 900  // the stats corner's width when closed (StatsCorner.qml)
     readonly property int rowH: 39
 
-    // centered in the closed stats corner; when the numbers get wider than that (a fast network
-    // speed) they grow to the left, never closer than 24px to the frame's right band
+    // centered in the closed stats corner; when the numbers are wider than that they grow to the
+    // left, never closer than 24px to the frame's right band
     anchors { top: parent.top; topMargin: (band - rowH) / 2
               right: parent.right; rightMargin: side + Math.max((collapsedW - width) / 2, 24) }
     width: numbers.width
@@ -44,8 +44,16 @@ Item {
             delegate: Item {
                 required property var modelData
                 required property int index
-                width: label.implicitWidth + 36
+                // a fixed width, so a number changing doesn't move the others: the text's with every
+                // number at its widest (a size up to 999.9 of its unit, a percentage up to 100); only
+                // a change in what it shows (another GPU) changes it
+                width: Math.ceil(widest.advanceWidth) + 36
                 height: root.rowH
+                TextMetrics {
+                    id: widest
+                    font: label.font
+                    text: (modelData.value.text || "").replace(/\d+(\.\d+)?([BKMGT])/g, "000.0$2").replace(/\d+%/g, "000%")
+                }
                 Rectangle {   // thin divider between modules
                     visible: index > 0
                     width: 1; height: parent.height - 12; anchors.verticalCenter: parent.verticalCenter
