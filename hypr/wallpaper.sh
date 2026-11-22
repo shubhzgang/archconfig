@@ -81,7 +81,13 @@ apply_palette() {
         # uses them) and its colors; make running kitty windows reload the theme
         ~/.config/quickshell/scripts/bar-colors.py
         ~/.config/kitty/gradient.py
-        cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
+        # the OLED and matte black palettes are all greys: kitty keeps its own colors on their black
+        if jq -e '(.special.background == "#000000" or .special.background == "#111113")
+                  and (.colors.color1 | .[1:3] == .[3:5] and .[3:5] == .[5:7])' ~/.cache/wal/colors.json >/dev/null; then
+            grep -vE '^color([1-6]|9|1[0-4]) ' ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
+        else
+            cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
+        fi
         pkill -USR1 kitty
     } &
 
