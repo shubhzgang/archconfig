@@ -19,6 +19,11 @@ ShellRoot {
     property bool hidden: false
     readonly property bool fullscreen: hidden || (Hyprland.focusedWorkspace?.hasFullscreen ?? false)
     onFullscreenChanged: if (fullscreen) win.closeOthers("")
+    // Hidden, the windows go edge to edge: no gaps, square corners, 1px borders, no shadows; shown,
+    // back to hyprland.lua's gaps and rounding and the style's border and shadows
+    onHiddenChanged: Quickshell.execDetached(["hyprctl", "eval", "hl.config({ general = { gaps_in = "
+        + (hidden ? 0 : 8) + ", gaps_out = " + (hidden ? 0 : 20) + ", border_size = " + (hidden || theme.glass ? 1 : 0)
+        + " }, decoration = { rounding = " + (hidden ? 0 : 10) + ", shadow = { enabled = " + (!hidden && theme.shadows) + " } } })"])
 
     // Reserve the frame's space on every edge (the top band holds the bar), so windows tile inside
     // it. These panels draw nothing and take no input; the frame itself is drawn below.
