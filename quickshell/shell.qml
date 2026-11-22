@@ -400,6 +400,7 @@ ShellRoot {
                 Region { item: powerButton },
                 Region { item: screenshotButton },
                 Region { item: audioButton },
+                Region { item: rgbButton },
                 Region { item: fullscreen ? null : frameAll; intersection: Intersection.Intersect }
             ]
         }
@@ -499,6 +500,14 @@ ShellRoot {
             slot: 4
             active: win.audioOpen
             onClicked: win.audioOpen = !win.audioOpen
+        }
+
+        DockButton {   // OpenRGB, the app: every device's RGB
+            id: rgbButton
+            theme: theme
+            glyph: 0xF07D6
+            slot: 5
+            onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/local/openrgb-1.1/OpenRGB_1.1_x86_64_8e16de2.AppImage"])
         }
     }
 
