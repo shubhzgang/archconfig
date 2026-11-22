@@ -13,10 +13,10 @@
 #   wallpaper.sh --harmony monochrome|complementary|split|analogous|triadic
 #                                        how a one-color swatch is grown into a palette (a plain
 #                                        wallpaper is always shades of its own color)
-#   wallpaper.sh --hyperion on|off|sync  Hyperion's LEDs in the palette's three main colors (as mood
-#                                        blobs, ~/.config/hypr/scripts/hyperion-blobs.py), following every
-#                                        change of it, or back to Hyperion's own effect; sync sends the
-#                                        colors again if on (at login: Hyperion forgets them on restart)
+#   wallpaper.sh --hyperion swatch|screen|sync  Hyperion's LEDs in the palette's three main colors (as
+#                                        mood blobs, ~/.config/hypr/scripts/hyperion-blobs.py), following
+#                                        every change of it, or in the screen's (its capture); sync sends
+#                                        the colors again if on swatch (Hyperion forgets them on restart)
 # The swatch and harmony are kept in ~/.cache/wal-swatch.json (the picker shows them from there).
 STATE="$HOME/.cache/wal-swatch.json"
 PLAIN_DIR="$HOME/wallpapers/plain"
@@ -29,11 +29,11 @@ save_state() {   # $1: colors, space-separated ("" = follow the wallpaper), $2: 
 }
 current_wallpaper() { jq -r .wallpaper ~/.cache/wal/colors.json; }   # wpaperctl only knows the copy at boot
 
-# Hyperion (its JSON API): the theme's effect at priority 250, above Hyperion's own background effect
-# (254) and below its capture (240); clearing it brings that effect back
-HYPERION_STATE="$HOME/.cache/hyperion-theme"   # on | off (the picker shows it from there)
-HYPERION_PRIORITY=250
-hyperion_on() { [ "$(cat "$HYPERION_STATE" 2>/dev/null)" = on ]; }
+# Hyperion (its JSON API): the theme's effect at priority 245, above Hyperion's screen capture (250) and
+# its own background effect (254); clearing it brings the capture back
+HYPERION_STATE="$HOME/.cache/hyperion-theme"   # swatch | screen (the picker shows it from there)
+HYPERION_PRIORITY=245
+hyperion_on() { [ "$(cat "$HYPERION_STATE" 2>/dev/null)" = swatch ]; }
 hyperion() { curl -s -m 3 -X POST http://localhost:8090/json-rpc -H 'Content-Type: application/json' -d "$1" >/dev/null; }
 apply_hyperion() {   # color1..color3, the accents the shell uses too
     hyperion "$(jq -c --arg script "$HOME/.config/hypr/scripts/hyperion-blobs.py" --argjson priority "$HYPERION_PRIORITY" '
@@ -128,10 +128,10 @@ case "$1" in
         ;;
     --hyperion)
         case "$2" in
-            on) echo on > "$HYPERION_STATE"; apply_hyperion ;;
-            off) echo off > "$HYPERION_STATE"; hyperion '{"command":"clear","priority":'"$HYPERION_PRIORITY"'}' ;;
+            swatch) echo swatch > "$HYPERION_STATE"; apply_hyperion ;;
+            screen) echo screen > "$HYPERION_STATE"; hyperion '{"command":"clear","priority":'"$HYPERION_PRIORITY"'}' ;;
             sync) if hyperion_on; then apply_hyperion; fi ;;
-            *) echo "usage: $0 --hyperion on|off|sync" >&2; exit 1 ;;
+            *) echo "usage: $0 --hyperion swatch|screen|sync" >&2; exit 1 ;;
         esac
         ;;
     *)

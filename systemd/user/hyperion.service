@@ -1,0 +1,9 @@
+[Unit]
+Description=Hyperion ambient light (in the session: it captures the screen through the Wayland portal)
+
+[Service]
+ExecStart=%h/local/hyperion-2.2.2/bin/hyperiond
+# The theme's colors once its API answers (Hyperion forgets them on restart)
+ExecStartPost=/bin/sh -c 'for i in $$(seq 40); do curl -s -m 1 -o /dev/null http://localhost:8090 && exec %h/.config/hypr/wallpaper.sh --hyperion sync; sleep 0.5; done'
+Restart=on-failure
+RestartSec=2

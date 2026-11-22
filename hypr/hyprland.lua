@@ -311,7 +311,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("LLConnect3")   -- LL-Connect 3: the Lian Li fan controller (lands on Alt+2, see its window rule)
-    hl.exec_cmd(HOME .. "/.config/hypr/wallpaper.sh --hyperion sync")   -- Hyperion's LEDs in the theme's colors, if on (it forgets them on restart)
+    hl.exec_cmd("systemctl --user start hyperion.service")   -- Hyperion: screen capture and the LEDs in the theme's colors, if on (the service syncs them)
 end)
 
 -- ---------------------------------------------------------------------------
