@@ -2,7 +2,11 @@
 Description=Hyperion ambient light (in the session: it captures the screen through the Wayland portal)
 
 [Service]
-ExecStart=%h/local/hyperion-2.2.2/bin/hyperiond
+# The screen portal first: Hyperion only offers its Wayland capture if the portal answers when it starts
+ExecStartPre=/bin/sh -c 'for i in $$(seq 60); do busctl --user get-property org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop org.freedesktop.portal.ScreenCast version >/dev/null 2>&1 && exit 0; sleep 0.5; done'
+# As a console service: without a window system it doesn't crash when XWayland goes at logout, so it
+# stops cleanly and blacks the LEDs out
+ExecStart=%h/local/hyperion-2.2.2/bin/hyperiond --service
 # The theme's colors once its API answers (Hyperion forgets them on restart)
 ExecStartPost=/bin/sh -c 'for i in $$(seq 40); do curl -s -m 1 -o /dev/null http://localhost:8090 && exec %h/.config/hypr/wallpaper.sh --hyperion sync; sleep 0.5; done'
 Restart=on-failure
