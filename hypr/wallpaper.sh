@@ -17,6 +17,8 @@
 #                                        mood blobs, ~/.config/hypr/scripts/hyperion-blobs.py), following
 #                                        every change of it, or in the screen's (its capture); sync sends
 #                                        the colors again if on swatch (Hyperion forgets them on restart)
+#   wallpaper.sh --hyperion on|off       Hyperion's LEDs lit or dark (its LED device on or off); sync
+#                                        turns them off again if off
 # The swatch and harmony are kept in ~/.cache/wal-swatch.json (the picker shows them from there).
 STATE="$HOME/.cache/wal-swatch.json"
 PLAIN_DIR="$HOME/wallpapers/plain"
@@ -34,6 +36,8 @@ current_wallpaper() { jq -r .wallpaper ~/.cache/wal/colors.json; }   # wpaperctl
 HYPERION_STATE="$HOME/.cache/hyperion-theme"   # swatch | screen (the picker shows it from there)
 HYPERION_PRIORITY=245
 hyperion_on() { [ "$(cat "$HYPERION_STATE" 2>/dev/null)" = swatch ]; }
+HYPERION_LEDS="$HOME/.cache/hyperion-leds"   # on | off (the picker shows it from there)
+hyperion_leds() { hyperion '{"command":"componentstate","componentstate":{"component":"LEDDEVICE","state":'"$1"'}}'; }
 hyperion() { curl -s -m 3 -X POST http://localhost:8090/json-rpc -H 'Content-Type: application/json' -d "$1" >/dev/null; }
 apply_hyperion() {   # color1..color3, the accents the shell uses too
     hyperion "$(jq -c --arg script "$HOME/.config/hypr/scripts/hyperion-blobs.py" --argjson priority "$HYPERION_PRIORITY" '
@@ -130,8 +134,13 @@ case "$1" in
         case "$2" in
             swatch) echo swatch > "$HYPERION_STATE"; apply_hyperion ;;
             screen) echo screen > "$HYPERION_STATE"; hyperion '{"command":"clear","priority":'"$HYPERION_PRIORITY"'}' ;;
-            sync) if hyperion_on; then apply_hyperion; fi ;;
-            *) echo "usage: $0 --hyperion swatch|screen|sync" >&2; exit 1 ;;
+            on) echo on > "$HYPERION_LEDS"; hyperion_leds true ;;
+            off) echo off > "$HYPERION_LEDS"; hyperion_leds false ;;
+            sync)
+                if hyperion_on; then apply_hyperion; fi
+                if [ "$(cat "$HYPERION_LEDS" 2>/dev/null)" = off ]; then hyperion_leds false; fi
+                ;;
+            *) echo "usage: $0 --hyperion swatch|screen|on|off|sync" >&2; exit 1 ;;
         esac
         ;;
     *)

@@ -16,8 +16,8 @@ import Quickshell.Widgets
 // everything from their colors instead of the wallpaper's until "auto" is picked again, with switches
 // for how a one-color swatch is grown into a palette (each harmony shown as the three main colors it
 // gives), for the shell's style, for shadows (all of them, the windows' too), and for Hyperion's LEDs
-// taking the colors too (as mood blobs) or the screen's. Picking any other wallpaper sets the shell
-// back to its colors.
+// taking the colors too (as mood blobs) or the screen's, and for the LEDs lit or dark. Picking any
+// other wallpaper sets the shell back to its colors.
 Item {
     id: panel
     required property var theme
@@ -172,6 +172,19 @@ Item {
     function setHyperion(screen) {
         hyperionScreen = screen
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", "--hyperion", screen ? "screen" : "swatch"])
+    }
+    // Hyperion's LEDs lit or dark (hypr/wallpaper.sh --hyperion on|off): from its file
+    property bool hyperionLeds: true
+    FileView {
+        path: Quickshell.env("HOME") + "/.cache/hyperion-leds"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: panel.hyperionLeds = text().trim() !== "off"
+    }
+    function setHyperionLeds(on) {
+        hyperionLeds = on
+        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/wallpaper.sh", "--hyperion", on ? "on" : "off"])
     }
 
     function run(args) {   // the colors change once the wal files are written: drop any preview first
@@ -533,6 +546,47 @@ Item {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: panel.setHyperion(!panel.hyperionScreen)
+                }
+            }
+            Item {   // Hyperion's LEDs lit (knob right, the track filled) or dark
+                id: ledSwitch
+                anchors.verticalCenter: parent.verticalCenter
+                width: ledRow.implicitWidth
+                height: ledRow.implicitHeight
+                readonly property bool on: panel.hyperionLeds
+                Row {
+                    id: ledRow
+                    spacing: 10
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "LEDs"
+                        color: panel.theme.ink
+                        opacity: ledSwitch.on ? 1 : 0.5
+                        font.family: "CodeNewRoman Nerd Font Mono"
+                        font.pixelSize: 15
+                    }
+                    Rectangle {   // the track, as the style switch's
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 46; height: 26
+                        radius: height / 2
+                        color: ledSwitch.on ? panel.theme.ink : "transparent"
+                        border.width: 1
+                        border.color: Qt.rgba(panel.theme.ink.r, panel.theme.ink.g, panel.theme.ink.b, ledSwitch.on ? 0 : 0.45)
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Rectangle {   // the knob
+                            width: 18; height: 18
+                            radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: ledSwitch.on ? parent.width - width - 4 : 4
+                            color: ledSwitch.on ? panel.theme.textOnInk : panel.theme.ink
+                            Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        }
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: panel.setHyperionLeds(!panel.hyperionLeds)
                 }
             }
         }
