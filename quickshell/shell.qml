@@ -86,7 +86,8 @@ ShellRoot {
         property bool shotOpen: false      // screenshot panel (bottom left)
         property bool audioOpen: false     // audio mixer (bottom left)
         property bool trayOpen: false      // a tray icon's menu (top left)
-        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen || audioOpen || trayOpen
+        property bool btOpen: false        // bluetooth (top left)
+        readonly property bool anyOpen: open || calOpen || launcherOpen || wallOpen || clipOpen || liveOpen || mediaOpen || overviewOpen || powerOpen || shotOpen || audioOpen || trayOpen || btOpen
         // the two top-left panels share the same spot, so only one can be open; the picker, the clipboard and the
         // live wallpaper list also take the keyboard, so they are alone too
         function closeOthers(except) {
@@ -102,6 +103,7 @@ ShellRoot {
             if (except !== "shot") shotOpen = false
             if (except !== "audio") audioOpen = false
             if (except !== "tray") trayOpen = false
+            if (except !== "bt") btOpen = false
         }
         onOpenChanged: if (open) closeOthers("stats")
         onCalOpenChanged: if (calOpen) closeOthers("cal")
@@ -115,6 +117,7 @@ ShellRoot {
         onShotOpenChanged: if (shotOpen) closeOthers("shot")
         onAudioOpenChanged: if (audioOpen) closeOthers("audio")
         onTrayOpenChanged: if (trayOpen) closeOthers("tray")
+        onBtOpenChanged: if (btOpen) closeOthers("bt")
         Connections {   // the player went away
             target: media
             function onPlayerChanged() { if (!media.player) win.mediaOpen = false }
@@ -236,6 +239,13 @@ ShellRoot {
             function close(): void { win.audioOpen = false }
         }
 
+        IpcHandler {   // qs ipc call bluetooth toggle|open|close
+            target: "bluetooth"
+            function toggle(): void { win.btOpen = !win.btOpen }
+            function open(): void { win.btOpen = true }
+            function close(): void { win.btOpen = false }
+        }
+
         // qs ipc call screenshot toggle|open|close|stop; while a capture is under way (a countdown,
         // a recording) toggle stops it instead, as the dock button does
         IpcHandler {
@@ -270,14 +280,14 @@ ShellRoot {
         }
     }
 
-    FrameRegion {   // the left column: calendar and launcher (top), media (middle), clipboard, live wallpaper, power, screenshots and audio (bottom)
+    FrameRegion {   // the left column: calendar, launcher and bluetooth (top), media (middle), clipboard, live wallpaper, power, screenshots and audio (bottom)
         frame: frame
         theme: theme
         name: "left"
         rect: frame.leftRect
         panels: frame.leftNotches
         keepRects: frame.leftKeep
-        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen || win.audioOpen
+        active: win.calOpen || win.launcherOpen || win.clipOpen || win.liveOpen || win.mediaOpen || win.powerOpen || win.shotOpen || win.audioOpen || win.btOpen
         shown: !fullscreen
         onDismiss: win.closeOthers("")
 
@@ -293,6 +303,13 @@ ShellRoot {
             theme: theme
             open: win.launcherOpen
             onToggle: win.launcherOpen = !win.launcherOpen
+        }
+
+        BluetoothPanel {
+            id: bluetooth
+            theme: theme
+            open: win.btOpen
+            onToggle: win.btOpen = !win.btOpen
         }
 
         ClipboardPanel {
@@ -413,8 +430,8 @@ ShellRoot {
             theme: theme
             panelW: stats.panelW
             panelH: stats.panelH
-            leftW: Math.max(calendar.panelW, launcher.panelW)
-            leftH: Math.max(calendar.panelH, launcher.panelH)
+            leftW: Math.max(calendar.panelW, launcher.panelW, bluetooth.panelW)
+            leftH: Math.max(calendar.panelH, launcher.panelH, bluetooth.panelH)
             bottomW: wallpaper.panelW
             bottomH: wallpaper.panelH
             // the bottom-left panel: whichever of them is furthest out
@@ -566,6 +583,8 @@ ShellRoot {
             theme: theme
             onCalendarToggle: win.calOpen = !win.calOpen
             onLauncherToggle: win.launcherOpen = !win.launcherOpen
+            btOpen: win.btOpen
+            onBluetoothToggle: win.btOpen = !win.btOpen
             onMenuRequested: (item, x) => {   // a second right click on the same icon closes it
                 const same = win.trayOpen && trayMenu.item === item
                 trayMenu.item = item

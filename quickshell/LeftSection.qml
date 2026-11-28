@@ -6,14 +6,16 @@ import Quickshell.Networking
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
-// Top-left section: Apps button (opens the launcher), clock (click opens the calendar panel),
-// pending pacman updates, tray, bluetooth and network.
+// Top-left section: Apps button (opens the launcher), bluetooth (opens the bluetooth panel), clock
+// (click opens the calendar panel), pending pacman updates, tray and network.
 Item {
     id: section
     required property var theme
     readonly property alias tipRect: tip
     signal calendarToggle()
     signal launcherToggle()
+    property bool btOpen: false   // the bluetooth panel is open
+    signal bluetoothToggle()
     signal menuRequested(var item, real x)   // a tray icon's menu, at its left edge on the screen (TrayMenu.qml)
 
     anchors { top: parent.top; left: parent.left; topMargin: 4; leftMargin: 14 + 8 }   // inside the frame's top band
@@ -37,7 +39,6 @@ Item {
         command: ["kitty", "sh", "-c", "yay -Syu; echo Done - Press enter to exit; read"]
         onExited: pacmanCheck.running = true
     }
-    Process { id: blueman; command: ["blueman-manager"] }
     Process { id: nmtui; command: ["kitty", "nmtui"] }
 
     readonly property var btAdapter: Bluetooth.defaultAdapter
@@ -92,6 +93,43 @@ Item {
             font.weight: Font.ExtraBold
             onClicked: section.launcherToggle()
         }
+        Item {   // a raised square, as the dock buttons (DockButton.qml)
+            id: btMod
+            readonly property alias hovered: btArea.containsMouse
+            width: 34 + 10
+            height: 39
+            Raised {
+                anchors.centerIn: parent
+                theme: section.theme
+                width: 34; height: 34; radius: 8
+                lit: section.btOpen !== btMod.hovered   // the focused color while open, swapped on hover
+            }
+            Text {
+                anchors.centerIn: parent
+                text: String.fromCodePoint(section.btAdapter && section.btAdapter.enabled ? 0xf00af : 0xf00b2)
+                color: section.theme.ink
+                font.family: "JetBrainsMono Nerd Font Propo"
+                font.pixelSize: 26
+            }
+            MouseArea {
+                id: btArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: { section.tipFor = null; section.bluetoothToggle() }
+            }
+            onHoveredChanged: {
+                if (hovered) {
+                    section.tipFor = btMod
+                    const a = section.btAdapter
+                    if (!a) { section.tipText = "No bluetooth controller"; return }
+                    let t = a.name + "\n\n" + section.btConnected.length + " connected"
+                    for (const d of section.btConnected)
+                        t += "\n" + d.name + (d.batteryAvailable ? "  " + Math.round(d.battery * (d.battery <= 1 ? 100 : 1)) + "%" : "")
+                    section.tipText = t
+                } else if (section.tipFor === btMod) { section.tipFor = null }
+            }
+        }
         Mod {
             id: clockMod
             theme: section.theme
@@ -130,23 +168,6 @@ Item {
                         }
                     }
                 }
-            }
-        }
-        Mod {
-            id: btMod
-            theme: section.theme
-            text: String.fromCodePoint(section.btAdapter && section.btAdapter.enabled ? 0xf00af : 0xf00b2)
-            onClicked: mouse => { if (mouse.button === Qt.RightButton) blueman.running = true }
-            onHoveredChanged: {
-                if (hovered) {
-                    section.tipFor = btMod
-                    const a = section.btAdapter
-                    if (!a) { section.tipText = "No bluetooth controller"; return }
-                    let t = a.name + "\n\n" + section.btConnected.length + " connected"
-                    for (const d of section.btConnected)
-                        t += "\n" + d.name + (d.batteryAvailable ? "  " + Math.round(d.battery * (d.battery <= 1 ? 100 : 1)) + "%" : "")
-                    section.tipText = t
-                } else if (section.tipFor === btMod) { section.tipFor = null }
             }
         }
         Mod {
